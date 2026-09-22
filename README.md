@@ -89,6 +89,8 @@ Como funciona:
   unidades diferentes) **se somam** no mesmo exame em vez de duplicar.
 - Com dois ou mais exames, o relatório ganha o card **Evolução**: variações de 10% ou mais, ou
   que cruzaram a faixa, ordenadas por relevância clínica, com sparkline sobre a faixa de referência.
+- **O app retoma sozinho de onde parou**: ao abrir, ou logo depois de importar o arquivo, o exame
+  mais recente é carregado e a análise com a evolução já aparece — sem precisar reprocessar PDF nenhum.
 
 O arquivo exportado:
 

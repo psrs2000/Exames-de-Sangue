@@ -1628,12 +1628,12 @@ function renderValues(){
   renderBio();
 }
 
-function showValuesCard(ids){
+function showValuesCard(ids, scroll=true){
   state.shown = ids;
   $('#card-values').classList.remove('hidden');
   $('#card-report').classList.add('hidden');
   renderValues();
-  $('#card-values').scrollIntoView({behavior:'smooth', block:'start'});
+  if (scroll) $('#card-values').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 /* ---------- 8. Relatório ------------------------------------------------- */
@@ -1681,7 +1681,7 @@ function atualizarFaixasDoLab(){
   state.labRefsSex = sexo;
 }
 
-function analyze(){
+function analyze(op={}){
   atualizarFaixasDoLab();
   const ctx = readCtx();
   const vals = {};
@@ -1837,7 +1837,7 @@ function analyze(){
   window.addEventListener('afterprint', () => recolhidos().forEach(d => { if (d.dataset.reabrir) d.open = false; }));
   $('#btn-edit').addEventListener('click', () => $('#card-values').scrollIntoView({behavior:'smooth'}));
   $('#btn-json').addEventListener('click', () => baixarJson(vals, st, derived, patterns, ctx, sugestoes));
-  rep.scrollIntoView({behavior:'smooth', block:'start'});
+  if (op.scroll !== false) rep.scrollIntoView({behavior:'smooth', block:'start'});
   return {vals, st, derived, patterns, sugestoes, principais, secundarios};
 }
 
@@ -1874,6 +1874,11 @@ async function handleFile(file){
   if (!/pdf$/i.test(file.name) && file.type !== 'application/pdf'){
     setStatus('Esse arquivo não parece ser um PDF. Envie o laudo em PDF ou digite os valores manualmente.','err'); return;
   }
+  /* limpa a tela antes de ler: com o auto-retomar, um exame anterior pode estar à
+     mostra, e valores velhos não podem sobrar se a leitura deste PDF falhar */
+  state.values = {}; state.origem = {}; state.labRefs = {}; state.lines = null; state.shown = [];
+  $('#card-values').classList.add('hidden');
+  $('#card-report').classList.add('hidden');
   setStatus('Lendo o PDF…<div class="bar"><i style="width:10%"></i></div>');
   try{
     const lines = await pdfToLines(file, (p,total) => {
@@ -2037,7 +2042,7 @@ function renderHistorico(){
     const n = Object.keys(reg.valores).length;
     const item = el('div',{class:'hist-item' + (reg.data === $('#coleta').value ? ' atual' : '')},
       `<span><b>${dataBR(reg.data)}</b> <span class="muted">· ${n} exame(s)</span></span>`);
-    const carregar = el('button',{class:'btn',type:'button'},'Carregar');
+    const carregar = el('button',{class:'btn',type:'button'},'Abrir análise');
     carregar.addEventListener('click', () => carregarExame(reg));
     const apagar = el('button',{class:'iconbtn',type:'button',title:'remover do histórico'},'✕');
     apagar.addEventListener('click', async () => {
@@ -2049,7 +2054,7 @@ function renderHistorico(){
   }
 }
 
-function carregarExame(reg){
+function carregarExame(reg, op={}){
   state.values = {}; state.origem = {}; state.labRefs = {}; state.lines = null;
   for (const [id,info] of Object.entries(reg.valores)){
     state.values[id] = info.v;
@@ -2063,8 +2068,21 @@ function carregarExame(reg){
   if (p.sexo) $('#sex').value = p.sexo;
   $('#gestante').checked = !!p.gestante; $('#atleta').checked = !!p.atleta;
   $('#coleta').value = reg.data;
-  setStatus(`Exame de <b>${dataBR(reg.data)}</b> carregado do histórico.`, 'info');
-  showValuesCard(Object.keys(reg.valores));
+  setStatus(op.msg || `Exame de <b>${dataBR(reg.data)}</b> carregado do histórico.`, 'info');
+  showValuesCard(Object.keys(reg.valores), op.scroll !== false);
+  analyze({scroll: op.scroll !== false});   /* abrir um exame já mostra a análise e a evolução */
+  renderHistorico();
+}
+
+/* Ao abrir o app (ou logo depois de importar), retoma sozinho o exame mais recente:
+   sem isso o histórico existe mas a tela começa vazia, e o usuário precisa refazer
+   todo o caminho — carregar os PDFs de novo — só para rever a evolução. */
+function retomarUltimoExame(motivo){
+  if (!state.historico.length) return;
+  const ultimo = state.historico[state.historico.length - 1];
+  carregarExame(ultimo, {scroll:false, msg:
+    `${motivo} Exame mais recente (<b>${dataBR(ultimo.data)}</b>) carregado, com a evolução em relação aos anteriores. ` +
+    `Para acrescentar um exame novo, envie o PDF aqui em cima.`});
 }
 
 /* --- exportar / importar o arquivo do histórico --- */
@@ -2094,6 +2112,7 @@ async function importarHistorico(file){
     await carregarHistorico();
     $('#card-hist').classList.remove('hidden');
     aviso(`✅ Importado: ${novos} exame(s) novo(s)` + (mesclados ? `, ${mesclados} atualizado(s)` : '') + '.', 'info');
+    retomarUltimoExame('Histórico importado.');
   }catch(e){
     aviso('Não consegui ler esse arquivo de histórico. ' + escapeHtml(e.message), 'err');
   }
@@ -2230,6 +2249,7 @@ $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValue
 /* ---------- 12. Início --------------------------------------------------- */
 (async () => {
   await carregarHistorico();
+  retomarUltimoExame('Bem-vindo de volta.');
   try{
     const p = await dbPerfil();
     if (p && !$('#peso').value){
