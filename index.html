@@ -144,11 +144,24 @@ details[open]>summary{margin-bottom:8px}
 .disc{font-size:.84rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:22px}
 .view-simple .tech-only{display:none}
 .view-tech .simple-only{display:none}
+.only-print{display:none}
 @media print{
   body{background:#fff}
-  .noprint,#drop,.toggle{display:none !important}
+  .noprint,#drop,.toggle,#card-upload,#card-values{display:none !important}
   .card,.res,.pat,details{box-shadow:none;break-inside:avoid}
   .wrap{max-width:none;padding:0}
+  .only-print{display:block}
+  details.normais{display:none}            /* substituído pela tabela completa */
+  details.menores{border:none;padding:0}
+  details.menores>*:not(summary){display:block !important}   /* garante o conteúdo mesmo fechado */
+  details.menores>summary{font-size:1.15rem;margin:18px 0 8px}
+  table.tudo{width:100%;border-collapse:collapse;font-size:.78rem}
+  table.tudo th{text-align:left;border-bottom:1px solid var(--border);padding:4px 6px;font-size:.72rem;
+    text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+  table.tudo td{padding:3px 6px;border-bottom:1px solid var(--surface-2)}
+  table.tudo td.v{font-family:var(--mono);text-align:right;white-space:nowrap}
+  table.tudo tr.fora td{font-weight:700}
+  table.tudo tr.cat td{background:var(--surface-2);font-weight:700;padding-top:7px}
 }
 </style>
 </head>
@@ -205,9 +218,9 @@ details[open]>summary{margin-bottom:8px}
     </label>
     <label class="fld">Pressão arterial (mmHg)
       <span class="row" style="flex-wrap:nowrap;gap:6px">
-        <input id="pas" type="number" min="50" max="300" step="1" placeholder="12x" aria-label="Pressão sistólica">
+        <input id="pas" type="number" min="5" max="300" step="1" placeholder="120 ou 12" aria-label="Pressão sistólica">
         <span class="muted">/</span>
-        <input id="pad" type="number" min="30" max="200" step="1" placeholder="8x" aria-label="Pressão diastólica">
+        <input id="pad" type="number" min="4" max="200" step="1" placeholder="80 ou 8" aria-label="Pressão diastólica">
       </span>
     </label>
     <label class="fld">Jejum (horas)
@@ -1496,10 +1509,13 @@ const MANUAL_DEFAULT = ['hemoglobina','hematocrito','vcm','leucocitos','plaqueta
 
 function readCtx(){
   const num = id => { const v = parseFloat(($('#'+id).value||'').replace(',','.')); return isFinite(v) ? v : null; };
+  /* muita gente digita a pressão como se fala: "12 por 8". Interpretamos como 120/80,
+     senão o critério de pressão da síndrome metabólica nunca dispararia para essas pessoas. */
+  const pa = (v, limite) => (v != null && v > 0 && v < limite) ? v*10 : v;
   return {
     sex: $('#sex').value, age: num('age') ?? 40,
     peso: num('peso'), altura: num('altura'), cintura: num('cintura'),
-    pas: num('pas'), pad: num('pad'), jejum: num('jejum'),
+    pas: pa(num('pas'), 30), pad: pa(num('pad'), 25), jejum: num('jejum'),
     gestante: $('#gestante').checked, atleta: $('#atleta').checked,
     labRefs: state.labRefs
   };
@@ -1714,7 +1730,7 @@ function analyze(){
       <p class="muted"><small>Em ordem de relevância clínica, não de tamanho do desvio.</small></p>` +
       principais.map(cardDe).join('') + `</div>`);
   if (secundarios.length)
-    html.push(`<details><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
+    html.push(`<details class="menores"><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
       ${secundarios.map(([id]) => escapeHtml(byId[id].nome)).join(', ')}</summary>
       <p class="muted"><small>Costumam acompanhar outro achado ou variar entre coletas; raramente decidem alguma conduta sozinhas.</small></p>` +
       secundarios.map(cardDe).join('') + `</details>`);
@@ -1726,10 +1742,31 @@ function analyze(){
         `<p style="font-size:.88rem;margin-top:8px"><b>${escapeHtml(d.rot)}:</b> ${escapeHtml(d.txt)}.</p>`).join('') + `</div>`);
 
   if (normais.length || infos.length)
-    html.push(`<details><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>
+    html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>
       <div class="mini">` + normais.concat(infos).map(([id,c]) =>
         `<div><span>${escapeHtml(byId[id].nome)}</span><b>${fmt(vals[id], byId[id].dec)} ${escapeHtml(byId[id].un)}</b></div>`).join('') +
       `</div></details>`);
+
+  /* Na impressão o passo 2 (formulário) não vai junto — no lugar dele sai uma tabela
+     compacta com todos os exames, que é o que se leva para o médico. */
+  const porCat = {};
+  for (const [id,c] of entries) (porCat[byId[id].cat] = porCat[byId[id].cat] || []).push([id,c]);
+  const linhas = Object.keys(CATS).filter(cat => porCat[cat]).map(cat => [cat, porCat[cat]]).map(([cat,list]) =>
+    `<tr class="cat"><td colspan="4">${escapeHtml(CATS[cat].nome)}</td></tr>` +
+    list.map(([id,c]) => {
+      const a = byId[id];
+      const sit = c.status === 'normal' ? '' : (c.sev === 1 ? 'no limite' : STATUS_LABEL[c.status].toLowerCase());
+      return `<tr class="${c.status !== 'normal' && c.status !== 'info' ? 'fora' : ''}">
+        <td>${escapeHtml(a.nome)}</td>
+        <td class="v">${fmt(vals[id], a.dec)} ${escapeHtml(a.un)}</td>
+        <td>${escapeHtml(refText(a, ctx))}${refOf(a, ctx) ? ' ' + escapeHtml(a.un) : ''}${state.labRefs[a.id] ? ' *' : ''}</td>
+        <td>${sit}</td></tr>`;
+    }).join('')).join('');
+  html.push(`<div class="only-print" style="break-before:page">
+    <h2>📋 Todos os resultados</h2>
+    <table class="tudo"><thead><tr><th>Exame</th><th style="text-align:right">Resultado</th>
+      <th>Referência</th><th>Situação</th></tr></thead><tbody>${linhas}</tbody></table>
+    <p class="muted"><small>* faixa informada pelo próprio laboratório no laudo original.</small></p></div>`);
 
   const perguntas = patterns.filter(p=>p.acao).map(p=>p.acao);
   if (perguntas.length)
@@ -1746,6 +1783,10 @@ function analyze(){
   $('#v-simple').addEventListener('click', () => setView('simple'));
   $('#v-tech').addEventListener('click', () => setView('tech'));
   $('#btn-print').addEventListener('click', () => window.print());
+  /* um <details> fechado não imprime o conteúdo: abrimos antes e restauramos depois */
+  const recolhidos = () => [...document.querySelectorAll('details.menores')];
+  window.addEventListener('beforeprint', () => recolhidos().forEach(d => { d.dataset.reabrir = d.open ? '' : '1'; d.open = true; }));
+  window.addEventListener('afterprint', () => recolhidos().forEach(d => { if (d.dataset.reabrir) d.open = false; }));
   $('#btn-edit').addEventListener('click', () => $('#card-values').scrollIntoView({behavior:'smooth'}));
   $('#btn-json').addEventListener('click', () => baixarJson(vals, st, derived, patterns, ctx, sugestoes));
   rep.scrollIntoView({behavior:'smooth', block:'start'});

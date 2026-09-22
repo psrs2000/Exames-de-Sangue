@@ -19,6 +19,8 @@ GitHub Pages. Não há build, dependências de projeto nem servidor.
 3. **Analise** e leia o relatório, alternando entre *Explicação simples* e *Técnico*.
    Dá para imprimir, salvar em PDF e baixar os dados em JSON.
 
+A pressão arterial aceita as duas formas de escrever: `120 / 80` ou `12 / 8`.
+
 Os arquivos **não saem do seu computador**: a leitura do PDF acontece dentro do navegador.
 A única requisição externa é o download da biblioteca [pdf.js](https://mozilla.github.io/pdf.js/)
 por CDN, feita uma vez. Para uso totalmente offline, hospede os dois arquivos do pdf.js
@@ -57,6 +59,9 @@ junto ao app e declare-os antes do script do app:
 - **Exames que faltaram**: a partir dos achados, o app lista o que *não* foi medido e ajudaria,
   com o motivo de cada sugestão (anemia sem saturação de transferrina, reticulócitos ou PCR;
   dislipidemia sem ApoB ou Lp(a); alteração metabólica sem albuminúria na urina; e assim por diante).
+- **Impressão pensada para levar ao médico**: o formulário de conferência fica fora do papel,
+  os blocos recolhidos são abertos e entra uma tabela compacta com todos os exames, resultado,
+  referência e situação.
 - **Valores de alerta** que sugerem procurar avaliação médica sem esperar a rotina.
 - **Perguntas para levar à consulta**, geradas a partir dos padrões encontrados.
 
