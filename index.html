@@ -142,6 +142,22 @@ details[open]>summary{margin-bottom:8px}
 .pat h3{margin-bottom:4px;font-size:.98rem}
 .pat p{font-size:.89rem;margin:6px 0 0}
 .disc{font-size:.84rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:22px}
+/* histórico e evolução */
+.hist{display:flex;flex-direction:column;gap:6px}
+.hist-item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+  padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:.9rem}
+.hist-item b{font-variant-numeric:tabular-nums}
+.hist-item.atual{border-color:var(--accent);background:var(--accent-soft)}
+table.evo{width:100%;border-collapse:collapse;font-size:.88rem}
+table.evo th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;
+  color:var(--muted);font-weight:600;padding:4px 8px;border-bottom:1px solid var(--border)}
+table.evo td{padding:7px 8px;border-bottom:1px solid var(--surface-2);vertical-align:middle}
+table.evo td.num{font-family:var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.evo td.spark{width:112px;padding:2px 8px}
+.delta{font-weight:700;white-space:nowrap}
+.delta.sobe{color:var(--high)} .delta.desce{color:var(--low)} .delta.igual{color:var(--muted)}
+.delta.bom{color:var(--ok)} .delta.ruim{color:var(--high)}
+@media (max-width:560px){table.evo td.spark{display:none}table.evo{font-size:.82rem}}
 .view-simple .tech-only{display:none}
 .view-tech .simple-only{display:none}
 .only-print{display:none}
@@ -152,6 +168,7 @@ details[open]>summary{margin-bottom:8px}
   .wrap{max-width:none;padding:0}
   .only-print{display:block}
   details.normais{display:none}            /* substituído pela tabela completa */
+  table.evo td.spark{display:table-cell}
   details.menores{border:none;padding:0}
   details.menores>*:not(summary){display:block !important}   /* garante o conteúdo mesmo fechado */
   details.menores>summary{font-size:1.15rem;margin:18px 0 8px}
@@ -193,6 +210,7 @@ details[open]>summary{margin-bottom:8px}
   <div class="row" style="margin-top:12px">
     <button class="btn" id="btn-demo" type="button">Ver exemplo</button>
     <button class="btn" id="btn-manual" type="button">Digitar valores sem PDF</button>
+    <button class="btn" id="btn-hist-importar2" type="button">⬆️ Importar histórico</button>
   </div>
   <div id="status"></div>
 </section>
@@ -226,6 +244,9 @@ details[open]>summary{margin-bottom:8px}
     <label class="fld">Jejum (horas)
       <input id="jejum" type="number" min="0" max="24" step="1" placeholder="ex.: 12">
     </label>
+    <label class="fld">Data da coleta
+      <input id="coleta" type="date">
+    </label>
     <label class="fld">Situações especiais
       <span class="row" style="gap:14px;padding-top:6px">
         <span class="row" style="gap:5px;flex-wrap:nowrap"><input type="checkbox" id="gestante" style="width:auto"> <small>Gestante</small></span>
@@ -243,8 +264,22 @@ details[open]>summary{margin-bottom:8px}
   <div id="values"></div>
   <div class="row" style="margin-top:18px">
     <button class="btn primary" id="btn-analyze" type="button">Analisar resultados</button>
+    <button class="btn" id="btn-salvar" type="button">💾 Salvar no histórico</button>
     <button class="btn" id="btn-reset" type="button">Recomeçar</button>
   </div>
+</section>
+
+<section class="card noprint hidden" id="card-hist">
+  <h2>📂 Histórico</h2>
+  <p class="muted"><small>Fica guardado neste navegador. <b>Baixe o arquivo do histórico</b> de tempos em tempos:
+    limpar os dados do navegador apaga o que está aqui, e é o arquivo que garante seus exames ao longo dos anos.</small></p>
+  <div class="hist" id="hist-lista"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn" id="btn-hist-baixar" type="button">⬇️ Baixar histórico</button>
+    <button class="btn" id="btn-hist-importar" type="button">⬆️ Importar histórico</button>
+    <input type="file" id="file-hist" accept="application/json,.json" class="hidden">
+  </div>
+  <div id="hist-status" style="margin-top:10px"></div>
 </section>
 
 <section class="hidden" id="card-report"></section>
@@ -997,6 +1032,15 @@ function extractFromLines(lines, sex){
       const r = Math.max(...lim) / Math.max(...b);
       return r >= 0.2 && r <= 5;
     };
+    /* Exames cuja referência é uma META (desejável até X, sem limite inferior): se o
+       laboratório imprime uma faixa populacional de dois lados, ela NÃO substitui a meta
+       — a ApoB de 128 mg/dL cai dentro do 46–174 do laboratório, mas está acima de
+       qualquer alvo terapêutico. Aproveitamos só o teto, e apenas se for mais rigoroso. */
+    if (base && base[0] == null && r[0] != null){
+      const teto = (r[1] != null && (base[1] == null || r[1] <= base[1])) ? [null, r[1]] : null;
+      if (teto && naEscala(teto)) labRefs[id] = teto;
+      continue;
+    }
     if (naEscala(r)) labRefs[id] = r;
     else if (v.fator && v.fator !== 1){
       /* o valor veio em outra unidade e foi convertido: a faixa precisa da mesma conversão */
@@ -1501,7 +1545,7 @@ const el = (tag, attrs={}, html='') => {
 };
 const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const state = {values:{}, labRefs:{}, shown:[], origem:{}, lines:null};
+const state = {values:{}, labRefs:{}, shown:[], origem:{}, lines:null, historico:[]};
 
 const MANUAL_DEFAULT = ['hemoglobina','hematocrito','vcm','leucocitos','plaquetas',
   'colesterol_total','hdl','ldl','triglicerideos','glicose','hba1c','creatinina','ureia',
@@ -1516,6 +1560,7 @@ function readCtx(){
     sex: $('#sex').value, age: num('age') ?? 40,
     peso: num('peso'), altura: num('altura'), cintura: num('cintura'),
     pas: pa(num('pas'), 30), pad: pa(num('pad'), 25), jejum: num('jejum'),
+    coleta: $('#coleta').value || null,
     gestante: $('#gestante').checked, atleta: $('#atleta').checked,
     labRefs: state.labRefs
   };
@@ -1703,6 +1748,9 @@ function analyze(){
   }
   html.push('</div>');
 
+  const evo = calcularEvolucao(vals, st, ctx);
+  html.push(evolucaoHtml(evo, ctx));
+
   if (patterns.length){
     const ordemP = {alerta:0, atencao:1, info:2};
     patterns.sort((a,b) => ordemP[a.nivel] - ordemP[b.nivel]);
@@ -1833,6 +1881,8 @@ async function handleFile(file){
     });
     const ctx = readCtx();
     const {found, labRefs} = extractFromLines(lines, ctx.sex);
+    const dataColeta = extrairDataColeta(lines);
+    if (dataColeta) $('#coleta').value = dataColeta;
     state.lines = lines; state.labRefsSex = ctx.sex;
     state.values = {}; state.origem = {}; state.labRefs = labRefs;
     for (const [id,info] of Object.entries(found)){ state.values[id] = info.value; state.origem[id] = 'pdf'; }
@@ -1845,7 +1895,8 @@ async function handleFile(file){
     const comRef = Object.keys(labRefs).length;
     setStatus(`✅ Encontrei <b>${ids.length}</b> exame(s) em ${lines.length} linhas de texto` +
       (comRef ? `, sendo ${comRef} com a faixa de referência do próprio laboratório` : '') +
-      `. Confira os valores abaixo antes de analisar.`, 'info');
+      (dataColeta ? `. Coleta de <b>${dataBR(dataColeta)}</b>` : '. Não achei a data da coleta — informe abaixo') +
+      `. Confira os valores antes de analisar.`, 'info');
     showValuesCard(ids);
   }catch(e){
     console.error(e);
@@ -1871,6 +1922,275 @@ function carregarDemo(){
   showValuesCard(Object.keys(DEMO.valores));
 }
 
+/* ---------- 11. Histórico ------------------------------------------------
+   O histórico vive em duas camadas: o IndexedDB do navegador, para a
+   conveniência do dia a dia, e o arquivo JSON exportado, que é a fonte de
+   verdade — armazenamento de navegador é cache, não arquivo, e some quando o
+   usuário limpa os dados do site.
+
+   Cada exame guarda a FAIXA DE REFERÊNCIA VIGENTE na data da coleta. Sem isso a
+   série temporal fica errada: laboratórios mudam método e faixa (o T4 livre de um
+   mesmo laboratório passou de 0,89–1,61 para 0,96–1,73 em quatro meses), e aplicar
+   a faixa de hoje ao passado inventa alterações que nunca existiram.
+   ------------------------------------------------------------------------ */
+const DB_NOME = 'exames-de-sangue', DB_VERSAO = 1;
+const ESQUEMA_VERSAO = 1;
+
+function abrirDB(){
+  return new Promise((ok, erro) => {
+    const req = indexedDB.open(DB_NOME, DB_VERSAO);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('exames')) db.createObjectStore('exames', {keyPath:'data'});
+      if (!db.objectStoreNames.contains('perfil')) db.createObjectStore('perfil');
+    };
+    req.onsuccess = () => ok(req.result);
+    req.onerror = () => erro(req.error);
+  });
+}
+function comStore(store, modo, fn){
+  return abrirDB().then(db => new Promise((ok, erro) => {
+    const tx = db.transaction(store, modo), req = fn(tx.objectStore(store));
+    tx.oncomplete = () => ok(req && req.result);
+    tx.onerror = () => erro(tx.error);
+  }));
+}
+const dbExames  = ()    => comStore('exames','readonly',  st => st.getAll());
+const dbGravar  = (reg) => comStore('exames','readwrite', st => st.put(reg));
+const dbApagar  = (data)=> comStore('exames','readwrite', st => st.delete(data));
+const dbPerfil  = ()    => comStore('perfil','readonly',  st => st.get('atual'));
+const dbPerfilSet = (v) => comStore('perfil','readwrite', st => st.put(v,'atual'));
+
+/* --- data da coleta, lida do próprio laudo --- */
+function extrairDataColeta(lines){
+  const iso = (d,m,a) => {
+    a = +a; if (a < 100) a += a > 70 ? 1900 : 2000;
+    const dt = new Date(Date.UTC(a, +m-1, +d));
+    return (dt.getUTCFullYear() === a && dt.getUTCMonth() === +m-1 && dt.getUTCDate() === +d)
+      ? `${a}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : null;
+  };
+  const RE_COLETA = /data\s*(?:da|de)?\s*coleta\s*:?\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
+  const contagem = {};
+  const limite = new Date().getFullYear() - 5;
+  for (const l of lines){
+    const t = norm(l.raw);
+    const m = RE_COLETA.exec(t);
+    if (m){ const d = iso(m[1],m[2],m[3]); if (d) return d; }
+    for (const g of t.matchAll(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/g)){
+      const d = iso(g[1],g[2],g[3]);
+      if (d && +d.slice(0,4) >= limite) contagem[d] = (contagem[d]||0) + 1;
+    }
+  }
+  /* sem marcação explícita: a data que mais aparece no laudo, ignorando as antigas
+     (data de nascimento) — empate resolve pela mais antiga, que costuma ser a coleta */
+  const ord = Object.entries(contagem).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+  return ord.length ? ord[0][0] : null;
+}
+
+const hojeISO = () => new Date().toISOString().slice(0,10);
+const dataBR = d => d ? d.split('-').reverse().join('/') : '—';
+
+/* --- gravar o exame atual --- */
+function registroAtual(){
+  const ctx = readCtx();
+  const valores = {};
+  for (const [id,v] of Object.entries(state.values)){
+    if (v == null || !isFinite(v) || !byId[id]) continue;
+    const r = refOf(byId[id], ctx);
+    valores[id] = {v, un:byId[id].un, ref:r || null, refLab:!!state.labRefs[id], origem:state.origem[id] || 'manual'};
+  }
+  return {
+    data: ctx.coleta || hojeISO(),
+    salvo_em: new Date().toISOString(),
+    perfil: {sexo:ctx.sex, idade:ctx.age, peso:ctx.peso, altura:ctx.altura, cintura:ctx.cintura,
+             pas:ctx.pas, pad:ctx.pad, jejum:ctx.jejum, gestante:ctx.gestante, atleta:ctx.atleta},
+    valores
+  };
+}
+
+async function salvarNoHistorico(){
+  const reg = registroAtual();
+  if (!Object.keys(reg.valores).length){ setStatus('Nada para salvar: preencha ao menos um exame.','warn'); return; }
+  const existente = state.historico.find(r => r.data === reg.data);
+  /* mesma data = mesma coleta: dois PDFs do mesmo dia se somam em vez de duplicar */
+  if (existente) reg.valores = {...existente.valores, ...reg.valores};
+  await dbGravar(reg);
+  await dbPerfilSet(reg.perfil);
+  await carregarHistorico();
+  setStatus(`💾 Exame de <b>${dataBR(reg.data)}</b> ${existente ? 'atualizado no' : 'salvo no'} histórico ` +
+    `(${Object.keys(reg.valores).length} exames). Baixe o arquivo do histórico para não depender do navegador.`, 'info');
+}
+
+async function carregarHistorico(){
+  try{
+    state.historico = (await dbExames()).sort((a,b) => a.data.localeCompare(b.data));
+  }catch(e){ state.historico = []; console.warn('histórico indisponível', e); }
+  renderHistorico();
+}
+
+function renderHistorico(){
+  const card = $('#card-hist'), lista = $('#hist-lista');
+  if (!state.historico.length){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  lista.innerHTML = '';
+  for (const reg of [...state.historico].reverse()){
+    const n = Object.keys(reg.valores).length;
+    const item = el('div',{class:'hist-item' + (reg.data === $('#coleta').value ? ' atual' : '')},
+      `<span><b>${dataBR(reg.data)}</b> <span class="muted">· ${n} exame(s)</span></span>`);
+    const carregar = el('button',{class:'btn',type:'button'},'Carregar');
+    carregar.addEventListener('click', () => carregarExame(reg));
+    const apagar = el('button',{class:'iconbtn',type:'button',title:'remover do histórico'},'✕');
+    apagar.addEventListener('click', async () => {
+      if (!confirm(`Remover o exame de ${dataBR(reg.data)} do histórico?`)) return;
+      await dbApagar(reg.data); await carregarHistorico();
+    });
+    item.append(carregar, apagar);
+    lista.appendChild(item);
+  }
+}
+
+function carregarExame(reg){
+  state.values = {}; state.origem = {}; state.labRefs = {}; state.lines = null;
+  for (const [id,info] of Object.entries(reg.valores)){
+    state.values[id] = info.v;
+    state.origem[id] = info.origem;
+    if (info.refLab && info.ref) state.labRefs[id] = info.ref;   /* faixa congelada na época */
+  }
+  const p = reg.perfil || {};
+  for (const [campo,val] of Object.entries({age:p.idade, peso:p.peso, altura:p.altura,
+      cintura:p.cintura, pas:p.pas, pad:p.pad, jejum:p.jejum}))
+    if (val != null) $('#'+campo).value = val;
+  if (p.sexo) $('#sex').value = p.sexo;
+  $('#gestante').checked = !!p.gestante; $('#atleta').checked = !!p.atleta;
+  $('#coleta').value = reg.data;
+  setStatus(`Exame de <b>${dataBR(reg.data)}</b> carregado do histórico.`, 'info');
+  showValuesCard(Object.keys(reg.valores));
+}
+
+/* --- exportar / importar o arquivo do histórico --- */
+function baixarHistorico(){
+  const dados = {versao:ESQUEMA_VERSAO, app:'analisador-exames-de-sangue',
+    gerado_em:new Date().toISOString(), exames:state.historico};
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = el('a',{href:url, download:`historico-exames-${hojeISO()}.json`});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function importarHistorico(file){
+  const aviso = (t,k) => $('#hist-status').innerHTML = `<div class="alert ${k}">${t}</div>`;
+  try{
+    const dados = JSON.parse(await file.text());
+    if (!dados || !Array.isArray(dados.exames)) throw new Error('arquivo sem a lista de exames');
+    if (dados.versao > ESQUEMA_VERSAO) throw new Error('arquivo gerado por uma versão mais nova do app');
+    let novos = 0, mesclados = 0;
+    for (const reg of dados.exames){
+      if (!reg || !reg.data || !reg.valores) continue;
+      const atual = state.historico.find(r => r.data === reg.data);
+      if (atual){ reg.valores = {...atual.valores, ...reg.valores}; mesclados++; } else novos++;
+      await dbGravar(reg);
+    }
+    await carregarHistorico();
+    $('#card-hist').classList.remove('hidden');
+    aviso(`✅ Importado: ${novos} exame(s) novo(s)` + (mesclados ? `, ${mesclados} atualizado(s)` : '') + '.', 'info');
+  }catch(e){
+    aviso('Não consegui ler esse arquivo de histórico. ' + escapeHtml(e.message), 'err');
+  }
+}
+
+/* --- evolução em relação aos exames anteriores --- */
+function calcularEvolucao(vals, st, ctx){
+  const dataAtual = ctx.coleta || hojeISO();
+  const anteriores = state.historico.filter(r => r.data < dataAtual);
+  if (!anteriores.length) return null;
+  const prev = anteriores[anteriores.length - 1];
+  const linhas = [];
+  for (const [id, v] of Object.entries(vals)){
+    const a = byId[id]; if (!a || prev.valores[id] == null) continue;
+    const antes = prev.valores[id].v;
+    if (!isFinite(antes) || antes === 0) continue;
+    const pct = (v - antes) / Math.abs(antes) * 100;
+    const cl = st[id];
+    const antesFora = prev.valores[id].ref ? foraDaFaixa(antes, prev.valores[id].ref) : null;
+    const agoraFora = cl ? (cl.status !== 'normal' && cl.status !== 'info') : null;
+    const mudouSituacao = antesFora != null && agoraFora != null && antesFora !== agoraFora;
+    if (Math.abs(pct) < 10 && !mudouSituacao) continue;
+    const serie = [...anteriores, {data:dataAtual, valores:{[id]:{v}}}]
+      .filter(r => r.valores[id] != null)
+      .map(r => ({data:r.data, v:r.valores[id].v}));
+    linhas.push({id, a, antes, agora:v, pct, cl, serie, mudouSituacao,
+      dataAntes:prev.data, prio:prioridadeDe(id, cl || {status:'normal', sev:0})});
+  }
+  linhas.sort((x,y) => (y.prio - x.prio) || (Math.abs(y.pct) - Math.abs(x.pct)));
+  return {prev, linhas, dataAtual};
+}
+const foraDaFaixa = (v, ref) =>
+  (ref[0] != null && v < ref[0]) || (ref[1] != null && v > ref[1]);
+
+/* Sparkline: série única, sem legenda; a faixa de referência entra como fundo e
+   o ponto atual carrega a cor de situação — os números ficam na própria tabela. */
+function sparkline(serie, ref, status){
+  const w = 104, h = 26, pad = 4;
+  if (serie.length < 2) return '';
+  const vs = serie.map(p => p.v);
+  let lo = Math.min(...vs), hi = Math.max(...vs);
+  if (ref){ if (ref[0] != null) lo = Math.min(lo, ref[0]); if (ref[1] != null) hi = Math.max(hi, ref[1]); }
+  const span = (hi - lo) || Math.abs(hi) || 1;
+  lo -= span*0.18; hi += span*0.18;
+  const X = i => pad + i*(w - 2*pad)/(serie.length - 1);
+  const Y = v => h - pad - (v - lo)/(hi - lo)*(h - 2*pad);
+  let banda = '';
+  if (ref && (ref[0] != null || ref[1] != null)){
+    const y1 = Y(ref[1] != null ? ref[1] : hi), y2 = Y(ref[0] != null ? ref[0] : lo);
+    banda = `<rect x="0" y="${Math.max(0,y1).toFixed(1)}" width="${w}" height="${Math.max(1,y2-y1).toFixed(1)}"
+      fill="var(--ok-soft)"/>`;
+  }
+  const pts = serie.map((p,i) => `${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+  const cor = status === 'normal' || !status ? 'var(--ok)'
+    : status === 'baixo' ? 'var(--low)' : status === 'info' ? 'var(--muted)' : 'var(--high)';
+  const ult = serie[serie.length-1];
+  const desc = serie.map(p => `${dataBR(p.data)}: ${p.v}`).join('; ');
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Evolução — ${escapeHtml(desc)}">
+    ${banda}
+    <polyline points="${pts}" fill="none" stroke="var(--muted)" stroke-width="2"
+      stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(serie.length-1).toFixed(1)}" cy="${Y(ult.v).toFixed(1)}" r="4"
+      fill="${cor}" stroke="var(--surface)" stroke-width="2"/>
+  </svg>`;
+}
+
+function evolucaoHtml(evo, ctx){
+  if (!evo || !evo.linhas.length) return '';
+  const linha = L => {
+    const dir = L.pct > 0 ? 'sobe' : L.pct < 0 ? 'desce' : 'igual';
+    const seta = L.pct > 0 ? '▲' : L.pct < 0 ? '▼' : '—';
+    /* voltar para dentro da faixa é sempre boa notícia, suba ou desça */
+    const virouBom = L.mudouSituacao && L.cl && (L.cl.status === 'normal');
+    const virouRuim = L.mudouSituacao && !virouBom;
+    const corDelta = virouBom ? 'bom' : virouRuim ? 'ruim' : 'igual';
+    return `<tr>
+      <td>${escapeHtml(L.a.nome)}${L.mudouSituacao ? ` <span class="st ${virouBom ? 'normal' : 'limite'}">${virouBom ? 'entrou na faixa' : 'saiu da faixa'}</span>` : ''}</td>
+      <td class="spark">${sparkline(L.serie, refOf(L.a, ctx), L.cl && L.cl.status)}</td>
+      <td class="num muted">${fmt(L.antes, L.a.dec)}</td>
+      <td class="num">${fmt(L.agora, L.a.dec)} <span class="muted">${escapeHtml(L.a.un)}</span></td>
+      <td class="num delta ${corDelta}" title="${dir === 'sobe' ? 'subiu' : dir === 'desce' ? 'desceu' : 'estável'}">${seta} ${fmt(Math.abs(L.pct),0)}%</td>
+    </tr>`;
+  };
+  return `<div class="card"><h2>📈 Evolução desde ${dataBR(evo.prev.data)}</h2>
+    <p class="muted"><small>Mudanças de 10% ou mais, ou que cruzaram a faixa de referência, em ordem de relevância clínica.
+    Cada valor é comparado com a faixa que valia na época da coleta.</small></p>
+    <table class="evo"><thead><tr><th>Exame</th><th>Tendência</th>
+      <th style="text-align:right">${dataBR(evo.prev.data)}</th>
+      <th style="text-align:right">${dataBR(evo.dataAtual)}</th>
+      <th style="text-align:right">Variação</th></tr></thead>
+      <tbody>${evo.linhas.slice(0,14).map(linha).join('')}</tbody></table>` +
+    (evo.linhas.length > 14
+      ? `<details style="margin-top:12px"><summary>mais ${evo.linhas.length-14} exame(s) com variação</summary>
+         <table class="evo"><tbody>${evo.linhas.slice(14).map(linha).join('')}</tbody></table></details>`
+      : '') + `</div>`;
+}
+
 /* ---------- 10. Eventos -------------------------------------------------- */
 const drop = $('#drop'), fileInput = $('#file');
 drop.addEventListener('click', () => fileInput.click());
@@ -1885,10 +2205,17 @@ $('#btn-manual').addEventListener('click', () => {
   showValuesCard(MANUAL_DEFAULT);
 });
 $('#btn-analyze').addEventListener('click', analyze);
+$('#btn-salvar').addEventListener('click', salvarNoHistorico);
+$('#btn-hist-baixar').addEventListener('click', baixarHistorico);
+for (const b of ['#btn-hist-importar','#btn-hist-importar2'])
+  $(b).addEventListener('click', () => $('#file-hist').click());
+$('#file-hist').addEventListener('change', e => { if (e.target.files[0]) importarHistorico(e.target.files[0]); e.target.value=''; });
+$('#coleta').addEventListener('change', renderHistorico);
 $('#btn-reset').addEventListener('click', () => {
   state.values = {}; state.origem = {}; state.labRefs = {}; state.shown = [];
   $('#card-values').classList.add('hidden'); $('#card-report').classList.add('hidden');
-  fileInput.value = ''; setStatus('');
+  fileInput.value = ''; $('#coleta').value = ''; setStatus('');
+  renderHistorico();
   window.scrollTo({top:0, behavior:'smooth'});
 });
 $('#add-analyte').addEventListener('change', e => {
@@ -1900,10 +2227,25 @@ for (const id of ['age','peso','altura','cintura','pas','pad'])
   $('#'+id).addEventListener('input', renderBio);
 $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValues(); });
 
+/* ---------- 12. Início --------------------------------------------------- */
+(async () => {
+  await carregarHistorico();
+  try{
+    const p = await dbPerfil();
+    if (p && !$('#peso').value){
+      if (p.sexo) $('#sex').value = p.sexo;
+      for (const [campo,val] of Object.entries({age:p.idade, peso:p.peso, altura:p.altura, cintura:p.cintura}))
+        if (val != null) $('#'+campo).value = val;
+      renderBio();
+    }
+  }catch(e){ /* navegador sem IndexedDB: o app segue funcionando sem histórico */ }
+})();
+
 /* ganchos para testes automatizados e para auto-hospedagem do pdf.js */
 window.EXAMES = {ANALYTES, byId, extractFromLines, pdfToLines, classify, computeDerived,
                  findPatterns, sugerirExames, prioridadeDe, analyze, state, handleFile,
-                 cleanLine, segmentValue, labRangeFrom};
+                 cleanLine, segmentValue, labRangeFrom, extrairDataColeta, salvarNoHistorico,
+                 carregarHistorico, baixarHistorico, importarHistorico, calcularEvolucao};
 </script>
 </body>
 </html>
