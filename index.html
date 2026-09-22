@@ -2074,17 +2074,6 @@ function carregarExame(reg, op={}){
   renderHistorico();
 }
 
-/* Ao abrir o app (ou logo depois de importar), retoma sozinho o exame mais recente:
-   sem isso o histórico existe mas a tela começa vazia, e o usuário precisa refazer
-   todo o caminho — carregar os PDFs de novo — só para rever a evolução. */
-function retomarUltimoExame(motivo){
-  if (!state.historico.length) return;
-  const ultimo = state.historico[state.historico.length - 1];
-  carregarExame(ultimo, {scroll:false, msg:
-    `${motivo} Exame mais recente (<b>${dataBR(ultimo.data)}</b>) carregado, com a evolução em relação aos anteriores. ` +
-    `Para acrescentar um exame novo, envie o PDF aqui em cima.`});
-}
-
 /* --- exportar / importar o arquivo do histórico --- */
 function baixarHistorico(){
   const dados = {versao:ESQUEMA_VERSAO, app:'analisador-exames-de-sangue',
@@ -2111,8 +2100,8 @@ async function importarHistorico(file){
     }
     await carregarHistorico();
     $('#card-hist').classList.remove('hidden');
-    aviso(`✅ Importado: ${novos} exame(s) novo(s)` + (mesclados ? `, ${mesclados} atualizado(s)` : '') + '.', 'info');
-    retomarUltimoExame('Histórico importado.');
+    aviso(`✅ Importado: ${novos} exame(s) novo(s)` + (mesclados ? `, ${mesclados} atualizado(s)` : '') +
+      '. Abra o exame que quiser analisar — a evolução é calculada até a data dele.', 'info');
   }catch(e){
     aviso('Não consegui ler esse arquivo de histórico. ' + escapeHtml(e.message), 'err');
   }
@@ -2249,7 +2238,11 @@ $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValue
 /* ---------- 12. Início --------------------------------------------------- */
 (async () => {
   await carregarHistorico();
-  retomarUltimoExame('Bem-vindo de volta.');
+  /* Nada é aberto automaticamente: qual exame analisar é escolha do usuário — abrir um
+     exame do meio mostra a evolução até aquela data, e isso é informação, não limitação. */
+  if (state.historico.length)
+    setStatus(`📂 Você tem <b>${state.historico.length}</b> exame(s) no histórico. Abra um deles para ver a análise ` +
+      `e a evolução até aquela data, ou envie um PDF novo.`, 'info');
   try{
     const p = await dbPerfil();
     if (p && !$('#peso').value){
