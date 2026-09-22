@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analisador de Exames de Sangue</title>
+<meta name="description" content="Leia o PDF do seu exame de sangue e receba uma análise dos resultados — em linguagem simples ou técnica. Tudo processado no seu navegador.">
+<style>
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --surface-2:#eef0f4; --border:#dfe3ea;
+  --text:#14181f; --muted:#5b6472; --accent:#b0203c; --accent-soft:#fdeef1;
+  --ok:#137a4b; --ok-soft:#e7f5ee; --warn:#9a6205; --warn-soft:#fdf3e2;
+  --high:#b3341b; --high-soft:#fdeee9; --low:#1a5fa8; --low-soft:#e9f1fb;
+  --crit:#8b1028; --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1115; --surface:#171a21; --surface-2:#1e222b; --border:#2b313d;
+    --text:#e9ecf1; --muted:#9aa4b2; --accent:#ff6b86; --accent-soft:#2a1620;
+    --ok:#4cc38a; --ok-soft:#10241b; --warn:#e3b341; --warn-soft:#2a2113;
+    --high:#ff8a65; --high-soft:#2c1a14; --low:#6ab0ff; --low-soft:#111f30;
+    --crit:#ff5c7a; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --surface:#171a21; --surface-2:#1e222b; --border:#2b313d;
+  --text:#e9ecf1; --muted:#9aa4b2; --accent:#ff6b86; --accent-soft:#2a1620;
+  --ok:#4cc38a; --ok-soft:#10241b; --warn:#e3b341; --warn-soft:#2a2113;
+  --high:#ff8a65; --high-soft:#2c1a14; --low:#6ab0ff; --low-soft:#111f30;
+  --crit:#ff5c7a; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 72px}
+h1,h2,h3{line-height:1.25;margin:0 0 8px}
+h1{font-size:clamp(1.5rem,4vw,2rem);letter-spacing:-.02em}
+h2{font-size:1.15rem;letter-spacing:-.01em}
+h3{font-size:1rem}
+p{margin:0 0 10px}
+a{color:var(--accent)}
+small{font-size:.82rem}
+.muted{color:var(--muted)}
+header.top{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px}
+.logo{flex:0 0 auto;width:42px;height:42px;border-radius:12px;background:var(--accent-soft);
+  display:grid;place-items:center;font-size:22px;border:1px solid var(--border)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 18px}
+.pill{font-size:.75rem;padding:3px 9px;border-radius:999px;background:var(--surface-2);
+  color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card h2{display:flex;align-items:center;gap:8px}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;flex:0 0 auto}
+:root[data-theme="dark"] .step,:root:not([data-theme="light"]) .step{color:#1a0b10}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .step{color:#fff}}
+/* dropzone */
+#drop{border:2px dashed var(--border);border-radius:var(--radius);padding:30px 18px;text-align:center;
+  background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s}
+#drop:hover,#drop.over{border-color:var(--accent);background:var(--accent-soft)}
+#drop .big{font-size:34px;line-height:1}
+.btn{display:inline-flex;align-items:center;gap:7px;font:inherit;font-weight:600;font-size:.9rem;
+  padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);cursor:pointer;transition:filter .15s,border-color .15s}
+.btn:hover{filter:brightness(.97);border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary,:root:not([data-theme="light"]) .btn.primary{color:#1a0b10}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn.primary{color:#fff}}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hidden{display:none !important}
+/* status */
+#status{margin-top:12px;font-size:.9rem}
+.bar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.alert{border-radius:10px;padding:10px 12px;font-size:.88rem;border:1px solid var(--border)}
+.alert.err{background:var(--high-soft);border-color:var(--high);color:var(--high)}
+.alert.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.alert.info{background:var(--low-soft);border-color:var(--low);color:var(--low)}
+/* patient */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label.fld{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted);font-weight:600}
+input,select{font:inherit;font-size:.92rem;padding:8px 10px;border-radius:9px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);width:100%}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+/* values table */
+.grp{margin-top:14px}
+.grp>h3{display:flex;align-items:center;gap:8px;font-size:.95rem;margin-bottom:6px;
+  padding-bottom:5px;border-bottom:1px solid var(--border)}
+.vrow{display:grid;grid-template-columns:1fr 104px 84px 30px;gap:8px;align-items:center;padding:5px 0}
+.vrow .nm{font-size:.9rem;display:flex;align-items:center;gap:6px;min-width:0}
+.vrow .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrow .un{font-size:.78rem;color:var(--muted);font-family:var(--mono)}
+.tag{font-size:.65rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  padding:2px 6px;border-radius:5px;background:var(--surface-2);color:var(--muted);flex:0 0 auto}
+.tag.pdf{background:var(--low-soft);color:var(--low)}
+.iconbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;border-radius:6px}
+.iconbtn:hover{color:var(--high);background:var(--high-soft)}
+@media (max-width:520px){.vrow{grid-template-columns:1fr 92px 30px}.vrow .un{display:none}}
+/* report */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-bottom:6px}
+.tile{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tile b{display:block;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile small{color:var(--muted)}
+.tile.alto b{color:var(--high)} .tile.baixo b{color:var(--low)}
+.tile.ok b{color:var(--ok)} .tile.crit b{color:var(--crit)}
+.toggle{display:inline-flex;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:3px;gap:3px}
+.toggle button{font:inherit;font-size:.85rem;font-weight:600;border:none;background:none;color:var(--muted);
+  padding:6px 13px;border-radius:8px;cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.res{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--surface)}
+.res.alto{border-left:4px solid var(--high)} .res.baixo{border-left:4px solid var(--low)}
+.res.normal{border-left:4px solid var(--ok)} .res.critico{border-left:4px solid var(--crit);background:var(--accent-soft)}
+.res .head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.res .val{font-family:var(--mono);font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
+.res .val .u{font-size:.78rem;font-weight:400;color:var(--muted)}
+.st{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:6px}
+.st.alto{background:var(--high-soft);color:var(--high)} .st.baixo{background:var(--low-soft);color:var(--low)}
+.st.normal{background:var(--ok-soft);color:var(--ok)} .st.critico{background:var(--crit);color:#fff}
+.st.limite{background:var(--warn-soft);color:var(--warn)}
+.gauge{position:relative;height:8px;border-radius:999px;margin:12px 0 6px;overflow:hidden;
+  background:linear-gradient(90deg,var(--low-soft) 0 25%,var(--ok-soft) 25% 75%,var(--high-soft) 75% 100%)}
+.gauge i{position:absolute;top:25%;height:50%;left:25%;width:50%;background:var(--ok);opacity:.35;border-radius:999px}
+.gauge b{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--text);transform:translateX(-50%)}
+.gscale{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+.res p{font-size:.9rem;margin:8px 0 0}
+.res .why{font-size:.88rem;margin-top:8px;padding:9px 11px;border-radius:9px;background:var(--surface-2)}
+details{border:1px solid var(--border);border-radius:12px;padding:10px 14px;background:var(--surface);margin-bottom:10px}
+details>summary{cursor:pointer;font-weight:600;font-size:.92rem}
+details[open]>summary{margin-bottom:8px}
+.mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 16px;font-size:.86rem}
+.mini div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed var(--border)}
+.mini b{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.pat{border:1px solid var(--border);border-left:4px solid var(--warn);border-radius:12px;padding:13px 15px;margin-bottom:10px;background:var(--surface)}
+.pat.crit{border-left-color:var(--crit);background:var(--accent-soft)}
+.pat h3{margin-bottom:4px;font-size:.98rem}
+.pat p{font-size:.89rem;margin:6px 0 0}
+.disc{font-size:.84rem;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:22px}
+.view-simple .tech-only{display:none}
+.view-tech .simple-only{display:none}
+@media print{
+  body{background:#fff}
+  .noprint,#drop,.toggle{display:none !important}
+  .card,.res,.pat,details{box-shadow:none;break-inside:avoid}
+  .wrap{max-width:none;padding:0}
+}
+</style>
+</head>
+<body class="view-simple">
+<div class="wrap">
+
+<header class="top">
+  <div class="logo" aria-hidden="true">🩸</div>
+  <div>
+    <h1>Analisador de Exames de Sangue</h1>
+    <p class="muted">Envie o PDF do seu laudo e veja o que cada resultado significa.</p>
+  </div>
+</header>
+<div class="badges">
+  <span class="pill">🔒 Processado no seu navegador</span>
+  <span class="pill">📄 Leitura automática do PDF</span>
+  <span class="pill">🔀 Linguagem simples ou técnica</span>
+  <span class="pill">⚕️ Não substitui consulta médica</span>
+</div>
+
+<section class="card noprint" id="card-upload">
+  <h2><span class="step">1</span> Envie o laudo em PDF</h2>
+  <div id="drop" tabindex="0" role="button" aria-label="Selecionar arquivo PDF do exame">
+    <div class="big" aria-hidden="true">📄</div>
+    <p><b>Clique aqui</b> ou arraste o PDF do exame</p>
+    <p class="muted"><small>O arquivo não sai do seu computador — nada é enviado para servidores.</small></p>
+  </div>
+  <input type="file" id="file" accept="application/pdf,.pdf" class="hidden">
+  <div class="row" style="margin-top:12px">
+    <button class="btn" id="btn-demo" type="button">Ver exemplo</button>
+    <button class="btn" id="btn-manual" type="button">Digitar valores sem PDF</button>
+  </div>
+  <div id="status"></div>
+</section>
+
+<section class="card hidden" id="card-values">
+  <h2><span class="step">2</span> Confira os valores</h2>
+  <p class="muted"><small>Corrija o que a leitura do PDF errou e complete o que faltou. Sexo e idade mudam os valores de referência de vários exames.</small></p>
+  <div class="fields" style="margin:14px 0 4px">
+    <label class="fld">Sexo biológico
+      <select id="sex"><option value="F">Feminino</option><option value="M">Masculino</option></select>
+    </label>
+    <label class="fld">Idade (anos)
+      <input id="age" type="number" min="0" max="120" step="1" value="40">
+    </label>
+    <label class="fld">Peso (kg)
+      <input id="peso" type="number" min="1" max="400" step="0.1" placeholder="ex.: 72,5">
+    </label>
+    <label class="fld">Altura (cm)
+      <input id="altura" type="number" min="50" max="250" step="0.5" placeholder="ex.: 170">
+    </label>
+    <label class="fld">Circunferência abdominal (cm)
+      <input id="cintura" type="number" min="30" max="250" step="0.5" placeholder="opcional">
+    </label>
+    <label class="fld">Pressão arterial (mmHg)
+      <span class="row" style="flex-wrap:nowrap;gap:6px">
+        <input id="pas" type="number" min="50" max="300" step="1" placeholder="12x" aria-label="Pressão sistólica">
+        <span class="muted">/</span>
+        <input id="pad" type="number" min="30" max="200" step="1" placeholder="8x" aria-label="Pressão diastólica">
+      </span>
+    </label>
+    <label class="fld">Jejum (horas)
+      <input id="jejum" type="number" min="0" max="24" step="1" placeholder="ex.: 12">
+    </label>
+    <label class="fld">Situações especiais
+      <span class="row" style="gap:14px;padding-top:6px">
+        <span class="row" style="gap:5px;flex-wrap:nowrap"><input type="checkbox" id="gestante" style="width:auto"> <small>Gestante</small></span>
+        <span class="row" style="gap:5px;flex-wrap:nowrap"><input type="checkbox" id="atleta" style="width:auto"> <small>Atleta</small></span>
+      </span>
+    </label>
+  </div>
+  <div id="bio-out" class="muted" style="font-size:.85rem;margin:2px 0 12px"></div>
+  <div class="row" style="justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:2px">
+    <h3 style="margin:0">Resultados do exame</h3>
+    <label class="fld" style="max-width:260px;flex:1 1 200px">Adicionar exame que faltou
+      <select id="add-analyte"></select>
+    </label>
+  </div>
+  <div id="values"></div>
+  <div class="row" style="margin-top:18px">
+    <button class="btn primary" id="btn-analyze" type="button">Analisar resultados</button>
+    <button class="btn" id="btn-reset" type="button">Recomeçar</button>
+  </div>
+</section>
+
+<section class="hidden" id="card-report"></section>
+
+<p class="disc">
+  <b>Aviso importante.</b> Esta ferramenta é educativa e automatizada. Ela compara seus resultados com
+  faixas de referência gerais de adultos e não conhece seu histórico, seus sintomas, seus medicamentos
+  nem o método usado pelo laboratório — por isso pode classificar como “alterado” algo normal para você,
+  e vice-versa. Nenhum resultado aqui é diagnóstico. Leve sempre o laudo original ao seu médico.
+  Em caso de sintomas graves (dor no peito, falta de ar, sangramento, confusão mental), procure
+  atendimento de urgência imediatamente.
+</p>
+
+</div>
+
+<script type="module">
+/* ==========================================================================
+   Analisador de Exames de Sangue — tudo roda no navegador do usuário.
+   Estrutura: (1) base de referência  (2) leitura do PDF  (3) classificação
+              (4) cálculos derivados  (5) padrões  (6) interface.
+   ========================================================================== */
+
+/* ---------- 1. Base de referência ---------------------------------------
+   ref: [min, max] — null = sem limite naquele lado. Por sexo: {F:[...],M:[...]}
+   crit: [abaixo, acima] = valores de alerta que pedem avaliação rápida.
+   conv: unidades alternativas -> fator/função de conversão para `un`.
+   ------------------------------------------------------------------------ */
+const CATS = {
+  hemograma:  {nome:'Hemograma',            ico:'🩸'},
+  lipidios:   {nome:'Lipídios (gorduras)',  ico:'🫀'},
+  glicemia:   {nome:'Açúcar no sangue',     ico:'🍬'},
+  renal:      {nome:'Rins',                 ico:'🫘'},
+  hepatico:   {nome:'Fígado e vias biliares',ico:'🫁'},
+  tireoide:   {nome:'Tireoide',             ico:'🦋'},
+  vitaminas:  {nome:'Vitaminas e ferro',    ico:'💊'},
+  minerais:   {nome:'Minerais e eletrólitos',ico:'🧂'},
+  inflamacao: {nome:'Inflamação',           ico:'🔥'},
+  outros:     {nome:'Outros',               ico:'🔬'}
+};
+
+const ANALYTES = [
+/* --- hemograma --- */
+{id:'hemacias',nome:'Hemácias',cat:'hemograma',un:'milhões/mm³',dec:2,
+ ali:['hemacias','eritrocitos','contagem de hemacias','globulos vermelhos'],
+ ref:{F:[3.9,5.4],M:[4.3,5.9]},conv:{'10^6/ul':1,'milhoes/mm3':1,'10^12/l':1,'/mm3':1e-6},
+ simples:'São as células que carregam oxigênio dos pulmões para o corpo todo.',
+ tecnico:'Contagem eritrocitária. Avaliar sempre junto de Hb, Ht e índices hematimétricos (VCM, HCM, RDW).',
+ alto:'Pode aparecer em desidratação, tabagismo, apneia do sono, altitude ou, mais raramente, doenças da medula óssea.',
+ baixo:'É o padrão das anemias — falta de ferro, de vitaminas, perdas de sangue ou doenças crônicas.'},
+
+{id:'hemoglobina',nome:'Hemoglobina',cat:'hemograma',un:'g/dL',dec:1,
+ ali:['hemoglobina','hb','hgb'],ref:{F:[12,15.5],M:[13.5,17.5]},crit:[7,20],
+ conv:{'g/l':0.1,'mmol/l':1.611},
+ simples:'É a proteína das hemácias que transporta o oxigênio. É o principal número para dizer se existe anemia.',
+ tecnico:'Parâmetro definidor de anemia (OMS: <12 g/dL em mulheres, <13 g/dL em homens). Interpretar com VCM e RDW para classificar morfologicamente.',
+ alto:'Pode indicar desidratação, tabagismo, hipóxia crônica ou policitemia.',
+ baixo:'Indica anemia. As causas mais comuns são falta de ferro, perdas de sangue (inclusive menstruais), doença crônica e deficiência de B12 ou folato.'},
+
+{id:'hematocrito',nome:'Hematócrito',cat:'hemograma',un:'%',dec:1,
+ ali:['hematocrito','ht','hct'],ref:{F:[35,47],M:[40,52]},conv:{'l/l':100},
+ simples:'É a porcentagem do sangue ocupada pelas hemácias — acompanha de perto a hemoglobina.',
+ tecnico:'Aproximadamente 3× a hemoglobina. Sobe em hemoconcentração e cai em anemia e hiper-hidratação.',
+ alto:'Geralmente acompanha hemoglobina alta: desidratação, tabagismo, policitemia.',
+ baixo:'Costuma acompanhar a anemia.'},
+
+{id:'vcm',nome:'VCM (volume das hemácias)',cat:'hemograma',un:'fL',dec:1,
+ ali:['vcm','volume corpuscular medio','vgm'],ref:[80,100],
+ simples:'Mostra se as hemácias são pequenas, normais ou grandes. Ajuda a descobrir a causa de uma anemia.',
+ tecnico:'Microcitose (<80): ferropenia, talassemia, doença crônica. Macrocitose (>100): deficiência de B12/folato, álcool, hipotireoidismo, medicamentos, reticulocitose.',
+ alto:'Hemácias grandes sugerem falta de vitamina B12 ou ácido fólico, uso de álcool ou hipotireoidismo.',
+ baixo:'Hemácias pequenas sugerem falta de ferro ou traço talassêmico.'},
+
+{id:'hcm',nome:'HCM',cat:'hemograma',un:'pg',dec:1,ali:['hcm','hemoglobina corpuscular media'],ref:[26,34],
+ simples:'Quantidade média de hemoglobina dentro de cada hemácia.',
+ tecnico:'Acompanha o VCM na classificação hipo/normocrômica.',
+ alto:'Costuma acompanhar VCM alto.',baixo:'Sugere hemácias pobres em hemoglobina, típico da falta de ferro.'},
+
+{id:'chcm',nome:'CHCM',cat:'hemograma',un:'g/dL',dec:1,ali:['chcm','concentracao de hemoglobina corpuscular media'],ref:[31,36],
+ simples:'Concentração de hemoglobina dentro das hemácias.',
+ tecnico:'Valores altos sugerem esferocitose ou interferência (lipemia, aglutininas frias); baixos, hipocromia.',
+ alto:'Valor alto é incomum e às vezes é interferência do exame.',baixo:'Sugere hemácias pálidas, comum na falta de ferro.'},
+
+{id:'rdw',nome:'RDW',cat:'hemograma',un:'%',dec:1,ali:['rdw','rdw-cv','indice de anisocitose'],ref:[11.5,14.5],
+ simples:'Mede o quanto as hemácias variam de tamanho entre si.',
+ tecnico:'RDW elevado com VCM baixo favorece ferropenia sobre talassemia; sobe precocemente nas carências.',
+ alto:'Hemácias de tamanhos muito diferentes — comum no início de uma carência de ferro ou vitaminas.',baixo:'Sem significado clínico relevante.'},
+
+{id:'leucocitos',nome:'Leucócitos',cat:'hemograma',un:'/mm³',dec:0,
+ ali:['leucocitos - global','leucocitos global','leucocitos','globulos brancos','contagem de leucocitos','wbc'],
+ ref:[4000,11000],crit:[2000,30000],conv:{'10^3/ul':1000,'mil/mm3':1000,'10^9/l':1000,'/ul':1},
+ simples:'São as células de defesa do corpo.',
+ tecnico:'Interpretar com o diferencial. Leucocitose neutrofílica sugere infecção bacteriana/estresse; linfocitose, viroses.',
+ alto:'Sobem em infecções, inflamação, estresse, uso de corticoide e tabagismo.',
+ baixo:'Podem cair em viroses, uso de alguns medicamentos, carências nutricionais e doenças da medula.'},
+
+{id:'neutrofilos_pct',nome:'Neutrófilos (%)',cat:'hemograma',un:'%',dec:1,ali:['neutrofilos','segmentados','neutrofilos segmentados'],ref:[40,75],
+ simples:'Defesa principal contra bactérias.',tecnico:'Percentual; o valor absoluto tem mais peso clínico.',
+ alto:'Sugere infecção bacteriana, inflamação ou estresse.',baixo:'Pode ocorrer em viroses e com alguns medicamentos.'},
+{id:'neutrofilos_abs',nome:'Neutrófilos (absoluto)',cat:'hemograma',un:'/mm³',dec:0,ali:['neutrofilos absolutos','neutrofilos (absoluto)','contagem absoluta de neutrofilos'],
+ ref:[1800,7500],crit:[1000,null],conv:{'10^3/ul':1000,'mil/mm3':1000,'10^9/l':1000},
+ simples:'Número real de neutrófilos no sangue.',tecnico:'Neutropenia <1500/mm³; grave <500/mm³ (risco infeccioso importante).',
+ alto:'Neutrofilia — infecção bacteriana, inflamação, corticoide.',baixo:'Neutropenia — atenção a infecções; investigar causas e repetir o exame.'},
+
+{id:'linfocitos_pct',nome:'Linfócitos (%)',cat:'hemograma',un:'%',dec:1,ali:['linfocitos','linfocitos tipicos'],ref:[20,45],
+ simples:'Defesa contra vírus e memória imunológica.',tecnico:'Percentual do diferencial.',
+ alto:'Comum em infecções virais.',baixo:'Pode ocorrer em estresse, corticoide, infecções agudas e imunodeficiências.'},
+{id:'linfocitos_abs',nome:'Linfócitos (absoluto)',cat:'hemograma',un:'/mm³',dec:0,ali:['linfocitos absolutos','contagem absoluta de linfocitos'],
+ ref:[1000,4800],conv:{'10^3/ul':1000,'mil/mm3':1000,'10^9/l':1000},
+ simples:'Número real de linfócitos no sangue.',tecnico:'Linfopenia <1000/mm³ merece contexto clínico.',
+ alto:'Linfocitose — viroses e, se persistente em adultos, investigar.',baixo:'Linfopenia — estresse, corticoide, infecções, desnutrição.'},
+
+{id:'monocitos_pct',nome:'Monócitos (%)',cat:'hemograma',un:'%',dec:1,ali:['monocitos'],ref:[2,10],
+ simples:'Células de limpeza e defesa prolongada.',tecnico:'Monocitose em infecções crônicas, recuperação medular e inflamação.',
+ alto:'Infecções crônicas, inflamação, fase de recuperação de infecções.',baixo:'Raramente tem significado isolado.'},
+{id:'eosinofilos_pct',nome:'Eosinófilos (%)',cat:'hemograma',un:'%',dec:1,ali:['eosinofilos'],ref:[1,6],
+ simples:'Sobem em alergias e em algumas verminoses.',tecnico:'Eosinofilia: atopia, parasitoses, fármacos, vasculites.',
+ alto:'Alergia, rinite, asma, verminose ou reação a medicamento.',baixo:'Sem significado clínico isolado.'},
+{id:'basofilos_pct',nome:'Basófilos (%)',cat:'hemograma',un:'%',dec:1,ali:['basofilos'],ref:[0,2],
+ simples:'Participam de reações alérgicas; são poucos no sangue.',tecnico:'Basofilia persistente exige descartar síndromes mieloproliferativas.',
+ alto:'Alergias e, se persistente, investigação hematológica.',baixo:'Sem significado clínico.'},
+
+{id:'plaquetas',nome:'Plaquetas',cat:'hemograma',un:'/mm³',dec:0,ali:['plaquetas','contagem de plaquetas','plt'],
+ ref:[150000,450000],crit:[50000,1000000],conv:{'10^3/ul':1000,'mil/mm3':1000,'10^9/l':1000},
+ simples:'São as células que fazem o sangue coagular e estancam sangramentos.',
+ tecnico:'Plaquetopenia <150 mil; risco hemorrágico relevante <50 mil. Descartar pseudoplaquetopenia por EDTA.',
+ alto:'Pode ocorrer em inflamação, falta de ferro, pós-cirurgia ou doenças da medula.',
+ baixo:'Aumenta o risco de sangramento — dengue, viroses, medicamentos, doenças hepáticas e autoimunes.'},
+
+/* --- lipídios --- */
+{id:'colesterol_total',nome:'Colesterol total',cat:'lipidios',un:'mg/dL',dec:0,
+ ali:['colesterol total','colesterol'],ref:[null,190],conv:{'mmol/l':38.67},
+ simples:'Soma de todo o colesterol do sangue. Sozinho diz pouco — o que importa é como ele se divide entre HDL e LDL.',
+ tecnico:'Alvo referencial <190 mg/dL. A decisão terapêutica se baseia em LDL e não-HDL conforme risco cardiovascular estimado.',
+ alto:'Aumenta o risco de placas nas artérias, sobretudo se o LDL também estiver alto.',
+ baixo:'Valores baixos costumam ser benignos; muito baixos podem aparecer em desnutrição, doença hepática ou hipertireoidismo.'},
+
+{id:'hdl',nome:'HDL (colesterol "bom")',cat:'lipidios',un:'mg/dL',dec:0,
+ ali:['hdl','colesterol hdl','hdl colesterol','hdl-c'],ref:{F:[50,null],M:[40,null]},conv:{'mmol/l':38.67},
+ simples:'É o colesterol que ajuda a limpar as artérias. Aqui, quanto mais alto, melhor.',
+ tecnico:'Marcador de risco, não alvo terapêutico direto. HDL muito alto (>90) não confere proteção adicional.',
+ alto:'Costuma ser favorável.',
+ baixo:'HDL baixo é fator de risco cardiovascular e é comum junto com triglicerídeos altos, sedentarismo e resistência à insulina.'},
+
+{id:'ldl',nome:'LDL (colesterol "ruim")',cat:'lipidios',un:'mg/dL',dec:0,
+ ali:['ldl','colesterol ldl','ldl colesterol','ldl-c'],ref:[null,130],conv:{'mmol/l':38.67},
+ simples:'É o colesterol que se deposita nas artérias. Quanto mais baixo, menor o risco de infarto e AVC.',
+ tecnico:'Meta individualizada por risco: <130 (baixo), <100 (intermediário), <70 (alto), <50 (muito alto) — diretriz SBC.',
+ alto:'Principal alvo do tratamento para reduzir risco de infarto e AVC — dieta, exercício e, quando indicado, medicação.',
+ baixo:'LDL baixo geralmente é desejável.'},
+
+{id:'vldl',nome:'VLDL',cat:'lipidios',un:'mg/dL',dec:0,ali:['vldl','colesterol vldl'],ref:[null,30],
+ simples:'Fração do colesterol ligada aos triglicerídeos.',tecnico:'Estimado como TG/5 quando calculado por Friedewald.',
+ alto:'Costuma acompanhar triglicerídeos altos.',baixo:'Sem significado clínico.'},
+
+{id:'triglicerideos',nome:'Triglicerídeos',cat:'lipidios',un:'mg/dL',dec:0,
+ ali:['triglicerideos','triglicerides','trigliceridios','tg'],ref:[null,150],crit:[null,500],conv:{'mmol/l':88.57},
+ simples:'Gordura do sangue que sobe com açúcar, farinha, álcool e excesso de peso.',
+ tecnico:'Jejum: desejável <150. Sem jejum: <175. Acima de 500 há risco de pancreatite.',
+ alto:'Ligado a dieta rica em carboidratos e álcool, excesso de peso e resistência à insulina. Acima de 500 há risco de pancreatite.',
+ baixo:'Valores baixos raramente preocupam.'},
+
+/* --- glicemia --- */
+{id:'glicose',nome:'Glicose em jejum',cat:'glicemia',un:'mg/dL',dec:0,
+ ali:['glicose','glicemia','glicemia de jejum','glicose em jejum','glicose plasmatica'],
+ ref:[70,99],crit:[50,300],conv:{'mmol/l':18.018},
+ simples:'É o açúcar no sangue depois do jejum. Mostra como o corpo controla a glicose.',
+ tecnico:'100–125 mg/dL: glicemia de jejum alterada. ≥126 em duas ocasiões: diabetes (ADA/SBD).',
+ alto:'Entre 100 e 125 indica pré-diabetes; a partir de 126 (confirmado) indica diabetes.',
+ baixo:'Hipoglicemia — pode causar tremor, suor e fraqueza; investigar se houver sintomas.'},
+
+{id:'hba1c',nome:'Hemoglobina glicada (HbA1c)',cat:'glicemia',un:'%',dec:1,
+ ali:['hemoglobina glicada (a1c)','hemoglobina glicada','hemoglobina glicosilada','hba1c','hb glicada','a1c'],ref:[null,5.7],crit:[null,10],
+ simples:'Mostra a média do açúcar no sangue dos últimos 2 a 3 meses.',
+ tecnico:'5,7–6,4%: pré-diabetes. ≥6,5%: diabetes. Falseia em anemias, hemoglobinopatias e uremia.',
+ alto:'De 5,7 a 6,4% indica pré-diabetes; 6,5% ou mais indica diabetes. Em quem já tem diabetes, mostra controle insuficiente.',
+ baixo:'Valores baixos podem ocorrer em anemia ou hipoglicemias frequentes.'},
+
+{id:'insulina',nome:'Insulina em jejum',cat:'glicemia',un:'µU/mL',dec:1,ali:['insulina','insulina de jejum','insulina basal'],
+ ref:[2.6,20],conv:{'pmol/l':0.1443},
+ simples:'Hormônio que coloca o açúcar para dentro das células.',
+ tecnico:'Isolada tem baixa acurácia; usar com glicemia no HOMA-IR.',
+ alto:'Insulina alta com glicose normal sugere resistência à insulina — o corpo precisa produzir mais para o mesmo efeito.',
+ baixo:'Pode ser normal em pessoas magras e sensíveis à insulina.'},
+
+/* --- renal --- */
+{id:'ureia',nome:'Ureia',cat:'renal',un:'mg/dL',dec:0,ali:['ureia','ureia serica'],ref:[15,45],conv:{'mmol/l':6.006},
+ simples:'Resíduo da digestão das proteínas, eliminado pelos rins.',
+ tecnico:'Sofre influência de dieta proteica, catabolismo, sangramento digestivo e estado de hidratação.',
+ alto:'Pode indicar desidratação, dieta muito rica em proteína ou redução da função dos rins.',
+ baixo:'Comum em dieta pobre em proteína, gravidez ou doença hepática.'},
+
+{id:'creatinina',nome:'Creatinina',cat:'renal',un:'mg/dL',dec:2,
+ ali:['creatinina','creatinina serica'],ref:{F:[0.5,0.9],M:[0.7,1.2]},crit:[null,3],conv:{'umol/l':0.0113},
+ simples:'Resíduo dos músculos filtrado pelos rins. É o principal exame da função renal.',
+ tecnico:'Interpretar sempre via TFG estimada (CKD-EPI 2021). Massa muscular, amputações e dieta afetam o valor.',
+ alto:'Sugere filtração renal reduzida; também sobe com desidratação, muita massa muscular e alguns medicamentos.',
+ baixo:'Comum em pessoas com pouca massa muscular, idosos e gestantes — geralmente sem significado de doença.'},
+
+{id:'acido_urico',nome:'Ácido úrico',cat:'renal',un:'mg/dL',dec:1,
+ ali:['acido urico','uricemia'],ref:{F:[2.4,5.7],M:[3.4,7]},conv:{'umol/l':0.0168},
+ simples:'Resíduo da quebra de substâncias dos alimentos; em excesso pode causar gota e pedras nos rins.',
+ tecnico:'Hiperuricemia associa-se a síndrome metabólica, diuréticos e doença renal. Tratar assintomático é controverso.',
+ alto:'Ligado a gota, cálculos renais, álcool, carnes, frutose e alguns diuréticos.',
+ baixo:'Raramente preocupa.'},
+
+/* --- hepático --- */
+{id:'tgo',nome:'TGO / AST',cat:'hepatico',un:'U/L',dec:0,ali:['tgo','ast','aspartato aminotransferase','transaminase oxalacetica'],
+ ref:{F:[null,32],M:[null,40]},crit:[null,300],
+ simples:'Enzima presente no fígado e também nos músculos e no coração.',
+ tecnico:'AST/ALT >2 sugere etiologia alcoólica; elevações musculares acompanham CPK alta.',
+ alto:'Pode indicar gordura no fígado, uso de álcool, medicamentos, hepatites virais ou lesão muscular.',
+ baixo:'Sem significado clínico.'},
+
+{id:'tgp',nome:'TGP / ALT',cat:'hepatico',un:'U/L',dec:0,ali:['tgp','alt','alanina aminotransferase','transaminase piruvica'],
+ ref:{F:[null,31],M:[null,41]},crit:[null,300],
+ simples:'Enzima mais específica do fígado — é o melhor marcador simples de irritação do fígado.',
+ tecnico:'Elevação persistente exige investigar esteatose (DHGM), hepatites B e C, álcool, fármacos e doenças autoimunes/metabólicas.',
+ alto:'A causa mais comum hoje é a gordura no fígado, ligada a peso, açúcar e resistência à insulina.',
+ baixo:'Sem significado clínico.'},
+
+{id:'ggt',nome:'Gama GT (GGT)',cat:'hepatico',un:'U/L',dec:0,ali:['gama gt','gamagt','ggt','gama glutamil transferase','gama-glutamiltransferase'],
+ ref:{F:[null,41],M:[null,61]},
+ simples:'Enzima das vias biliares, muito sensível a álcool e medicamentos.',
+ tecnico:'Confirma origem hepática de fosfatase alcalina elevada; sobe em colestase, álcool, fármacos e esteatose.',
+ alto:'Álcool, medicamentos, gordura no fígado ou obstrução das vias biliares.',baixo:'Sem significado clínico.'},
+
+{id:'fosfatase_alcalina',nome:'Fosfatase alcalina',cat:'hepatico',un:'U/L',dec:0,ali:['fosfatase alcalina','fal','fa'],ref:[40,129],
+ simples:'Enzima do fígado, das vias biliares e dos ossos.',
+ tecnico:'Origem definida pela GGT (hepática) ou por contexto ósseo (crescimento, Paget, metástases, deficiência de vitamina D).',
+ alto:'Pode vir das vias biliares ou dos ossos — a GGT ajuda a distinguir.',baixo:'Pode ocorrer em hipotireoidismo e desnutrição.'},
+
+{id:'bilirrubina_total',nome:'Bilirrubina total',cat:'hepatico',un:'mg/dL',dec:2,ali:['bilirrubina total','bilirrubinas totais'],
+ ref:[0.2,1.2],crit:[null,5],conv:{'umol/l':0.0585},
+ simples:'Pigmento amarelo resultante da reciclagem das hemácias; em excesso causa icterícia (pele amarelada).',
+ tecnico:'Fracionar sempre: predomínio indireto sugere Gilbert/hemólise; direto, colestase ou lesão hepatocelular.',
+ alto:'Pode ser síndrome de Gilbert (benigna e comum), destruição de hemácias ou problema no fígado/vias biliares.',
+ baixo:'Sem significado clínico.'},
+{id:'bilirrubina_direta',nome:'Bilirrubina direta',cat:'hepatico',un:'mg/dL',dec:2,ali:['bilirrubina direta','bilirrubina conjugada'],ref:[null,0.3],conv:{'umol/l':0.0585},
+ simples:'Fração da bilirrubina já processada pelo fígado.',tecnico:'Elevação indica colestase ou lesão hepatocelular.',
+ alto:'Sugere dificuldade na eliminação da bile.',baixo:'Sem significado clínico.'},
+
+{id:'albumina',nome:'Albumina',cat:'hepatico',un:'g/dL',dec:1,ali:['albumina'],ref:[3.5,5.2],conv:{'g/l':0.1},
+ simples:'Principal proteína do sangue, produzida pelo fígado. Reflete nutrição e função hepática.',
+ tecnico:'Marcador de síntese hepática e estado inflamatório/nutricional; cai em síndrome nefrótica e enteropatias perdedoras.',
+ alto:'Quase sempre desidratação.',baixo:'Desnutrição, inflamação crônica, doença do fígado ou perda pelos rins.'},
+
+{id:'proteinas_totais',nome:'Proteínas totais',cat:'hepatico',un:'g/dL',dec:1,ali:['proteinas totais','proteina total'],ref:[6,8],conv:{'g/l':0.1},
+ simples:'Soma das proteínas do sangue.',tecnico:'Avaliar com fracionamento albumina/globulina.',
+ alto:'Pode indicar desidratação ou aumento de globulinas.',baixo:'Desnutrição, perda renal ou intestinal, doença hepática.'},
+
+/* --- tireoide --- */
+{id:'tsh',nome:'TSH',cat:'tireoide',un:'µUI/mL',dec:2,ali:['tsh','hormonio tireoestimulante','tireotrofina'],
+ ref:[0.4,4],crit:[0.1,10],
+ simples:'É o hormônio que comanda a tireoide. Ele sobe quando a tireoide está funcionando pouco.',
+ tecnico:'Primeiro teste na triagem tireoidiana. TSH alto com T4L normal = hipotireoidismo subclínico; faixa de referência varia com idade e gestação.',
+ alto:'Sugere tireoide lenta (hipotireoidismo) — cansaço, ganho de peso, frio, pele seca.',
+ baixo:'Sugere tireoide acelerada (hipertireoidismo) ou dose alta de hormônio tireoidiano.'},
+
+{id:'t4_livre',nome:'T4 livre',cat:'tireoide',un:'ng/dL',dec:2,ali:['t4 livre','tiroxina livre','ft4','t4l'],ref:[0.7,1.8],
+ simples:'É o hormônio da tireoide disponível para o corpo usar.',
+ tecnico:'Define se a disfunção é franca ou subclínica quando combinado ao TSH.',
+ alto:'Com TSH baixo, indica hipertireoidismo.',baixo:'Com TSH alto, indica hipotireoidismo.'},
+
+{id:'t3',nome:'T3 total',cat:'tireoide',un:'ng/dL',dec:0,ali:['t3 total','triiodotironina','t3'],ref:[80,200],
+ simples:'Outro hormônio da tireoide.',tecnico:'Útil na suspeita de tireotoxicose por T3; cai na síndrome do eutireoideo doente.',
+ alto:'Pode indicar hipertireoidismo.',baixo:'Comum em doenças agudas, sem indicar doença da tireoide.'},
+
+/* --- vitaminas e ferro --- */
+{id:'vitamina_d',nome:'Vitamina D (25-OH)',cat:'vitaminas',un:'ng/mL',dec:1,
+ ali:['vitamina d','25 hidroxivitamina d','25-oh-vitamina d','25 oh vitamina d','calcidiol','vitamina d 25 hidroxi'],
+ ref:[30,100],conv:{'nmol/l':0.4006},
+ simples:'Importante para ossos, músculos e imunidade. A maior parte vem do sol.',
+ tecnico:'Consenso: <20 deficiência; 20–29 insuficiência; 30–60 desejável para população geral e grupos de risco.',
+ alto:'Valores muito altos (>100) geralmente vêm de suplementação excessiva e podem elevar o cálcio.',
+ baixo:'Deficiência é muito comum — associa-se a dor óssea, fraqueza muscular e maior risco de osteoporose.'},
+
+{id:'vitamina_b12',nome:'Vitamina B12',cat:'vitaminas',un:'pg/mL',dec:0,ali:['vitamina b12','b12','cianocobalamina','cobalamina'],
+ ref:[200,900],conv:{'pmol/l':1.355},
+ simples:'Essencial para o sangue e para os nervos. Vem de alimentos de origem animal.',
+ tecnico:'Valores 200–400 pg/mL são zona cinzenta — considerar homocisteína e ácido metilmalônico se houver sintomas.',
+ alto:'Costuma ser suplementação; se não houver suplemento, vale investigar.',
+ baixo:'Pode causar anemia, formigamento, perda de memória. Comum em veganos, após bariátrica e em uso prolongado de metformina ou omeprazol.'},
+
+{id:'acido_folico',nome:'Ácido fólico',cat:'vitaminas',un:'ng/mL',dec:1,ali:['acido folico','folato','vitamina b9'],ref:[3,17],
+ simples:'Vitamina importante para a produção do sangue e, na gravidez, para a formação do bebê.',
+ tecnico:'Deficiência isolada é rara pós-fortificação da farinha; corrigir sempre B12 antes para não mascarar neuropatia.',
+ alto:'Geralmente por suplementação, sem risco relevante.',baixo:'Pode causar anemia; importante corrigir antes e durante a gestação.'},
+
+{id:'ferro',nome:'Ferro sérico',cat:'vitaminas',un:'µg/dL',dec:0,ali:['ferro serico','ferro'],ref:{F:[37,145],M:[59,158]},conv:{'umol/l':5.587},
+ simples:'Ferro circulando no sangue naquele momento — varia muito ao longo do dia.',
+ tecnico:'Isolado tem pouco valor; interpretar com ferritina e saturação de transferrina.',
+ alto:'Pode indicar suplementação recente ou sobrecarga de ferro.',baixo:'Sugere falta de ferro, mas precisa da ferritina para confirmar.'},
+
+{id:'ferritina',nome:'Ferritina',cat:'vitaminas',un:'ng/mL',dec:0,ali:['ferritina'],ref:{F:[15,150],M:[30,400]},
+ simples:'Mostra o estoque de ferro do corpo. É o melhor exame para detectar falta de ferro.',
+ tecnico:'Reagente de fase aguda: pode estar normal/alta mesmo com ferropenia se houver inflamação (avaliar PCR e saturação).',
+ alto:'Sobe em inflamação, gordura no fígado, álcool e sobrecarga de ferro (hemocromatose).',
+ baixo:'Indica estoque de ferro esgotado — a causa mais comum de anemia. Investigar perdas (menstruação, trato digestivo).'},
+
+{id:'transferrina',nome:'Transferrina',cat:'vitaminas',un:'mg/dL',dec:0,ali:['transferrina'],ref:[200,360],
+ simples:'Proteína que transporta o ferro pelo sangue.',tecnico:'Sobe na ferropenia e cai em inflamação e desnutrição.',
+ alto:'Costuma subir quando falta ferro.',baixo:'Inflamação crônica, desnutrição ou doença hepática.'},
+
+{id:'sat_transferrina',nome:'Saturação de transferrina',cat:'vitaminas',un:'%',dec:1,ali:['saturacao de transferrina','indice de saturacao da transferrina','ist','saturacao da transferrina'],ref:[20,50],
+ simples:'Mostra quanto do "transporte de ferro" está ocupado.',tecnico:'<20% sugere ferropenia; >45% levanta suspeita de hemocromatose.',
+ alto:'Acima de 45% levanta suspeita de sobrecarga de ferro.',baixo:'Abaixo de 20% reforça falta de ferro.'},
+
+/* --- minerais --- */
+{id:'calcio',nome:'Cálcio',cat:'minerais',un:'mg/dL',dec:1,ali:['calcio','calcio total','calcio serico'],ref:[8.6,10.2],crit:[7,12],conv:{'mmol/l':4.008},
+ simples:'Mineral dos ossos, dos músculos e do coração.',
+ tecnico:'Corrigir pela albumina ou dosar cálcio iônico. Hipercalcemia: hiperparatireoidismo e neoplasias.',
+ alto:'Pode indicar excesso de paratormônio, excesso de vitamina D ou outras causas que exigem investigação.',
+ baixo:'Falta de vitamina D, problemas na paratireoide ou baixa albumina.'},
+{id:'magnesio',nome:'Magnésio',cat:'minerais',un:'mg/dL',dec:2,ali:['magnesio'],ref:[1.6,2.6],conv:{'mmol/l':2.43},
+ simples:'Mineral ligado a músculos, sono e ritmo do coração.',tecnico:'Hipomagnesemia acompanha diuréticos, inibidores de bomba de prótons, álcool e diarreia.',
+ alto:'Geralmente por suplementos ou função renal reduzida.',baixo:'Pode causar cãibras, fraqueza e arritmias.'},
+{id:'sodio',nome:'Sódio',cat:'minerais',un:'mEq/L',dec:0,ali:['sodio','na+'],ref:[135,145],crit:[125,155],
+ simples:'Sal do sangue; controla a água do corpo.',tecnico:'Avaliar volemia e osmolaridade; hiponatremia crônica x aguda muda a conduta.',
+ alto:'Costuma indicar desidratação.',baixo:'Excesso de água, diuréticos, insuficiência cardíaca, hepática ou renal.'},
+{id:'potassio',nome:'Potássio',cat:'minerais',un:'mEq/L',dec:1,ali:['potassio','k+'],ref:[3.5,5.1],crit:[3,6],
+ simples:'Mineral essencial para o ritmo do coração.',tecnico:'Descartar hemólise da amostra em hipercalemia inesperada. Valores extremos são emergência.',
+ alto:'Pode afetar o coração — atenção com doença renal e alguns remédios de pressão.',
+ baixo:'Causa fraqueza e cãibras; comum com diuréticos, vômitos e diarreia.'},
+{id:'fosforo',nome:'Fósforo',cat:'minerais',un:'mg/dL',dec:1,ali:['fosforo','fosfato'],ref:[2.5,4.5],
+ simples:'Mineral que trabalha junto com o cálcio nos ossos.',tecnico:'Sobe na doença renal crônica avançada; cai em hiperparatireoidismo e refeeding.',
+ alto:'Frequente na doença renal.',baixo:'Falta de vitamina D, alcoolismo, uso de antiácidos.'},
+{id:'zinco',nome:'Zinco',cat:'minerais',un:'µg/dL',dec:0,ali:['zinco'],ref:[70,120],
+ simples:'Mineral ligado à imunidade, à pele e ao paladar.',tecnico:'Dosagem sérica reflete mal os estoques; cai em inflamação.',
+ alto:'Geralmente por suplementação.',baixo:'Pode afetar imunidade, cicatrização e paladar.'},
+
+/* --- inflamação --- */
+{id:'pcr',nome:'Proteína C reativa (PCR)',cat:'inflamacao',un:'mg/L',dec:2,
+ ali:['proteina c reativa','pcr','pcr ultrassensivel','proteina c reativa ultrassensivel','pcr-us','pcr us'],
+ ref:[null,3],crit:[null,100],conv:{'mg/dl':10},
+ simples:'Sobe quando há inflamação ou infecção no corpo.',
+ tecnico:'Ultrassensível para risco CV: <1 baixo, 1–3 intermediário, >3 alto. Valores >10 sugerem processo inflamatório/infeccioso agudo.',
+ alto:'Indica inflamação ou infecção. Valores levemente altos acompanham obesidade e risco cardiovascular.',
+ baixo:'Sem inflamação detectável — resultado favorável.'},
+{id:'vhs',nome:'VHS (hemossedimentação)',cat:'inflamacao',un:'mm/h',dec:0,ali:['vhs','velocidade de hemossedimentacao','hemossedimentacao','vsg'],
+ ref:{F:[null,20],M:[null,15]},
+ simples:'Outro marcador de inflamação, mais lento para subir e descer que a PCR.',
+ tecnico:'Inespecífico; sobe com idade, anemia, gestação e gamopatias.',
+ alto:'Sugere processo inflamatório; precisa de contexto clínico.',baixo:'Sem significado clínico.'},
+
+/* --- outros --- */
+{id:'cpk',nome:'CPK (creatinoquinase)',cat:'outros',un:'U/L',dec:0,ali:['creatinofosfoquinase','creatino fosfoquinase','cpk','ck total','creatinoquinase','creatina quinase','ck-total'],
+ ref:{F:[26,192],M:[39,308]},crit:[null,1000],
+ simples:'Enzima dos músculos. Sobe após exercício intenso ou lesão muscular.',
+ tecnico:'Avaliar exercício recente, estatinas e rabdomiólise (>5× o limite com mialgia).',
+ alto:'Exercício intenso recente, pancada muscular ou reação a medicamentos como estatinas.',baixo:'Sem significado clínico.'},
+{id:'ldh',nome:'LDH',cat:'outros',un:'U/L',dec:0,ali:['ldh','desidrogenase latica','lactato desidrogenase'],ref:[120,246],
+ simples:'Enzima presente em quase todas as células.',tecnico:'Marcador inespecífico de dano tecidual e hemólise.',
+ alto:'Inespecífico — hemólise, lesão muscular, infecções e outras causas.',baixo:'Sem significado clínico.'},
+{id:'amilase',nome:'Amilase',cat:'outros',un:'U/L',dec:0,ali:['amilase'],ref:[28,100],
+ simples:'Enzima do pâncreas e das glândulas salivares.',tecnico:'Menos específica que a lipase para pancreatite.',
+ alto:'Pode indicar problema no pâncreas ou nas glândulas salivares.',baixo:'Sem significado clínico.'},
+{id:'lipase',nome:'Lipase',cat:'outros',un:'U/L',dec:0,ali:['lipase'],ref:[13,60],
+ simples:'Enzima do pâncreas.',tecnico:'Mais específica para pancreatite aguda (geralmente >3× o limite).',
+ alto:'Valores muito altos com dor abdominal sugerem pancreatite — avaliação urgente.',baixo:'Sem significado clínico.'},
+{id:'psa',nome:'PSA total',cat:'outros',un:'ng/mL',dec:2,ali:['psa','psa total','antigeno prostatico especifico'],ref:[null,4],sexOnly:'M',
+ simples:'Exame de rastreio da próstata.',tecnico:'Interpretar com idade, volume prostático, toque retal e velocidade de PSA.',
+ alto:'Pode ser aumento benigno da próstata, prostatite ou câncer — exige avaliação do urologista.',baixo:'Resultado favorável.'},
+{id:'testosterona',nome:'Testosterona total',cat:'outros',un:'ng/dL',dec:0,ali:['testosterona total','testosterona'],
+ ref:{F:[15,70],M:[250,836]},
+ simples:'Principal hormônio masculino, presente também em mulheres em quantidade menor.',
+ tecnico:'Colher entre 7h e 10h, em jejum; confirmar valor baixo em segunda amostra com SHBG.',
+ alto:'Em mulheres, pode estar ligado a ovários policísticos; em homens, geralmente por uso de hormônio.',
+ baixo:'Em homens, pode causar cansaço, queda de libido e perda de massa muscular.'},
+{id:'homocisteina',nome:'Homocisteína',cat:'outros',un:'µmol/L',dec:1,ali:['homocisteina'],ref:[5,15],
+ simples:'Substância que sobe quando faltam vitaminas do complexo B.',tecnico:'Marcador funcional de B12/folato e fator de risco vascular independente.',
+ alto:'Sugere falta de B12, B6 ou folato; associa-se a risco cardiovascular.',baixo:'Sem significado clínico.'}
+];
+
+/* Exames adicionais frequentes em laudos brasileiros */
+ANALYTES.push(
+{id:'neutrofilos_bast',nome:'Neutrófilos bastonetes (%)',cat:'hemograma',un:'%',dec:1,
+ ali:['neutrofilos bastonetes','bastonetes','bastoes'],ref:[0,5],
+ simples:'Neutrófilos "jovens", recém-liberados pela medula.',
+ tecnico:'Desvio à esquerda quando elevado; sugere infecção bacteriana aguda.',
+ alto:'Aumento sugere infecção aguda em curso.',baixo:'Sem significado clínico.'},
+
+{id:'nao_hdl',nome:'Colesterol não-HDL',cat:'lipidios',un:'mg/dL',dec:0,
+ ali:['colesterol nao-hdl','nao-hdl','colesterol nao hdl','nao hdl'],ref:[null,160],
+ simples:'Soma de todo o colesterol "ruim" — é um previsor de risco melhor que o LDL isolado.',
+ tecnico:'Meta = LDL alvo + 30 mg/dL. Útil sobretudo com triglicerídeos altos.',
+ alto:'Indica muitas partículas capazes de entupir artérias.',baixo:'Favorável.'},
+
+{id:'apo_b',nome:'Apolipoproteína B',cat:'lipidios',un:'mg/dL',dec:0,ali:['apolipoproteina b','apo b','apob'],ref:[null,100],
+ simples:'Conta o número de partículas ruins de gordura no sangue — quanto menor, melhor.',
+ tecnico:'Marcador de risco superior ao LDL-C em discordância; metas por risco: <100 (baixo), <90, <70, <55, <45.',
+ alto:'Muitas partículas aterogênicas — risco cardiovascular aumentado.',baixo:'Favorável.'},
+
+{id:'apo_a1',nome:'Apolipoproteína A-1',cat:'lipidios',un:'mg/dL',dec:0,ali:['apolipoproteina a-1','apolipoproteina a1','apo a1','apo a-1'],
+ ref:{F:[76,214],M:[79,169]},
+ simples:'Proteína principal do HDL, o colesterol "bom".',tecnico:'Usada na relação ApoB/ApoA-1 para estratificação de risco.',
+ alto:'Costuma ser favorável.',baixo:'Acompanha HDL baixo.'},
+
+{id:'lipoproteina_a',nome:'Lipoproteína (a)',cat:'lipidios',un:'mg/dL',dec:1,ali:['lipoproteina - a','lipoproteina a','lp(a)','lipoproteina (a)'],ref:[null,30],
+ simples:'Um tipo de gordura determinado principalmente pela genética. Basta medir uma vez na vida.',
+ tecnico:'≥50 mg/dL é fator agravante de risco cardiovascular; não responde a mudanças de estilo de vida.',
+ alto:'Fator de risco herdado — reforça a necessidade de controlar os demais fatores.',baixo:'Favorável.'},
+
+{id:'tfg',nome:'Taxa de filtração glomerular (TFG)',cat:'renal',un:'mL/min/1,73m²',dec:0,
+ ali:['ritmo de filtracao glomerular','taxa de filtracao glomerular','tfg','rfg','egfr','filtracao glomerular','clearance estimado'],
+ ref:[90,null],crit:[30,null],
+ simples:'Estima o quanto os rins estão filtrando. Quanto maior, melhor.',
+ tecnico:'CKD-EPI 2021. Estágios: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 <15. Doença renal crônica exige alteração por ≥3 meses.',
+ alto:'Valores altos costumam ser normais.',
+ baixo:'Filtração reduzida. Entre 60 e 89 é comum com a idade; abaixo de 60 merece acompanhamento e repetição em 3 meses.'},
+
+{id:'homa_ir',nome:'HOMA-IR',cat:'glicemia',un:'',dec:2,ali:['homa ir','homa-ir','homa 1-ir','indice homa ir'],ref:[null,2.7],
+ simples:'Índice que estima resistência à insulina — a dificuldade do corpo em usar a própria insulina.',
+ tecnico:'HOMA-IR = (glicemia mg/dL × insulina µU/mL)/405. Ponto de corte populacional brasileiro ≈ 2,7.',
+ alto:'Sugere resistência à insulina, passo anterior ao diabetes tipo 2. Responde bem a perda de peso e exercício.',
+ baixo:'Boa sensibilidade à insulina.'},
+
+{id:'homa_beta',nome:'HOMA-Beta',cat:'glicemia',un:'%',dec:1,ali:['homa beta','homa-beta','homa b'],ref:null,
+ simples:'Estima o quanto o pâncreas está trabalhando para produzir insulina.',
+ tecnico:'HOMA-β = (20 × insulina)/(glicemia mmol/L − 3,5). Interpretar junto ao HOMA-IR.',
+ alto:'Pâncreas produzindo bastante insulina — comum na resistência à insulina.',baixo:'Pode sugerir menor reserva de insulina.'},
+
+{id:'glicemia_media',nome:'Glicemia média estimada',cat:'glicemia',un:'mg/dL',dec:0,ali:['glicemia media estimada','glicose media estimada'],ref:null,
+ simples:'Traduz a hemoglobina glicada em um valor médio de açúcar no sangue.',
+ tecnico:'eAG = 28,7 × HbA1c − 46,7. Não validada em não diabéticos.',
+ alto:'Acompanha a hemoglobina glicada.',baixo:'Acompanha a hemoglobina glicada.'},
+
+{id:'pth',nome:'Paratormônio (PTH)',cat:'minerais',un:'pg/mL',dec:1,ali:['paratormonio','pth intacto','pth'],ref:[15,65],
+ simples:'Hormônio que controla o cálcio do corpo e a saúde dos ossos.',
+ tecnico:'Interpretar sempre com cálcio e vitamina D; PTH alto com cálcio normal e vitamina D baixa sugere hiperparatireoidismo secundário.',
+ alto:'Costuma subir quando falta vitamina D ou cálcio, ou na doença renal.',
+ baixo:'Pode ocorrer com cálcio alto ou após cirurgia de tireoide/paratireoide.'},
+
+{id:'calcio_ionico',nome:'Cálcio iônico',cat:'minerais',un:'mmol/L',dec:2,ali:['calcio ionico','calcio ionizado'],ref:[1.1,1.35],
+ simples:'A parte do cálcio realmente ativa no corpo — mais precisa que o cálcio total.',
+ tecnico:'Não depende da albumina; preferível quando há alteração proteica.',
+ alto:'Investigar hiperparatireoidismo e excesso de vitamina D.',baixo:'Pode causar formigamentos e cãibras.'},
+
+{id:'psa_livre',nome:'PSA livre',cat:'outros',un:'ng/mL',dec:2,ali:['psa livre'],ref:null,sexOnly:'M',
+ simples:'Fração livre do PSA; usada junto com o PSA total.',tecnico:'Isolado não tem valor; usar a relação livre/total.',
+ alto:'Avaliar pela relação livre/total.',baixo:'Avaliar pela relação livre/total.'},
+
+{id:'psa_relacao',nome:'Relação PSA livre/total',cat:'outros',un:'%',dec:1,
+ ali:['porcentagem de psa livre/psa total','relacao psa livre/psa total','relacao psa livre/total'],ref:[25,null],sexOnly:'M',
+ simples:'Ajuda a diferenciar aumento benigno da próstata de casos que exigem investigação.',
+ tecnico:'Relevante quando PSA total está entre 4 e 10 ng/mL; <25% aumenta a suspeita de neoplasia.',
+ alto:'Favorece causa benigna.',baixo:'Se o PSA total estiver entre 4 e 10, reforça a necessidade de avaliação urológica.'}
+);
+
+/* ---------- 2. Utilidades ----------------------------------------------- */
+const norm = s => (s||'').toString().toLowerCase()
+  .normalize('NFD').replace(/[̀-ͯ]/g,'')
+  .replace(/\s+/g,' ').trim();
+
+const normUnit = u => norm(u).replace(/µ|μ/g,'u').replace(/mcg/g,'ug').replace(/micro/g,'u')
+  .replace(/[\s.]/g,'').replace(/^uui/,'uu').replace(/^ui\//,'uu/');
+
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+
+/* "4.430.000" -> 4430000 ; "12,3" -> 12.3 ; "1.05" -> 1.05 */
+function parseNum(tok){
+  tok = tok.trim();
+  if (/^-?\d{1,3}(\.\d{3})+$/.test(tok)) return parseFloat(tok.replace(/\./g,''));
+  if (/^-?\d{1,3}(\.\d{3})+,\d+$/.test(tok)) return parseFloat(tok.replace(/\./g,'').replace(',','.'));
+  if (tok.includes(',')) return parseFloat(tok.replace(/\./g,'').replace(',','.'));
+  return parseFloat(tok);
+}
+
+const fmt = (v,dec=1) => v==null || !isFinite(v) ? '—'
+  : v.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+
+/* faixa de referência efetiva do analito para o perfil informado */
+function refOf(a, ctx){
+  if (ctx && ctx.labRefs && ctx.labRefs[a.id]) return ctx.labRefs[a.id].slice(0,2);
+  const r = a.ref;
+  if (!r) return null;
+  if (Array.isArray(r)) return r;
+  return r[(ctx && ctx.sex) || 'F'] || r.F;
+}
+/* limites plausíveis, para descartar números que não são o resultado */
+function plausible(a, v){
+  if (!isFinite(v) || v < 0) return false;
+  const r = Array.isArray(a.ref) ? a.ref : (a.ref ? (a.ref.F||a.ref.M) : null);
+  if (!r) return true;
+  const lo = r[0]!=null ? r[0]/8 : 0;
+  const hi = r[1]!=null ? r[1]*8 : (r[0]!=null ? r[0]*40 : Infinity);
+  return v >= lo && v <= hi;
+}
+
+/* índice de sinônimos, do mais longo para o mais curto */
+const ALIAS_INDEX = (() => {
+  const list = [];
+  for (const a of ANALYTES) for (const al of a.ali){
+    const n = norm(al);
+    list.push({id:a.id, alias:n, len:n.length,
+      re:new RegExp('(?:^|[^a-z0-9])(' + esc(n).replace(/\\?[\s\-]/g,'[\\s\\-]+') + ')(?![a-z0-9])','i')});
+  }
+  return list.sort((x,y)=>y.len-x.len);
+})();
+
+const byId = Object.fromEntries(ANALYTES.map(a=>[a.id,a]));
+
+/* ---------- 3. Leitura do PDF ------------------------------------------- */
+const PDFJS_SOURCES = window.PDFJS_SOURCES || [
+  {lib:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs',
+   worker:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs'},
+  {lib:'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs',
+   worker:'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs'},
+  {lib:'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.mjs',
+   worker:'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs'}
+];
+
+let _pdfjs = null;
+async function loadPdfJs(){
+  if (_pdfjs) return _pdfjs;
+  let lastErr;
+  for (const src of PDFJS_SOURCES){
+    try{
+      const mod = await import(/* @vite-ignore */ src.lib);
+      mod.GlobalWorkerOptions.workerSrc = src.worker;
+      _pdfjs = mod; return mod;
+    }catch(e){ lastErr = e; }
+  }
+  throw new Error('Não foi possível carregar o leitor de PDF (pdf.js). Verifique sua conexão. Detalhe: ' + (lastErr && lastErr.message));
+}
+
+/* Reconstrói linhas de texto agrupando os fragmentos por coordenada vertical. */
+async function pdfToLines(file, onProgress){
+  const pdfjs = await loadPdfJs();
+  const doc = await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const lines = [];
+  for (let p=1; p<=doc.numPages; p++){
+    if (onProgress) onProgress(p, doc.numPages);
+    const page = await doc.getPage(p);
+    const items = (await page.getTextContent()).items
+      .filter(i=>i.str && i.str.trim())
+      .map(i=>({s:i.str, x:i.transform[4], y:i.transform[5]}))
+      .sort((a,b)=> (b.y-a.y) || (a.x-b.x));
+    let cur = null;
+    const rows = [];
+    for (const it of items){
+      if (!cur || Math.abs(cur.y - it.y) > 2.5){ cur = {y:it.y, items:[it]}; rows.push(cur); }
+      else cur.items.push(it);
+    }
+    for (const r of rows){
+      r.items.sort((a,b)=>a.x-b.x);
+      const txt = r.items.map(i=>i.s).join(' ').replace(/\s+/g,' ').trim();
+      if (txt) lines.push({page:p, raw:txt});
+    }
+  }
+  await doc.destroy();
+  return lines;
+}
+
+/* Limpeza: datas, horas, paginação e carimbos atrapalham a busca por números. */
+function cleanLine(raw){
+  return norm(raw)
+    .replace(/data (de )?impressao\s*:.*$/,' ')
+    .replace(/\[data da coleta[^\]]*\]/g,' ')
+    .replace(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g,' ')
+    .replace(/\b\d{1,2}:\d{2}\b/g,' ')
+    .replace(/\b\d+\s*\/\s*\d+\s*$/,' ')
+    .replace(/assinado digitalmente.*$/,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+/* Marcadores que indicam: daqui em diante é faixa de referência, não resultado. */
+const REF_CUT = /(valor(es)?\s*(de)?\s*referenci|valores?\s*referenci|referencia|inferior\s*(ou\s*igual\s*)?(a|que)|superior\s*(ou\s*igual\s*)?(a|que)|menor\s*(ou\s*igual\s*)?(a|que)|maior\s*(ou\s*igual\s*)?(a|que)|igual\s*ou\s*maior|abaixo\s*de|acima\s*de|\bate\b|\bentre\b|desejavel|alvo|\bmeta\b|nota:|\d[\d.,]*\s*a\s*\d)/;
+
+const NUM_UNIT = /(?<![a-z0-9])(-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?)\s*([%a-z0-9µμ^/³².\-]*)/gi;
+
+function segmentValue(a, seg){
+  const cut = seg.search(REF_CUT);
+  const s = cut >= 0 ? seg.slice(0, cut) : seg;
+  if (!s.trim()) return null;
+  const cands = [];
+  let m; NUM_UNIT.lastIndex = 0;
+  while ((m = NUM_UNIT.exec(s))){
+    const v = parseNum(m[1]);
+    if (isFinite(v)) cands.push({v, unit:normUnit(m[2]||'')});
+  }
+  if (!cands.length) return null;
+  const want = normUnit(a.un||'');
+  const conv = a.conv || {};
+  const score = c => {
+    let sc = 0;
+    if (want && c.unit === want) sc += 10;
+    if (a.un === '%' && c.unit.startsWith('%')) sc += 10;
+    if (want.includes('mm3') && (c.unit.includes('mm3') || c.unit.includes('/ul'))) sc += 8;
+    if (c.unit && Object.keys(conv).some(k=>normUnit(k)===c.unit)) sc += 6;
+    if (a.un === '%' && !c.unit.startsWith('%') && c.unit) sc -= 6;
+    if (want.includes('mm3') && c.unit.startsWith('%')) sc -= 8;
+    return sc;
+  };
+  const ranked = cands.map((c,i)=>({c,i,sc:score(c)})).sort((x,y)=> y.sc-x.sc || x.i-y.i);
+  for (const {c} of ranked){
+    let v = c.v, fator = 1;
+    for (const [k,f] of Object.entries(conv)){
+      if (normUnit(k) === c.unit){
+        if (typeof f === 'function'){ v = f(v); fator = null; } else { v = v*f; fator = f; }
+        break;
+      }
+    }
+    if (plausible(a, v)) return {value:v, unit:c.unit, fator};
+  }
+  return null;
+}
+
+/* Faixas declaradas pelo próprio laboratório dentro do bloco do exame. */
+const RANGE_PATTERNS = [
+  {re:/(?:de\s*)?(-?\d[\d.,]*)\s*(?:a|e)\s*(-?\d[\d.,]*)/, kind:'both'},
+  {re:/(?:inferior|menor|abaixo)\s*(?:ou\s*igual\s*)?(?:a|que|de)\s*(-?\d[\d.,]*)/, kind:'max'},
+  {re:/(?:superior|maior|acima)\s*(?:ou\s*igual\s*)?(?:a|que|de)\s*(-?\d[\d.,]*)/, kind:'min'}
+];
+const PEDIATRIC = /(crianc|recem|adolescent|pediatric|neonat|\bmes(es)?\b|\bdias?\b|cordao|horas de vida|gestante|trimestre|de \d+ a \d+ anos|ate \d+ anos|menores de)/;
+const QUALIFIER = /(deficien|insuficien|intoxicacao|risco|ideal|bom controle|diagnostic|pre-diabetes|tratamento|grupos de risco|otimo|limitrofe|elevado)/;
+
+function labRangeFrom(blockLines, sex){
+  const cands = [];
+  let colOrder = null, secaoPediatrica = false;
+  for (const ln of blockLines){
+    if (!ln) continue;
+    if (/feminino/.test(ln) && /masculino/.test(ln) && !/\d/.test(ln))
+      colOrder = ln.indexOf('feminino') < ln.indexOf('masculino') ? ['F','M'] : ['M','F'];
+    /* "PARA CRIANÇAS E ADOLESCENTES:" abre uma seção que vale para as linhas seguintes */
+    if (/adulto/.test(ln)) secaoPediatrica = false;
+    else if (/(crianc|adolescent|pediatric|recem|neonat|gestante)/.test(ln)) secaoPediatrica = true;
+    if (secaoPediatrica || PEDIATRIC.test(ln)) continue;
+    if (!/referenci|inferior|superior|maior|menor|acima|abaixo|adulto|\d\s*a\s*\d/.test(ln)) continue;
+    const ranges = [];
+    let rest = ln;
+    for (let guard=0; guard<3 && rest; guard++){
+      let best = null;
+      for (const p of RANGE_PATTERNS){
+        const m = p.re.exec(rest);
+        if (m && (!best || m.index < best.m.index)) best = {m, kind:p.kind};
+      }
+      if (!best) break;
+      const depois = rest.slice(best.m.index + best.m[0].length);
+      if (/^\s*(anos?|meses|dias|horas)/.test(depois)){ rest = depois; continue; } /* é idade, não resultado */
+      const a = parseNum(best.m[1]), b = best.kind === 'both' ? parseNum(best.m[2]) : null;
+      if (best.kind === 'both') ranges.push([a,b]);
+      else if (best.kind === 'max') ranges.push([null,a]);
+      else ranges.push([a,null]);
+      rest = rest.slice(best.m.index + best.m[0].length);
+    }
+    if (!ranges.length) continue;
+    const sexTag = /(home[mn]s?|masculino)/.test(ln) ? 'M' : (/(mulher(es)?|feminino)/.test(ln) ? 'F' : null);
+    cands.push({ranges, sexTag, adult:/adulto/.test(ln), qualifier:QUALIFIER.test(ln), line:ln});
+  }
+  if (!cands.length) return null;
+  const bySex = cands.filter(c=>c.sexTag === sex && c.ranges.length === 1);
+  if (bySex.length === 1) return bySex[0].ranges[0];
+  const clean = cands.filter(c=>!c.qualifier);
+  const adults = clean.filter(c=>c.adult);
+  if (adults.length === 1){
+    const c = adults[0];
+    if (c.ranges.length === 1) return c.ranges[0];
+    if (c.ranges.length === 2 && colOrder) return c.ranges[colOrder.indexOf(sex)] || null;
+  }
+  if (clean.length === 1 && clean[0].ranges.length === 1) return clean[0].ranges[0];
+  return null; /* ambíguo: mantemos a referência geral do app */
+}
+
+/* Motor principal: percorre as linhas e monta {id: {value, unit, page}} */
+function extractFromLines(lines, sex){
+  const found = {}, labRefs = {}, pending = [];
+  const clean = lines.map(l=>({page:l.page, raw:l.raw, t:cleanLine(l.raw)}));
+
+  const matchesIn = t => {
+    const hits = [];
+    for (const ai of ALIAS_INDEX){
+      if (hits.some(h=>h.id === ai.id)) continue;
+      const m = ai.re.exec(t);
+      if (!m) continue;
+      const start = m.index + (m[0].length - m[1].length);
+      const end = start + m[1].length;
+      if (hits.some(h => start < h.end && end > h.start)) continue;
+      hits.push({id:ai.id, start, end});
+    }
+    return hits.sort((a,b)=>a.start-b.start);
+  };
+
+  for (let i=0; i<clean.length; i++){
+    const t = clean[i].t;
+    if (!t || t.startsWith('-') || t.length < 3) continue;
+    const hits = matchesIn(t);
+
+    /* pendências: cabeçalho do exame numa linha, "RESULTADO:" algumas linhas abaixo.
+       O resultado pertence ao cabeçalho mais próximo acima dele. */
+    if (/\bresultados?\b/.test(t) && !hits.length && !/impress|liberad|anterior/.test(t)){
+      for (let k=pending.length-1; k>=0; k--){
+        const p = pending[k];
+        if (i - p.i > 8 || found[p.id]){ pending.splice(k,1); continue; }
+        const seg = t.replace(/^.*?\bresultados?\b\s*:?/,'');
+        const got = segmentValue(byId[p.id], seg);
+        if (got){
+          found[p.id] = {...got, page:clean[i].page, line:clean[i].raw, vline:i, hline:p.i};
+          pending.splice(k,1);
+        }
+        break;  /* apenas o cabeçalho mais próximo concorre por este resultado */
+      }
+    }
+
+    for (let h=0; h<hits.length; h++){
+      const a = byId[hits[h].id];
+      const segEnd = h+1 < hits.length ? hits[h+1].start : t.length;
+      const seg = t.slice(hits[h].end, segEnd);
+      const got = segmentValue(a, seg);
+      if (got && !found[a.id]){
+        found[a.id] = {...got, page:clean[i].page, line:clean[i].raw, vline:i, hline:i};
+      } else if (!got && !found[a.id] && !pending.some(p=>p.id===a.id)){
+        pending.push({id:a.id, i});
+      }
+    }
+    for (const p of pending.slice()) if (i - p.i > 8) pending.splice(pending.indexOf(p),1);
+  }
+
+  /* faixas declaradas pelo laboratório: procuradas a partir da linha do resultado */
+  for (const [id, v] of Object.entries(found)){
+    const start = v.vline ?? 0;
+    const block = [];
+    for (let i=start; i<Math.min(clean.length, start+16); i++){
+      const t = clean[i].t;
+      if (i > start && /\bresultados?\b\s*:/.test(t)) break;   /* já é o próximo exame */
+      if (i > start && /assinado|^_+$/.test(t)) break;
+      block.push(i === start ? t.slice(t.search(REF_CUT) >= 0 ? t.search(REF_CUT) : 0) : t);
+    }
+    /* linhas que citam outro exame não valem como referência deste, mas seguem no bloco
+       para que cabeçalhos de seção (adulto/criança) continuem sendo lidos na ordem */
+    const candidatas = block.map(t => matchesIn(t).some(h => h.id !== id) ? '' : t);
+    const r = labRangeFrom(candidatas, sex);
+    if (!r || (r[0] == null && r[1] == null)) continue;
+    /* só aceitamos a faixa do laboratório se ela tiver a mesma ordem de grandeza do valor
+       (protege contra pegar a faixa do valor absoluto quando o resultado é percentual) */
+    const base = (() => {
+      const b = byId[id].ref;
+      return Array.isArray(b) ? b : (b ? (b[sex] || b.F) : null);
+    })();
+    /* a faixa lida precisa ser compatível com o valor e com a faixa conhecida do exame:
+       impede, por exemplo, que um percentual herde a faixa do valor absoluto */
+    const naEscala = faixa => {
+      const lim = faixa.filter(x => x != null);
+      if (!lim.length) return false;
+      if (!(v.value >= Math.min(...lim)/20 && v.value <= Math.max(...lim)*20)) return false;
+      if (!base) return true;
+      const pares = [[faixa[0],base[0]],[faixa[1],base[1]]].filter(([x,y]) => x != null && y != null && y !== 0);
+      if (pares.length) return pares.every(([x,y]) => x/y >= 0.2 && x/y <= 5);
+      const b = base.filter(x => x != null);
+      if (!b.length) return true;
+      const r = Math.max(...lim) / Math.max(...b);
+      return r >= 0.2 && r <= 5;
+    };
+    if (naEscala(r)) labRefs[id] = r;
+    else if (v.fator && v.fator !== 1){
+      /* o valor veio em outra unidade e foi convertido: a faixa precisa da mesma conversão */
+      const rc = r.map(x => x == null ? null : x * v.fator);
+      if (naEscala(rc)) labRefs[id] = rc;
+    }
+  }
+  return {found, labRefs};
+}
+
+/* ---------- 4. Classificação -------------------------------------------- */
+function classify(a, value, ctx){
+  const r = refOf(a, ctx);
+  if (!r || (r[0] == null && r[1] == null))
+    return {status:'info', sev:0, ref:r, texto:'Resultado informativo — interpretar no conjunto.'};
+  const [lo,hi] = r;
+  const span = (lo != null && hi != null) ? (hi - lo) : (hi != null ? hi*0.35 : lo*0.35);
+  const crit = a.crit || [null,null];
+  let status = 'normal', sev = 0;
+  if (lo != null && value < lo){
+    status = 'baixo';
+    const d = (lo - value) / (span || lo || 1);
+    sev = d < 0.08 ? 1 : (d > 0.4 ? 3 : 2);
+  } else if (hi != null && value > hi){
+    status = 'alto';
+    const d = (value - hi) / (span || hi || 1);
+    sev = d < 0.08 ? 1 : (d > 0.4 ? 3 : 2);
+  }
+  if ((crit[0] != null && value <= crit[0]) || (crit[1] != null && value >= crit[1]))
+    return {status:'critico', sev:4, ref:r, base:status};
+  return {status, sev, ref:r};
+}
+
+const refText = (a, ctx) => {
+  const r = refOf(a, ctx);
+  if (!r) return 'sem faixa fixa';
+  if (r[0] != null && r[1] != null) return `${fmt(r[0],a.dec)} a ${fmt(r[1],a.dec)}`;
+  if (r[1] != null) return `até ${fmt(r[1],a.dec)}`;
+  return `acima de ${fmt(r[0],a.dec)}`;
+};
+
+/* ---------- 5. Cálculos derivados --------------------------------------- */
+function computeDerived(vals, ctx){
+  const d = {}, add = (k,v,extra) => { if (isFinite(v) && v != null) d[k] = {v, ...extra}; };
+  const g = id => vals[id];
+
+  if (ctx.peso > 0 && ctx.altura > 0){
+    const h = ctx.altura/100, imc = ctx.peso/(h*h);
+    const faixa = imc < 18.5 ? 'abaixo do peso' : imc < 25 ? 'peso adequado' : imc < 30 ? 'sobrepeso'
+      : imc < 35 ? 'obesidade grau I' : imc < 40 ? 'obesidade grau II' : 'obesidade grau III';
+    add('imc', imc, {rot:'IMC', un:'kg/m²', dec:1, txt:faixa,
+      alterado: imc < 18.5 || imc >= 25});
+  }
+  if (ctx.cintura > 0){
+    const lim = ctx.sex === 'M' ? [94,102] : [80,88];
+    add('cintura', ctx.cintura, {rot:'Circunferência abdominal', un:'cm', dec:0,
+      txt: ctx.cintura >= lim[1] ? 'risco cardiometabólico muito aumentado'
+         : ctx.cintura >= lim[0] ? 'risco cardiometabólico aumentado' : 'dentro do desejável',
+      alterado: ctx.cintura >= lim[0]});
+  }
+  if (ctx.pas > 0 && ctx.pad > 0){
+    const pa = (ctx.pas >= 140 || ctx.pad >= 90) ? 'níveis compatíveis com hipertensão (confirmar com medidas repetidas)'
+      : (ctx.pas >= 130 || ctx.pad >= 85) ? 'pressão limítrofe' : 'pressão dentro do desejável';
+    add('pa', ctx.pas, {rot:'Pressão arterial', un:`/${ctx.pad} mmHg`, dec:0, txt:pa,
+      alterado: ctx.pas >= 130 || ctx.pad >= 85});
+  }
+
+  const ct = g('colesterol_total'), hdl = g('hdl'), tg = g('triglicerideos');
+  if (ct != null && hdl != null){
+    add('nao_hdl_calc', ct - hdl, {rot:'Colesterol não-HDL (calculado)', un:'mg/dL', dec:0,
+      txt: (ct-hdl) < 130 ? 'desejável para risco baixo/intermediário' : 'acima do desejável',
+      alterado:(ct-hdl) >= 130, inject:'nao_hdl'});
+    add('castelli1', ct/hdl, {rot:'Índice de Castelli I (CT/HDL)', un:'', dec:2,
+      txt: ct/hdl > (ctx.sex==='M'?5:4.4) ? 'acima do desejável' : 'desejável',
+      alterado: ct/hdl > (ctx.sex==='M'?5:4.4)});
+  }
+  if (ct != null && hdl != null && tg != null && tg < 400 && g('ldl') == null){
+    add('ldl_calc', ct - hdl - tg/5, {rot:'LDL estimado (Friedewald)', un:'mg/dL', dec:0,
+      txt:'estimado a partir de colesterol total, HDL e triglicerídeos', inject:'ldl'});
+  }
+  if (tg != null && hdl != null){
+    add('tg_hdl', tg/hdl, {rot:'Razão triglicerídeos/HDL', un:'', dec:2,
+      txt: tg/hdl >= 3 ? 'sugere partículas de LDL pequenas e densas e resistência à insulina' : 'desejável',
+      alterado: tg/hdl >= 3});
+  }
+  const glic = g('glicose'), ins = g('insulina');
+  if (glic != null && ins != null && g('homa_ir') == null){
+    add('homa_calc', (glic*ins)/405, {rot:'HOMA-IR (calculado)', un:'', dec:2,
+      txt: (glic*ins)/405 > 2.7 ? 'sugere resistência à insulina' : 'dentro do esperado',
+      alterado:(glic*ins)/405 > 2.7, inject:'homa_ir'});
+  }
+  const a1c = g('hba1c');
+  if (a1c != null && g('glicemia_media') == null)
+    add('eag', 28.7*a1c - 46.7, {rot:'Glicemia média estimada', un:'mg/dL', dec:0,
+      txt:'média aproximada dos últimos 2–3 meses', inject:'glicemia_media'});
+
+  const cr = g('creatinina');
+  if (cr != null && ctx.age > 17 && g('tfg') == null){
+    const k = ctx.sex === 'F' ? 0.7 : 0.9, al = ctx.sex === 'F' ? -0.241 : -0.302;
+    const tfg = 142 * Math.pow(Math.min(cr/k,1), al) * Math.pow(Math.max(cr/k,1), -1.2)
+      * Math.pow(0.9938, ctx.age) * (ctx.sex === 'F' ? 1.012 : 1);
+    add('tfg_calc', tfg, {rot:'TFG estimada (CKD-EPI 2021)', un:'mL/min/1,73m²', dec:0,
+      txt: tfg >= 90 ? 'filtração normal' : tfg >= 60 ? 'levemente reduzida (G2)'
+        : tfg >= 45 ? 'reduzida (G3a)' : tfg >= 30 ? 'reduzida (G3b)' : tfg >= 15 ? 'muito reduzida (G4)' : 'falência renal (G5)',
+      alterado: tfg < 90, inject:'tfg'});
+  }
+  const fe = g('ferro'), tf = g('transferrina');
+  if (fe != null && tf != null && g('sat_transferrina') == null){
+    const sat = fe/(tf*1.25)*100;
+    add('sat_calc', sat, {rot:'Saturação de transferrina (calculada)', un:'%', dec:1,
+      txt: sat < 20 ? 'baixa — reforça falta de ferro' : sat > 45 ? 'alta — avaliar sobrecarga de ferro' : 'normal',
+      alterado: sat < 20 || sat > 45, inject:'sat_transferrina'});
+  }
+  const bt = g('bilirrubina_total'), bd = g('bilirrubina_direta');
+  if (bt != null && bd != null)
+    add('bi', bt - bd, {rot:'Bilirrubina indireta (calculada)', un:'mg/dL', dec:2,
+      txt: (bt-bd) > 0.9 ? 'predomínio indireto — considerar Gilbert ou hemólise' : 'normal',
+      alterado:(bt-bd) > 0.9});
+  const ast = g('tgo'), alt = g('tgp');
+  if (ast != null && alt != null && alt > 0)
+    add('deritis', ast/alt, {rot:'Relação AST/ALT (De Ritis)', un:'', dec:2,
+      txt: ast/alt > 2 ? 'relação >2 — padrão que sugere origem alcoólica ou muscular'
+        : ast/alt < 1 ? 'ALT predominante — padrão comum na gordura no fígado' : 'relação intermediária'});
+  const alb = g('albumina'), ca = g('calcio');
+  if (alb != null && ca != null && alb < 4)
+    add('ca_corr', ca + 0.8*(4 - alb), {rot:'Cálcio corrigido pela albumina', un:'mg/dL', dec:1,
+      txt:'ajuste necessário quando a albumina está baixa'});
+  const leuco = g('leucocitos');
+  for (const [pct, abs] of [['neutrofilos_pct','neutrofilos_abs'],['linfocitos_pct','linfocitos_abs']]){
+    if (leuco != null && vals[pct] != null && vals[abs] == null)
+      d['_inj_'+abs] = {v: leuco*vals[pct]/100, inject:abs, hidden:true};
+  }
+  const ne = g('neutrofilos_abs') ?? d['_inj_neutrofilos_abs']?.v;
+  const li = g('linfocitos_abs') ?? d['_inj_linfocitos_abs']?.v;
+  if (ne != null && li > 0)
+    add('nlr', ne/li, {rot:'Razão neutrófilos/linfócitos', un:'', dec:2,
+      txt: ne/li > 3 ? 'acima de 3 — marcador inespecífico de inflamação/estresse' : 'dentro do habitual',
+      alterado: ne/li > 3});
+  return d;
+}
+
+/* ---------- 6. Padrões (hipóteses para discutir com o médico) ------------ */
+function findPatterns(v, st, d, ctx){
+  const out = [];
+  const is = (id,s) => st[id] && st[id].status === s;
+  const lowish = id => st[id] && (st[id].status === 'baixo' || st[id].status === 'critico');
+  const has = id => v[id] != null;
+  const push = (nivel, titulo, simples, tecnico, acao) => out.push({nivel, titulo, simples, tecnico, acao});
+
+  const anemia = (ctx.sex === 'F' ? v.hemoglobina < 12 : v.hemoglobina < 13);
+  if (has('hemoglobina') && anemia){
+    const micro = v.vcm != null && v.vcm < 80, macro = v.vcm != null && v.vcm > 100;
+    const ferroBaixo = (v.ferritina != null && v.ferritina < (ctx.sex==='F'?15:30)) ||
+                       (v.sat_transferrina != null && v.sat_transferrina < 20);
+    if (micro || ferroBaixo)
+      push('atencao','Padrão sugestivo de anemia por falta de ferro',
+        'A hemoglobina está baixa e os índices apontam hemácias pequenas e/ou estoque de ferro reduzido — o padrão mais comum de anemia por falta de ferro.',
+        'Anemia microcítica com ferritina e/ou saturação de transferrina reduzidas. Investigar a causa da perda (menstrual, trato gastrointestinal) antes de apenas repor ferro.',
+        'Leve ferritina, ferro e saturação de transferrina ao médico e investigue a origem da perda de ferro.');
+    else if (macro || (v.vitamina_b12 != null && v.vitamina_b12 < 200))
+      push('atencao','Padrão sugestivo de anemia por falta de vitaminas',
+        'A hemoglobina está baixa e as hemácias estão grandes — padrão ligado à falta de vitamina B12 ou ácido fólico.',
+        'Anemia macrocítica. Dosar B12, folato, homocisteína e ácido metilmalônico; investigar má absorção, uso de metformina e inibidores de bomba de prótons.',
+        'Converse sobre dosar B12 e ácido fólico e sobre causas de má absorção.');
+    else
+      push('atencao','Anemia detectada',
+        'A hemoglobina está abaixo do esperado. Existem várias causas possíveis, e os outros índices do hemograma ajudam a identificar qual é.',
+        'Anemia normocítica: considerar doença crônica/inflamatória, renal, endócrina, perda aguda ou fase inicial de carência.',
+        'Leve o hemograma completo ao médico para investigar a causa.');
+  }
+  if (!anemia && v.ferritina != null && v.ferritina < (ctx.sex==='F'?15:30))
+    push('atencao','Estoque de ferro baixo, ainda sem anemia',
+      'A ferritina está baixa mesmo com a hemoglobina normal — os estoques de ferro estão se esgotando. Pode causar cansaço e queda de cabelo antes de virar anemia.',
+      'Ferropenia sem anemia. Repor ferro e investigar perdas costuma ser indicado mesmo com Hb normal.',
+      'Pergunte se vale repor ferro e investigar perdas.');
+  if (v.ferritina != null && v.ferritina > (ctx.sex==='F'?150:400) && v.sat_transferrina != null && v.sat_transferrina > 45)
+    push('atencao','Possível sobrecarga de ferro',
+      'Ferritina e saturação de transferrina altas juntas podem indicar acúmulo de ferro no corpo.',
+      'Suspeita de hemocromatose: confirmar com nova saturação em jejum e considerar pesquisa de HFE.',
+      'Peça avaliação para sobrecarga de ferro (hemocromatose).');
+
+  const preDm = (v.glicose >= 100 && v.glicose <= 125) || (v.hba1c >= 5.7 && v.hba1c <= 6.4);
+  const dm = v.glicose >= 126 || v.hba1c >= 6.5;
+  if (dm)
+    push('alerta','Valores na faixa de diabetes',
+      'A glicose e/ou a hemoglobina glicada estão na faixa usada para diagnosticar diabetes. O diagnóstico exige confirmação, mas isso precisa de avaliação médica sem demora.',
+      'Glicemia ≥126 mg/dL e/ou HbA1c ≥6,5%. Confirmar com segundo teste (ou o mesmo em outro momento), salvo hiperglicemia inequívoca com sintomas.',
+      'Agende consulta para confirmar o diagnóstico e definir conduta.');
+  else if (preDm)
+    push('atencao','Valores na faixa de pré-diabetes',
+      'O açúcar no sangue está acima do ideal, mas ainda abaixo da faixa de diabetes. É a fase em que mudanças de alimentação, peso e exercício têm mais efeito.',
+      'Glicemia de jejum 100–125 mg/dL e/ou HbA1c 5,7–6,4%. Considerar TOTG e rastreio anual; metformina em casos selecionados.',
+      'Discuta plano de alimentação, atividade física e reavaliação em 3 a 6 meses.');
+  const homa = v.homa_ir ?? d.homa_calc?.v;
+  if (homa != null && homa > 2.7 && !dm)
+    push('atencao','Sinais de resistência à insulina',
+      'Seu corpo parece precisar de mais insulina que o normal para controlar o açúcar. É reversível e responde bem a perda de peso, menos açúcar e mais exercício.',
+      `HOMA-IR ${fmt(homa,2)} acima do ponto de corte de 2,7. Associa-se a esteatose hepática, dislipidemia aterogênica e risco de DM2.`,
+      'Converse sobre prevenção de diabetes: alimentação, exercício e acompanhamento.');
+
+  if (v.triglicerideos >= 150 && ((ctx.sex === 'M' && v.hdl < 40) || (ctx.sex === 'F' && v.hdl < 50)))
+    push('atencao','Dislipidemia aterogênica (triglicerídeos altos com HDL baixo)',
+      'A combinação de gordura alta no sangue com HDL baixo aumenta o risco para o coração mais do que cada uma isolada. Costuma andar junto com peso e açúcar.',
+      'Fenótipo aterogênico: TG ≥150 com HDL baixo, tipicamente com LDL pequeno e denso. Priorizar não-HDL e ApoB como alvos.',
+      'Pergunte sobre metas de não-HDL/ApoB e não só de LDL.');
+  const ldl = v.ldl ?? d.ldl_calc?.v;
+  if (ldl != null && ldl >= 160)
+    push('atencao','LDL bastante elevado',
+      'O colesterol "ruim" está bem acima do desejável. É o principal fator modificável de risco de infarto e AVC.',
+      `LDL ${fmt(ldl,0)} mg/dL. Estratificar risco cardiovascular global para definir meta; considerar hipercolesterolemia familiar se CT ≥310 mg/dL.`,
+      'Peça a estratificação do seu risco cardiovascular e a definição de uma meta de LDL.');
+  if (v.lipoproteina_a != null && v.lipoproteina_a >= 50)
+    push('atencao','Lipoproteína (a) elevada',
+      'É um fator de risco herdado, que não muda com dieta. Saber disso ajuda a ser mais rigoroso com os fatores que dão para controlar.',
+      'Lp(a) ≥50 mg/dL é fator agravante de risco; considerar rastreio familiar e metas de LDL mais rigorosas.',
+      'Mencione a Lp(a) alta ao avaliar seu risco cardiovascular.');
+
+  const met = [];
+  if (ctx.cintura > 0 && ctx.cintura >= (ctx.sex==='M'?94:80)) met.push('circunferência abdominal aumentada');
+  if (v.triglicerideos >= 150) met.push('triglicerídeos ≥150');
+  if ((ctx.sex==='M' && v.hdl < 40) || (ctx.sex==='F' && v.hdl < 50)) met.push('HDL baixo');
+  if (ctx.pas >= 130 || ctx.pad >= 85) met.push('pressão ≥130/85');
+  if (v.glicose >= 100) met.push('glicemia ≥100');
+  if (met.length >= 3)
+    push('atencao','Critérios laboratoriais de síndrome metabólica',
+      `Você reúne ${met.length} de 5 critérios (${met.join(', ')}). O conjunto aumenta o risco de diabetes e de doença cardiovascular — e melhora bastante com perda de peso e exercício.`,
+      `Critérios NCEP-ATP III/IDF presentes: ${met.join('; ')}. Diagnóstico requer ≥3 e considera também uso de anti-hipertensivo e hipolipemiante.`,
+      'Leve esses cinco itens juntos ao médico e discuta um plano integrado.');
+
+  if (is('tsh','alto') && v.t4_livre != null && st.t4_livre.status === 'normal')
+    push('atencao','Padrão de hipotireoidismo subclínico',
+      'O hormônio que comanda a tireoide está alto, mas o hormônio da tireoide ainda está normal — a glândula está trabalhando com esforço extra.',
+      'TSH elevado com T4L normal. Repetir em 2–3 meses com anti-TPO; tratar conforme TSH >10, sintomas, gestação ou anticorpos positivos.',
+      'Pergunte sobre repetir o TSH com anti-TPO em 2 a 3 meses.');
+  else if (is('tsh','alto') && lowish('t4_livre'))
+    push('alerta','Padrão de hipotireoidismo',
+      'A tireoide parece estar funcionando pouco: TSH alto com T4 livre baixo. Costuma causar cansaço, ganho de peso, frio e pele seca — e tem tratamento simples.',
+      'Hipotireoidismo primário franco. Iniciar levotiroxina com ajuste por TSH.',
+      'Procure o médico para iniciar tratamento.');
+  else if (lowish('tsh') && (is('t4_livre','alto') || is('t3','alto')))
+    push('alerta','Padrão de hipertireoidismo',
+      'A tireoide parece acelerada: TSH baixo com hormônio tireoidiano alto. Pode causar palpitação, perda de peso e insônia.',
+      'Tireotoxicose: dosar TRAb e considerar cintilografia; avaliar repercussão cardiovascular.',
+      'Procure avaliação médica para investigar a causa.');
+
+  const hep = (id) => st[id] && (st[id].status === 'alto' || st[id].status === 'critico');
+  if (hep('tgp') || hep('tgo')){
+    const razao = d.deritis?.v;
+    if (razao != null && razao > 2)
+      push('atencao','Enzimas do fígado alteradas, com padrão AST/ALT >2',
+        'As enzimas do fígado estão acima do normal, em um padrão classicamente ligado ao álcool (ou a origem muscular, se você treina pesado).',
+        'AST/ALT >2 sugere doença hepática alcoólica; excluir origem muscular com CPK.',
+        'Converse sobre consumo de álcool, medicamentos e a necessidade de ultrassom do fígado.');
+    else
+      push('atencao','Enzimas do fígado acima do normal',
+        'As enzimas que indicam irritação no fígado estão elevadas. Hoje a causa mais comum é a gordura no fígado, ligada a peso, açúcar e resistência à insulina.',
+        'Elevação de transaminases: investigar DHGM/esteatose, hepatites B e C, álcool, fármacos, doença celíaca, autoimune, hemocromatose e Wilson conforme idade.',
+        'Peça avaliação da causa — costuma incluir ultrassom e sorologias de hepatite.');
+  }
+  if (hep('fosfatase_alcalina') && hep('ggt'))
+    push('atencao','Padrão colestático (vias biliares)',
+      'Duas enzimas ligadas às vias biliares estão altas ao mesmo tempo, o que sugere dificuldade no fluxo da bile.',
+      'Padrão colestático: solicitar ultrassom de vias biliares e considerar causas medicamentosas e autoimunes.',
+      'Peça uma avaliação das vias biliares.');
+  else if (hep('ggt') && !hep('tgp') && !hep('tgo'))
+    push('info','Gama GT isolada elevada',
+      'Apenas a Gama GT está alta. Isso é comum com álcool, alguns medicamentos e gordura no fígado, e sozinho costuma ter pouco peso.',
+      'GGT isolada: baixa especificidade; correlacionar com álcool, fármacos indutores enzimáticos e esteatose.',
+      'Comente seu consumo de álcool e seus medicamentos com o médico.');
+
+  const tfg = v.tfg ?? d.tfg_calc?.v;
+  if (tfg != null && tfg < 60)
+    push(tfg < 30 ? 'alerta' : 'atencao','Filtração dos rins reduzida',
+      `A estimativa de filtração dos rins está em ${fmt(tfg,0)} mL/min/1,73m². Abaixo de 60 é importante repetir e acompanhar — muitas causas são tratáveis.`,
+      `TFG ${fmt(tfg,0)} (estágio ${tfg>=45?'G3a':tfg>=30?'G3b':tfg>=15?'G4':'G5'}). Confirmar cronicidade (≥3 meses), dosar albuminúria (RAC) e revisar nefrotóxicos.`,
+      'Leve creatinina e TFG ao médico e pergunte sobre exame de albuminúria na urina.');
+  if (v.acido_urico != null && st.acido_urico?.status === 'alto')
+    push('info','Ácido úrico elevado',
+      'O ácido úrico alto pode causar crises de gota e pedras nos rins, e costuma andar junto com peso, álcool e pressão alta.',
+      'Hiperuricemia: tratar apenas assintomático é controverso; rever diuréticos, álcool e frutose.',
+      'Pergunte se, no seu caso, o ácido úrico alto precisa de tratamento.');
+
+  if (v.pcr != null && v.pcr > 10)
+    push('atencao','Inflamação ativa (PCR elevada)',
+      'A PCR está bem acima do normal, o que indica inflamação ou infecção em curso no momento da coleta.',
+      'PCR >10 mg/L sugere processo inflamatório/infeccioso agudo — reavaliar clinicamente e repetir após resolução.',
+      'Comente sintomas recentes (febre, dor, infecção) com o médico.');
+  else if (v.pcr != null && v.pcr > 3)
+    push('info','PCR levemente elevada',
+      'Uma inflamação de baixo grau, comum em excesso de peso e sedentarismo, e associada a maior risco cardiovascular.',
+      'PCR-us >3 mg/L: categoria de risco cardiovascular alto pelo marcador inflamatório.',
+      'Vale citar junto da avaliação de risco cardiovascular.');
+
+  if (v.vitamina_d != null && v.vitamina_d < 20)
+    push('atencao','Deficiência de vitamina D',
+      'A vitamina D está em faixa de deficiência, o que afeta ossos, músculos e imunidade.',
+      'Deficiência (<20 ng/mL): repor conforme grupo de risco e reavaliar em 3 meses.',
+      'Pergunte sobre reposição de vitamina D e a dose adequada para você.');
+  if (v.vitamina_b12 != null && v.vitamina_b12 < 300 && v.vitamina_b12 >= 200)
+    push('info','Vitamina B12 na zona limítrofe',
+      'A B12 está na faixa cinzenta: não é deficiência clara, mas pode já causar sintomas em algumas pessoas.',
+      'B12 200–300 pg/mL: considerar homocisteína e ácido metilmalônico se houver sintomas neurológicos ou anemia.',
+      'Se tiver formigamentos, cansaço ou usar metformina/omeprazol, comente com o médico.');
+
+  if (v.pth != null && st.pth?.status === 'alto' && v.calcio != null && st.calcio?.status === 'normal')
+    push('info','PTH alto com cálcio normal',
+      'O hormônio que regula o cálcio está trabalhando acima do normal, algo comum quando falta vitamina D.',
+      'Hiperparatireoidismo secundário provável: avaliar vitamina D, função renal e ingestão de cálcio.',
+      'Leve cálcio, PTH e vitamina D juntos ao médico.');
+
+  if (st.cpk?.status === 'alto' && ctx.atleta)
+    push('info','CPK elevada — atenção ao contexto de treino',
+      'A enzima muscular está alta, o que é esperado depois de treinos intensos. Se o exame foi colhido perto de um treino forte, costuma não significar doença.',
+      'Elevação de CPK pós-exercício: repetir após 72h de repouso antes de investigar miopatia ou toxicidade por estatina.',
+      'Comente há quanto tempo treinou antes da coleta.');
+  else if (st.cpk?.status === 'alto')
+    push('atencao','CPK elevada',
+      'A enzima dos músculos está alta. Exercício intenso, pancadas e alguns remédios (como estatinas) são as causas mais comuns.',
+      'Investigar exercício recente, estatinas e sintomas de rabdomiólise; repetir após repouso.',
+      'Informe se fez exercício intenso antes do exame e se usa estatina.');
+
+  if (st.plaquetas?.status === 'baixo' || st.plaquetas?.status === 'critico')
+    push(v.plaquetas < 50000 ? 'alerta' : 'atencao','Plaquetas abaixo do normal',
+      'As plaquetas ajudam o sangue a coagular. Valores baixos aumentam o risco de sangramentos e precisam de avaliação.',
+      'Plaquetopenia: descartar pseudoplaquetopenia por EDTA, dengue, hepatopatia, fármacos e PTI.',
+      'Procure o médico; se houver sangramentos ou manchas roxas, com urgência.');
+
+  if (ctx.gestante)
+    push('info','Você marcou gestação',
+      'Na gravidez, muitos valores de referência mudam (hemoglobina, TSH, ferritina, entre outros). A análise automática abaixo usa faixas de adultos não gestantes e pode classificar como alterado algo esperado na gestação.',
+      'Faixas gestacionais específicas por trimestre não são aplicadas aqui — interpretar com o pré-natal.',
+      'Leve o laudo ao pré-natal para leitura com as faixas da gestação.');
+  if (ctx.jejum != null && ctx.jejum < 8 && (v.glicose != null || v.triglicerideos != null))
+    push('info','Jejum menor que 8 horas',
+      'Glicose e triglicerídeos sobem depois das refeições. Com jejum curto, esses dois resultados podem estar superestimados.',
+      'Considerar repetir glicemia e perfil lipídico com jejum de 12h se os valores estiverem limítrofes.',
+      'Informe ao médico o tempo real de jejum.');
+  return out;
+}
+
+/* ---------- 7. Estado e interface --------------------------------------- */
+const $ = sel => document.querySelector(sel);
+const el = (tag, attrs={}, html='') => {
+  const n = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)) n.setAttribute(k,v);
+  if (html) n.innerHTML = html;
+  return n;
+};
+const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const state = {values:{}, labRefs:{}, shown:[], origem:{}, lines:null};
+
+const MANUAL_DEFAULT = ['hemoglobina','hematocrito','vcm','leucocitos','plaquetas',
+  'colesterol_total','hdl','ldl','triglicerideos','glicose','hba1c','creatinina','ureia',
+  'tgo','tgp','ggt','tsh','vitamina_d','ferritina','vitamina_b12','pcr'];
+
+function readCtx(){
+  const num = id => { const v = parseFloat(($('#'+id).value||'').replace(',','.')); return isFinite(v) ? v : null; };
+  return {
+    sex: $('#sex').value, age: num('age') ?? 40,
+    peso: num('peso'), altura: num('altura'), cintura: num('cintura'),
+    pas: num('pas'), pad: num('pad'), jejum: num('jejum'),
+    gestante: $('#gestante').checked, atleta: $('#atleta').checked,
+    labRefs: state.labRefs
+  };
+}
+
+function setStatus(html, kind){
+  $('#status').innerHTML = html ? `<div class="alert ${kind||'info'}">${html}</div>` : '';
+}
+
+function renderBio(){
+  const c = readCtx();
+  const bits = [];
+  if (c.peso > 0 && c.altura > 0){
+    const imc = c.peso/Math.pow(c.altura/100,2);
+    bits.push(`IMC <b>${fmt(imc,1)}</b> kg/m²`);
+  }
+  if (c.cintura > 0) bits.push(`cintura ${fmt(c.cintura,0)} cm`);
+  if (c.pas > 0 && c.pad > 0) bits.push(`PA ${c.pas}/${c.pad} mmHg`);
+  $('#bio-out').innerHTML = bits.length ? bits.join(' · ') : '';
+}
+
+function renderValues(){
+  const box = $('#values');
+  box.innerHTML = '';
+  const ctx = readCtx();
+  const groups = {};
+  for (const id of state.shown){
+    const a = byId[id]; if (!a) continue;
+    (groups[a.cat] = groups[a.cat] || []).push(a);
+  }
+  for (const [cat, list] of Object.entries(groups)){
+    const g = el('div',{class:'grp'});
+    g.appendChild(el('h3',{},`<span aria-hidden="true">${CATS[cat].ico}</span> ${CATS[cat].nome}`));
+    for (const a of list){
+      const row = el('div',{class:'vrow'});
+      const origem = state.origem[a.id];
+      row.appendChild(el('div',{class:'nm'},
+        `<span>${escapeHtml(a.nome)}</span>` +
+        (origem === 'pdf' ? '<span class="tag pdf">PDF</span>' : '') +
+        (state.labRefs[a.id] ? '<span class="tag" title="faixa informada pelo laboratório">lab</span>' : '')));
+      const inp = el('input',{type:'text',inputmode:'decimal','aria-label':a.nome,
+        value: state.values[a.id] != null ? fmt(state.values[a.id], a.dec) : ''});
+      inp.addEventListener('input', () => {
+        const v = parseNum(inp.value.trim());
+        if (inp.value.trim() === '') { delete state.values[a.id]; }
+        else if (isFinite(v)) { state.values[a.id] = v; state.origem[a.id] = 'manual'; }
+      });
+      row.appendChild(inp);
+      row.appendChild(el('div',{class:'un'}, escapeHtml(a.un || '—')));
+      const del = el('button',{class:'iconbtn',type:'button',title:'remover','aria-label':'Remover '+a.nome},'✕');
+      del.addEventListener('click', () => {
+        delete state.values[a.id];
+        state.shown = state.shown.filter(x=>x!==a.id);
+        renderValues();
+      });
+      row.appendChild(del);
+      g.appendChild(row);
+    }
+    box.appendChild(g);
+  }
+  const sel = $('#add-analyte');
+  sel.innerHTML = '<option value="">escolha um exame…</option>' +
+    ANALYTES.filter(a => !state.shown.includes(a.id) && (!a.sexOnly || a.sexOnly === ctx.sex))
+      .map(a => `<option value="${a.id}">${escapeHtml(a.nome)}</option>`).join('');
+  renderBio();
+}
+
+function showValuesCard(ids){
+  state.shown = ids;
+  $('#card-values').classList.remove('hidden');
+  $('#card-report').classList.add('hidden');
+  renderValues();
+  $('#card-values').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ---------- 8. Relatório ------------------------------------------------- */
+const STATUS_LABEL = {alto:'Acima', baixo:'Abaixo', normal:'Normal', critico:'Atenção', info:'Informativo'};
+
+function gaugeHtml(a, value, r){
+  if (!r || (r[0] == null && r[1] == null)) return '';
+  let lo = r[0], hi = r[1];
+  if (lo == null) lo = 0;
+  if (hi == null) hi = Math.max(value*1.2, lo*2);
+  const span = (hi - lo) || Math.abs(hi) || 1;
+  const min = lo - span*0.5, max = hi + span*0.5;
+  const pos = Math.max(2, Math.min(98, (value - min)/(max - min)*100));
+  return `<div class="gauge"><i></i><b style="left:${pos.toFixed(1)}%"></b></div>
+    <div class="gscale"><span>${fmt(lo,a.dec)}</span><span>${fmt(hi,a.dec)}</span></div>`;
+}
+
+function resultCard(a, value, cl, ctx){
+  const stCls = cl.status === 'critico' ? 'critico' : cl.status;
+  const label = cl.sev === 1 ? 'No limite' : STATUS_LABEL[cl.status];
+  const labTag = state.labRefs[a.id] ? ' <small class="muted">(faixa do laboratório)</small>' : '';
+  const dir = cl.status === 'alto' || (cl.status === 'critico' && cl.base === 'alto') ? a.alto
+            : cl.status === 'baixo' || (cl.status === 'critico' && cl.base === 'baixo') ? a.baixo : null;
+  return `<article class="res ${stCls}">
+    <div class="head">
+      <h3>${escapeHtml(a.nome)}</h3>
+      <div><span class="val">${fmt(value,a.dec)} <span class="u">${escapeHtml(a.un)}</span></span>
+        <span class="st ${cl.sev === 1 ? 'limite' : stCls}">${label}</span></div>
+    </div>
+    ${gaugeHtml(a, value, cl.ref)}
+    <div class="gscale"><span class="muted">referência: ${refText(a, ctx)} ${a.un}${labTag}</span></div>
+    <p class="simple-only">${escapeHtml(a.simples)}</p>
+    <p class="tech-only">${escapeHtml(a.tecnico)}</p>
+    ${dir ? `<div class="why"><b>O que pode explicar:</b> ${escapeHtml(dir)}</div>` : ''}
+  </article>`;
+}
+
+/* As faixas informadas pelo laboratório costumam ser separadas por sexo:
+   se o usuário corrigir o sexo depois da leitura, elas precisam ser relidas. */
+function atualizarFaixasDoLab(){
+  if (!state.lines) return;
+  const sexo = $('#sex').value;
+  if (sexo === state.labRefsSex) return;
+  state.labRefs = extractFromLines(state.lines, sexo).labRefs;
+  state.labRefsSex = sexo;
+}
+
+function analyze(){
+  atualizarFaixasDoLab();
+  const ctx = readCtx();
+  const vals = {};
+  for (const [id,v] of Object.entries(state.values)) if (v != null && isFinite(v)) vals[id] = v;
+  if (!Object.keys(vals).length){ setStatus('Nenhum valor para analisar. Envie um PDF ou preencha ao menos um exame.','warn'); return; }
+
+  const derived = computeDerived(vals, ctx);
+  const calculado = new Set();
+  for (const d of Object.values(derived))
+    if (d.inject && vals[d.inject] == null){ vals[d.inject] = d.v; calculado.add(d.inject); }
+
+  const st = {};
+  for (const [id,v] of Object.entries(vals)) if (byId[id]) st[id] = classify(byId[id], v, ctx);
+  const patterns = findPatterns(vals, st, derived, ctx);
+
+  const ordem = ['critico','alto','baixo','info','normal'];
+  const entries = Object.entries(st).filter(([id]) => byId[id])
+    .sort((a,b) => (ordem.indexOf(a[1].status) - ordem.indexOf(b[1].status)) || (b[1].sev - a[1].sev));
+  const alterados = entries.filter(([,c]) => c.status !== 'normal' && c.status !== 'info');
+  const normais   = entries.filter(([,c]) => c.status === 'normal');
+  const infos     = entries.filter(([,c]) => c.status === 'info');
+  const criticos  = entries.filter(([,c]) => c.status === 'critico');
+
+  const perfil = Object.entries(derived).filter(([k,d]) => !d.hidden && ['imc','cintura','pa'].includes(k));
+  const contas = Object.entries(derived).filter(([k,d]) => !d.hidden && !['imc','cintura','pa'].includes(k));
+
+  const html = [];
+  html.push(`<div class="card"><h2><span class="step">3</span> Resultado da análise</h2>
+    <div class="row noprint" style="justify-content:space-between;margin-bottom:14px">
+      <div class="toggle" role="group" aria-label="Modo de leitura">
+        <button type="button" id="v-simple" aria-pressed="true">Explicação simples</button>
+        <button type="button" id="v-tech" aria-pressed="false">Técnico</button>
+      </div>
+      <div class="row">
+        <button class="btn" type="button" id="btn-print">🖨️ Imprimir / PDF</button>
+        <button class="btn" type="button" id="btn-json">⬇️ Baixar dados</button>
+        <button class="btn" type="button" id="btn-edit">✏️ Editar valores</button>
+      </div>
+    </div>
+    <div class="summary">
+      <div class="tile"><b>${entries.length}</b><small>exames analisados</small></div>
+      <div class="tile ok"><b>${normais.length}</b><small>dentro da referência</small></div>
+      <div class="tile ${alterados.length ? 'alto' : ''}"><b>${alterados.length}</b><small>fora da referência</small></div>
+      ${criticos.length ? `<div class="tile crit"><b>${criticos.length}</b><small>pedem atenção rápida</small></div>` : ''}
+    </div>`);
+
+  if (criticos.length)
+    html.push(`<div class="pat crit"><h3>⚠️ Resultados que merecem contato médico sem demora</h3>
+      <p>${criticos.map(([id]) => escapeHtml(byId[id].nome)).join(', ')} — ${criticos.length > 1 ? 'estão' : 'está'} bem fora da faixa habitual.
+      Isso não confirma nenhum diagnóstico, mas procure orientação médica sem esperar a próxima consulta de rotina.
+      Se houver sintomas importantes agora, procure um pronto-atendimento.</p></div>`);
+
+  if (perfil.length){
+    html.push(`<h3 style="margin-top:18px">Seu perfil</h3><div class="mini">` +
+      perfil.map(([,d]) => `<div><span>${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un)}</b></div>`).join('') +
+      `</div>` + perfil.filter(([,d])=>d.txt).map(([,d]) =>
+        `<p style="font-size:.88rem;margin-top:6px" class="muted">${escapeHtml(d.rot)}: ${escapeHtml(d.txt)}.</p>`).join(''));
+  }
+  html.push('</div>');
+
+  if (patterns.length){
+    const ordemP = {alerta:0, atencao:1, info:2};
+    patterns.sort((a,b) => ordemP[a.nivel] - ordemP[b.nivel]);
+    html.push(`<div class="card"><h2>🔎 Padrões encontrados</h2>
+      <p class="muted"><small>São combinações de resultados que costumam andar juntas. São hipóteses para conversar com seu médico — não diagnósticos.</small></p>` +
+      patterns.map(p => `<div class="pat ${p.nivel === 'alerta' ? 'crit' : ''}">
+        <h3>${p.nivel === 'alerta' ? '⚠️ ' : p.nivel === 'atencao' ? '🔸 ' : 'ℹ️ '}${escapeHtml(p.titulo)}</h3>
+        <p class="simple-only">${escapeHtml(p.simples)}</p>
+        <p class="tech-only">${escapeHtml(p.tecnico)}</p>
+      </div>`).join('') + `</div>`);
+  }
+
+  if (alterados.length)
+    html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>` +
+      alterados.map(([id,c]) => resultCard(byId[id], vals[id], c, ctx) +
+        (calculado.has(id) ? '<p class="muted" style="margin:-4px 0 10px"><small>valor calculado pelo app a partir dos demais exames</small></p>' : '')).join('') +
+      `</div>`);
+
+  if (contas.length)
+    html.push(`<div class="card"><h2>🧮 Cálculos a partir dos seus exames</h2><div class="mini">` +
+      contas.map(([,d]) => `<div><span>${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</b></div>`).join('') +
+      `</div>` + contas.filter(([,d])=>d.txt).map(([,d]) =>
+        `<p style="font-size:.88rem;margin-top:8px"><b>${escapeHtml(d.rot)}:</b> ${escapeHtml(d.txt)}.</p>`).join('') + `</div>`);
+
+  if (normais.length || infos.length)
+    html.push(`<details><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>
+      <div class="mini">` + normais.concat(infos).map(([id,c]) =>
+        `<div><span>${escapeHtml(byId[id].nome)}</span><b>${fmt(vals[id], byId[id].dec)} ${escapeHtml(byId[id].un)}</b></div>`).join('') +
+      `</div></details>`);
+
+  const perguntas = patterns.filter(p=>p.acao).map(p=>p.acao);
+  if (perguntas.length)
+    html.push(`<div class="card"><h2>💬 O que levar para a consulta</h2><ul style="margin:6px 0 0;padding-left:20px">` +
+      [...new Set(perguntas)].map(q => `<li style="margin-bottom:6px">${escapeHtml(q)}</li>`).join('') +
+      `</ul></div>`);
+
+  html.push(`<p class="muted"><small>Análise gerada em ${new Date().toLocaleString('pt-BR')} por uma ferramenta automática.
+    Faixas de referência variam entre laboratórios e entre pessoas — quem interpreta o seu caso é o seu médico.</small></p>`);
+
+  const rep = $('#card-report');
+  rep.innerHTML = html.join('\n');
+  rep.classList.remove('hidden');
+  $('#v-simple').addEventListener('click', () => setView('simple'));
+  $('#v-tech').addEventListener('click', () => setView('tech'));
+  $('#btn-print').addEventListener('click', () => window.print());
+  $('#btn-edit').addEventListener('click', () => $('#card-values').scrollIntoView({behavior:'smooth'}));
+  $('#btn-json').addEventListener('click', () => baixarJson(vals, st, derived, patterns, ctx));
+  rep.scrollIntoView({behavior:'smooth', block:'start'});
+  return {vals, st, derived, patterns};
+}
+
+function setView(v){
+  document.body.classList.toggle('view-simple', v === 'simple');
+  document.body.classList.toggle('view-tech', v === 'tech');
+  const s = $('#v-simple'), t = $('#v-tech');
+  if (s && t){ s.setAttribute('aria-pressed', v === 'simple'); t.setAttribute('aria-pressed', v === 'tech'); }
+}
+
+function baixarJson(vals, st, derived, patterns, ctx){
+  const dados = {
+    gerado_em: new Date().toISOString(),
+    perfil: {sexo:ctx.sex, idade:ctx.age, peso_kg:ctx.peso, altura_cm:ctx.altura,
+             cintura_cm:ctx.cintura, pa:(ctx.pas && ctx.pad) ? `${ctx.pas}/${ctx.pad}` : null,
+             jejum_h:ctx.jejum, gestante:ctx.gestante, atleta:ctx.atleta},
+    exames: Object.entries(vals).filter(([id]) => byId[id]).map(([id,v]) => ({
+      id, nome:byId[id].nome, valor:v, unidade:byId[id].un,
+      referencia:refOf(byId[id], ctx), situacao:st[id] && st[id].status, origem:state.origem[id] || 'calculado'})),
+    calculos: Object.entries(derived).filter(([,d]) => !d.hidden).map(([k,d]) => ({id:k, rotulo:d.rot, valor:d.v, unidade:d.un})),
+    padroes: patterns.map(p => ({nivel:p.nivel, titulo:p.titulo, tecnico:p.tecnico}))
+  };
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = el('a', {href:url, download:'analise-exames.json'});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------- 9. Entrada de arquivo --------------------------------------- */
+async function handleFile(file){
+  if (!file) return;
+  if (!/pdf$/i.test(file.name) && file.type !== 'application/pdf'){
+    setStatus('Esse arquivo não parece ser um PDF. Envie o laudo em PDF ou digite os valores manualmente.','err'); return;
+  }
+  setStatus('Lendo o PDF…<div class="bar"><i style="width:10%"></i></div>');
+  try{
+    const lines = await pdfToLines(file, (p,total) => {
+      const bar = $('#status .bar > i'); if (bar) bar.style.width = Math.round(p/total*90)+'%';
+    });
+    const ctx = readCtx();
+    const {found, labRefs} = extractFromLines(lines, ctx.sex);
+    state.lines = lines; state.labRefsSex = ctx.sex;
+    state.values = {}; state.origem = {}; state.labRefs = labRefs;
+    for (const [id,info] of Object.entries(found)){ state.values[id] = info.value; state.origem[id] = 'pdf'; }
+    const ids = Object.keys(found);
+    if (!ids.length){
+      setStatus('Li o PDF, mas não reconheci nenhum exame. Isso acontece quando o laudo é uma imagem escaneada (sem texto) ou usa um formato incomum. Você pode digitar os valores manualmente.','warn');
+      showValuesCard(MANUAL_DEFAULT);
+      return;
+    }
+    const comRef = Object.keys(labRefs).length;
+    setStatus(`✅ Encontrei <b>${ids.length}</b> exame(s) em ${lines.length} linhas de texto` +
+      (comRef ? `, sendo ${comRef} com a faixa de referência do próprio laboratório` : '') +
+      `. Confira os valores abaixo antes de analisar.`, 'info');
+    showValuesCard(ids);
+  }catch(e){
+    console.error(e);
+    setStatus('Não consegui ler esse PDF. ' + escapeHtml(e.message || '') +
+      ' Você ainda pode digitar os valores manualmente.', 'err');
+  }
+}
+
+const DEMO = {sex:'F', age:52, peso:78, altura:162, cintura:92, pas:134, pad:86, jejum:12,
+  valores:{hemoglobina:11.4, hematocrito:34.8, vcm:76.2, hcm:24.1, rdw:16.2, leucocitos:7200,
+    plaquetas:295000, ferritina:9, ferro:41, sat_transferrina:12,
+    colesterol_total:236, hdl:44, ldl:158, triglicerideos:198,
+    glicose:112, hba1c:6.1, insulina:18.4, creatinina:0.82, ureia:34,
+    tgo:26, tgp:44, ggt:58, tsh:5.9, t4_livre:1.1, vitamina_d:17, vitamina_b12:268, pcr:4.6}};
+
+function carregarDemo(){
+  $('#sex').value = DEMO.sex; $('#age').value = DEMO.age; $('#peso').value = DEMO.peso;
+  $('#altura').value = DEMO.altura; $('#cintura').value = DEMO.cintura;
+  $('#pas').value = DEMO.pas; $('#pad').value = DEMO.pad; $('#jejum').value = DEMO.jejum;
+  state.values = {...DEMO.valores}; state.labRefs = {};
+  state.origem = Object.fromEntries(Object.keys(DEMO.valores).map(k => [k,'manual']));
+  setStatus('Exemplo fictício carregado — os valores não são de ninguém real.','info');
+  showValuesCard(Object.keys(DEMO.valores));
+}
+
+/* ---------- 10. Eventos -------------------------------------------------- */
+const drop = $('#drop'), fileInput = $('#file');
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); } });
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+$('#btn-demo').addEventListener('click', carregarDemo);
+$('#btn-manual').addEventListener('click', () => {
+  setStatus('Preencha os exames que você tem. Use o campo “adicionar exame” para incluir outros.','info');
+  showValuesCard(MANUAL_DEFAULT);
+});
+$('#btn-analyze').addEventListener('click', analyze);
+$('#btn-reset').addEventListener('click', () => {
+  state.values = {}; state.origem = {}; state.labRefs = {}; state.shown = [];
+  $('#card-values').classList.add('hidden'); $('#card-report').classList.add('hidden');
+  fileInput.value = ''; setStatus('');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+$('#add-analyte').addEventListener('change', e => {
+  const id = e.target.value;
+  if (id && !state.shown.includes(id)){ state.shown.push(id); renderValues(); }
+  e.target.value = '';
+});
+for (const id of ['age','peso','altura','cintura','pas','pad'])
+  $('#'+id).addEventListener('input', renderBio);
+$('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValues(); });
+
+/* ganchos para testes automatizados e para auto-hospedagem do pdf.js */
+window.EXAMES = {ANALYTES, byId, extractFromLines, pdfToLines, classify, computeDerived,
+                 findPatterns, analyze, state, handleFile, cleanLine, segmentValue, labRangeFrom};
+</script>
+</body>
+</html>
