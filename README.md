@@ -87,8 +87,11 @@ Como funciona:
   que nunca existiram.
 - A chave é a **data da coleta**, nunca o nome do arquivo. Dois PDFs do mesmo dia (laudos de
   unidades diferentes) **se somam** no mesmo exame em vez de duplicar.
-- Com dois ou mais exames, o relatório ganha o card **Evolução**: variações de 10% ou mais, ou
-  que cruzaram a faixa, ordenadas por relevância clínica, com sparkline sobre a faixa de referência.
+- Com dois ou mais exames, o relatório ganha o card **Evolução**, com **todos** os exames do laudo
+  e sparkline sobre a faixa de referência. Nada é filtrado: a ordem é que trabalha, trazendo para
+  cima o que mudou mais do que aquele exame costuma oscilar (o limiar é por exame — 5% no PSA e na
+  creatinina, 25% no ferro sérico e na CPK), o que cruzou a faixa e o que segue alterado. Exames sem
+  par no laudo anterior aparecem como *primeira medida*.
 - **Qual exame analisar é escolha sua.** O app não abre nada sozinho: no histórico, "Abrir análise"
   leva direto ao relatório daquele exame, com a evolução calculada **até a data dele**. Abrir um
   exame do meio mostra a evolução até aquele ponto, e não a história inteira.

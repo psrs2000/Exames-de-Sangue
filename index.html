@@ -2108,6 +2108,18 @@ async function importarHistorico(file){
 }
 
 /* --- evolução em relação aos exames anteriores --- */
+/* Quanta variação é notícia depende do exame. Marcadores acompanhados pela
+   velocidade (PSA) ou muito estáveis (creatinina, cálcio, sódio) falam alto com 5%;
+   exames de variação biológica larga (ferro sérico, CPK, eosinófilos, insulina)
+   só dizem algo acima de 25%, senão a tabela vira ruído. */
+const LIMIAR_EVOLUCAO = {
+  psa:5, psa_livre:5, psa_relacao:5, creatinina:5, tfg:5, hemoglobina:5, hematocrito:5,
+  hemacias:5, vcm:5, calcio:5, calcio_ionico:5, sodio:5, potassio:5, albumina:5, hba1c:5,
+  ferro:25, cpk:25, insulina:25, homa_beta:25, eosinofilos_pct:25, basofilos_pct:25,
+  monocitos_pct:25, neutrofilos_bast:25, pcr:25, vhs:25, amilase:25, lipase:25, ldh:25,
+  bilirrubina_total:25, bilirrubina_direta:25, triglicerideos:20
+};
+
 function calcularEvolucao(vals, st, ctx){
   const dataAtual = ctx.coleta || hojeISO();
   const anteriores = state.historico.filter(r => r.data < dataAtual);
@@ -2115,23 +2127,32 @@ function calcularEvolucao(vals, st, ctx){
   const prev = anteriores[anteriores.length - 1];
   const linhas = [];
   for (const [id, v] of Object.entries(vals)){
-    const a = byId[id]; if (!a || prev.valores[id] == null) continue;
-    const antes = prev.valores[id].v;
-    if (!isFinite(antes) || antes === 0) continue;
-    const pct = (v - antes) / Math.abs(antes) * 100;
+    const a = byId[id]; if (!a) continue;
     const cl = st[id];
+    const antes = prev.valores[id] != null ? prev.valores[id].v : null;
+    if (antes == null || !isFinite(antes) || antes === 0){
+      /* sem par no exame anterior: entra assim mesmo, como primeira medida */
+      linhas.push({id, a, antes:null, agora:v, pct:null, cl, serie:[], mudouSituacao:false,
+        relevante:false, prio:prioridadeDe(id, cl || {status:'normal', sev:0})});
+      continue;
+    }
+    const pct = (v - antes) / Math.abs(antes) * 100;
     const antesFora = prev.valores[id].ref ? foraDaFaixa(antes, prev.valores[id].ref) : null;
     const agoraFora = cl ? (cl.status !== 'normal' && cl.status !== 'info') : null;
     const mudouSituacao = antesFora != null && agoraFora != null && antesFora !== agoraFora;
-    if (Math.abs(pct) < 10 && !mudouSituacao) continue;
+    /* Um exame que segue fora da faixa entra sempre, por menor que tenha sido a variação:
+       é exatamente aí que saber se subiu ou desceu importa. */
+    const relevante = Math.abs(pct) >= (LIMIAR_EVOLUCAO[id] ?? 10) || mudouSituacao || antesFora || agoraFora;
     const serie = [...anteriores, {data:dataAtual, valores:{[id]:{v}}}]
       .filter(r => r.valores[id] != null)
       .map(r => ({data:r.data, v:r.valores[id].v}));
-    linhas.push({id, a, antes, agora:v, pct, cl, serie, mudouSituacao,
+    linhas.push({id, a, antes, agora:v, pct, cl, serie, mudouSituacao, relevante,
       dataAntes:prev.data, prio:prioridadeDe(id, cl || {status:'normal', sev:0})});
   }
-  linhas.sort((x,y) => (y.prio - x.prio) || (Math.abs(y.pct) - Math.abs(x.pct)));
-  return {prev, linhas, dataAtual};
+  /* todos aparecem; a ordem apenas coloca o que é notícia clínica em cima */
+  linhas.sort((x,y) => (y.relevante - x.relevante) || (y.prio - x.prio) ||
+    (Math.abs(y.pct ?? -1) - Math.abs(x.pct ?? -1)));
+  return {prev, linhas, dataAtual, relevantes:linhas.filter(l => l.relevante).length};
 }
 const foraDaFaixa = (v, ref) =>
   (ref[0] != null && v < ref[0]) || (ref[1] != null && v > ref[1]);
@@ -2171,6 +2192,11 @@ function sparkline(serie, ref, status){
 function evolucaoHtml(evo, ctx){
   if (!evo || !evo.linhas.length) return '';
   const linha = L => {
+    if (L.pct == null) return `<tr>
+      <td>${escapeHtml(L.a.nome)}</td><td class="spark"></td>
+      <td class="num muted">—</td>
+      <td class="num">${fmt(L.agora, L.a.dec)} <span class="muted">${escapeHtml(L.a.un)}</span></td>
+      <td class="num delta igual"><small>primeira medida</small></td></tr>`;
     const dir = L.pct > 0 ? 'sobe' : L.pct < 0 ? 'desce' : 'igual';
     const seta = L.pct > 0 ? '▲' : L.pct < 0 ? '▼' : '—';
     /* voltar para dentro da faixa é sempre boa notícia, suba ou desça */
@@ -2186,17 +2212,14 @@ function evolucaoHtml(evo, ctx){
     </tr>`;
   };
   return `<div class="card"><h2>📈 Evolução desde ${dataBR(evo.prev.data)}</h2>
-    <p class="muted"><small>Mudanças de 10% ou mais, ou que cruzaram a faixa de referência, em ordem de relevância clínica.
-    Cada valor é comparado com a faixa que valia na época da coleta.</small></p>
+    <p class="muted"><small>Todos os ${evo.linhas.length} exames deste laudo, em ordem de relevância clínica —
+    variações maiores do que esse exame costuma oscilar, cruzamentos da faixa e resultados que seguem alterados vêm primeiro.
+    Cada valor é comparado com a faixa que valia na época de cada coleta.</small></p>
     <table class="evo"><thead><tr><th>Exame</th><th>Tendência</th>
       <th style="text-align:right">${dataBR(evo.prev.data)}</th>
       <th style="text-align:right">${dataBR(evo.dataAtual)}</th>
       <th style="text-align:right">Variação</th></tr></thead>
-      <tbody>${evo.linhas.slice(0,14).map(linha).join('')}</tbody></table>` +
-    (evo.linhas.length > 14
-      ? `<details style="margin-top:12px"><summary>mais ${evo.linhas.length-14} exame(s) com variação</summary>
-         <table class="evo"><tbody>${evo.linhas.slice(14).map(linha).join('')}</tbody></table></details>`
-      : '') + `</div>`;
+      <tbody>${evo.linhas.map(linha).join('')}</tbody></table></div>`;
 }
 
 /* ---------- 10. Eventos -------------------------------------------------- */
