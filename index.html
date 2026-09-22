@@ -1017,6 +1017,54 @@ function classify(a, value, ctx){
   return {status, sev, ref:r};
 }
 
+/* Peso clínico de cada exame: quanto de decisão costuma pendurar nele.
+   Sem isso a lista sairia ordenada por desvio percentual, e um CHCM no limite
+   apareceria com o mesmo destaque de um LDL muito alto. Padrão = 2. */
+const PESO_CLINICO = {
+  hemoglobina:3, plaquetas:3, leucocitos:3, neutrofilos_abs:3, ferritina:3,
+  glicose:3, hba1c:3, homa_ir:3, ldl:3, nao_hdl:3, apo_b:3, colesterol_total:3,
+  triglicerideos:3, creatinina:3, tfg:3, potassio:3, sodio:3, calcio:3, calcio_ionico:3,
+  tsh:3, t4_livre:3, tgp:3, tgo:3, vitamina_b12:3, vitamina_d:3, pcr:3, psa:3, pth:3,
+  hemacias:1, hcm:1, chcm:1, rdw:1, vldl:1, apo_a1:1, psa_livre:1, homa_beta:1,
+  glicemia_media:1, transferrina:1, neutrofilos_pct:1, linfocitos_pct:1, monocitos_pct:1,
+  eosinofilos_pct:1, basofilos_pct:1, neutrofilos_bast:1, amilase:1, fosforo:1
+};
+/* Exames que cada padrão envolve. Um exame citado por um padrão relevante sobe de
+   prioridade: é o que impede que a ureia apareça como "achado menor" logo abaixo de
+   um padrão que a está usando para levantar suspeita de perda digestiva. */
+const PADRAO_EXAMES = {
+  'Padrão sugestivo de anemia por falta de ferro':['hemoglobina','hematocrito','hemacias','vcm','hcm','ferritina','ferro','sat_transferrina','rdw'],
+  'Padrão sugestivo de anemia por falta de vitaminas':['hemoglobina','hematocrito','vcm','vitamina_b12','acido_folico'],
+  'Anemia detectada':['hemoglobina','hematocrito','hemacias','vcm','rdw','ferro','ferritina','sat_transferrina'],
+  'Anemia junto de ureia desproporcional à creatinina':['ureia','creatinina','hemoglobina'],
+  'Estoque de ferro baixo, ainda sem anemia':['ferritina','ferro','sat_transferrina'],
+  'Possível sobrecarga de ferro':['ferritina','sat_transferrina','ferro'],
+  'Valores na faixa de diabetes':['glicose','hba1c','homa_ir'],
+  'Valores na faixa de pré-diabetes':['glicose','hba1c','homa_ir'],
+  'Sinais de resistência à insulina':['homa_ir','insulina','glicose'],
+  'Dislipidemia aterogênica (triglicerídeos altos com HDL baixo)':['triglicerideos','hdl','nao_hdl','apo_b'],
+  'LDL bastante elevado':['ldl','nao_hdl','colesterol_total','apo_b'],
+  'Lipoproteína (a) elevada':['lipoproteina_a'],
+  'Critérios laboratoriais de síndrome metabólica':['triglicerideos','hdl','glicose'],
+  'Padrão de hipotireoidismo subclínico':['tsh','t4_livre'],
+  'Padrão de hipotireoidismo':['tsh','t4_livre'],
+  'Padrão de hipertireoidismo':['tsh','t4_livre','t3'],
+  'Enzimas do fígado alteradas, com padrão AST/ALT >2':['tgo','tgp','ggt','cpk'],
+  'Enzimas do fígado acima do normal':['tgp','tgo','ggt'],
+  'Padrão colestático (vias biliares)':['fosfatase_alcalina','ggt','bilirrubina_total','bilirrubina_direta'],
+  'Filtração dos rins reduzida':['tfg','creatinina','ureia'],
+  'Inflamação ativa (PCR elevada)':['pcr','vhs'],
+  'Deficiência de vitamina D':['vitamina_d','pth','calcio'],
+  'PTH alto com cálcio normal':['pth','calcio','vitamina_d'],
+  'Plaquetas abaixo do normal':['plaquetas'],
+  'CPK elevada':['cpk'],
+  'CPK elevada — atenção ao contexto de treino':['cpk'],
+  'Vitamina B12 na zona limítrofe':['vitamina_b12']
+};
+const prioridadeDe = (id, cl, citados) =>
+  cl.status === 'critico' ? 10
+  : (PESO_CLINICO[id] ?? 2) + (cl.sev >= 3 ? 1 : 0) + (citados && citados.has(id) ? 1 : 0);
+
 const refText = (a, ctx) => {
   const r = refOf(a, ctx);
   if (!r) return 'sem faixa fixa';
@@ -1107,6 +1155,23 @@ function computeDerived(vals, ctx){
     add('deritis', ast/alt, {rot:'Relação AST/ALT (De Ritis)', un:'', dec:2,
       txt: ast/alt > 2 ? 'relação >2 — padrão que sugere origem alcoólica ou muscular'
         : ast/alt < 1 ? 'ALT predominante — padrão comum na gordura no fígado' : 'relação intermediária'});
+  const ur = g('ureia'), crea = g('creatinina');
+  if (ur != null && crea > 0){
+    const rel = ur/crea;
+    add('ureia_creat', rel, {rot:'Relação ureia/creatinina', un:'', dec:0,
+      txt: rel > 45 ? 'ureia desproporcionalmente alta — típico de desidratação, dieta muito proteica, uso de diurético ou perda de sangue no trato digestivo'
+        : rel < 20 ? 'ureia baixa para a creatinina — comum em dieta pobre em proteína, doença hepática ou excesso de líquidos'
+        : 'dentro do habitual',
+      alterado: rel > 45 || rel < 20});
+  }
+  const apoB = g('apo_b'), apoA = g('apo_a1');
+  if (apoB != null && apoA > 0){
+    const rel = apoB/apoA, lim = ctx.sex === 'M' ? 0.9 : 0.8, bom = ctx.sex === 'M' ? 0.7 : 0.6;
+    add('apob_apoa1', rel, {rot:'Relação ApoB/ApoA-1', un:'', dec:2,
+      txt: rel >= lim ? 'risco cardiovascular alto por este marcador'
+        : rel > bom ? 'risco intermediário' : 'faixa de menor risco',
+      alterado: rel > bom});
+  }
   const alb = g('albumina'), ca = g('calcio');
   if (alb != null && ca != null && alb < 4)
     add('ca_corr', ca + 0.8*(4 - alb), {rot:'Cálcio corrigido pela albumina', un:'mg/dL', dec:1,
@@ -1131,7 +1196,8 @@ function findPatterns(v, st, d, ctx){
   const is = (id,s) => st[id] && st[id].status === s;
   const lowish = id => st[id] && (st[id].status === 'baixo' || st[id].status === 'critico');
   const has = id => v[id] != null;
-  const push = (nivel, titulo, simples, tecnico, acao) => out.push({nivel, titulo, simples, tecnico, acao});
+  const push = (nivel, titulo, simples, tecnico, acao) =>
+    out.push({nivel, titulo, simples, tecnico, acao, ids: PADRAO_EXAMES[titulo] || []});
 
   const anemia = (ctx.sex === 'F' ? v.hemoglobina < 12 : v.hemoglobina < 13);
   if (has('hemoglobina') && anemia){
@@ -1311,6 +1377,18 @@ function findPatterns(v, st, d, ctx){
       'Plaquetopenia: descartar pseudoplaquetopenia por EDTA, dengue, hepatopatia, fármacos e PTI.',
       'Procure o médico; se houver sangramentos ou manchas roxas, com urgência.');
 
+  const relUC = d.ureia_creat?.v;
+  if (anemia && relUC != null && relUC > 45)
+    push('atencao','Anemia junto de ureia desproporcional à creatinina',
+      'A ureia está alta enquanto a creatinina segue normal — o que costuma vir de pouca hidratação, dieta muito rica em proteína ou diurético. Mas essa combinação, quando aparece junto de anemia, também é a assinatura de uma perda lenta de sangue pelo trato digestivo, e vale ser dita em voz alta na consulta.',
+      `Relação ureia/creatinina ${fmt(relUC,0)} com anemia: considerar azotemia pré-renal, hipercatabolismo e sangramento digestivo alto. Pesquisa de sangue oculto e revisão de AINEs, anticoagulantes e antiagregantes.`,
+      'Pergunte sobre pesquisa de sangue oculto nas fezes e se a investigação digestiva está em dia.');
+  if (v.hba1c != null && v.hba1c >= 5.7 && (anemia || (v.ferritina != null && v.ferritina < (ctx.sex==='F'?30:40)) ||
+      (v.ferro != null && st.ferro && st.ferro.status === 'baixo')))
+    push('info','Hemoglobina glicada precisa ser lida com cautela aqui',
+      'A HbA1c mede o açúcar grudado na hemoglobina — e você tem alteração no ferro e/ou na hemoglobina. Falta de ferro tende a elevar a HbA1c sem que o açúcar tenha subido de verdade. Vale dar mais peso à glicemia e ao HOMA-IR.',
+      'Interferência conhecida: ferropenia eleva a HbA1c; anemias hemolíticas e perdas agudas a reduzem. Preferir glicemia de jejum, TOTG ou frutosamina enquanto o status de ferro não estiver corrigido.',
+      'Comente que a HbA1c pode estar distorcida pelo quadro de ferro/anemia.');
   if (ctx.gestante)
     push('info','Você marcou gestação',
       'Na gravidez, muitos valores de referência mudam (hemoglobina, TSH, ferritina, entre outros). A análise automática abaixo usa faixas de adultos não gestantes e pode classificar como alterado algo esperado na gestação.',
@@ -1321,6 +1399,82 @@ function findPatterns(v, st, d, ctx){
       'Glicose e triglicerídeos sobem depois das refeições. Com jejum curto, esses dois resultados podem estar superestimados.',
       'Considerar repetir glicemia e perfil lipídico com jejum de 12h se os valores estiverem limítrofes.',
       'Informe ao médico o tempo real de jejum.');
+  return out;
+}
+
+/* ---------- 6b. Exames que não foram medidos e ajudariam ------------------
+   Cada sugestão nasce de um achado concreto do laudo: sem o achado, não aparece.
+   ------------------------------------------------------------------------- */
+function sugerirExames(v, st, d, ctx){
+  const out = [], vistos = new Set();
+  const falta = (...ids) => ids.every(id => v[id] == null);
+  const add = (exame, porque) => { if (!vistos.has(exame)){ vistos.add(exame); out.push({exame, porque}); } };
+  const alto = id => st[id] && (st[id].status === 'alto' || st[id].status === 'critico');
+  const baixo = id => st[id] && (st[id].status === 'baixo' || st[id].status === 'critico');
+
+  const anemia = v.hemoglobina != null && (ctx.sex === 'F' ? v.hemoglobina < 12 : v.hemoglobina < 13);
+  const ferritinaBaixa = v.ferritina != null && v.ferritina < (ctx.sex === 'F' ? 30 : 40);
+  const preDm = (v.glicose >= 100) || (v.hba1c >= 5.7);
+  const dm = v.glicose >= 126 || v.hba1c >= 6.5;
+  const tfg = v.tfg ?? d.tfg_calc?.v;
+
+  if (anemia){
+    add('Contagem de reticulócitos',
+      'mostra se a medula está respondendo à anemia — separa perda ou destruição de células de produção insuficiente, e é o exame que mais rápido direciona a investigação');
+    if (falta('sat_transferrina','transferrina'))
+      add('Saturação de transferrina, com ferro e capacidade de ligação (TIBC)',
+        'é o que separa falta de ferro de anemia inflamatória; a ferritina sozinha não resolve, porque sobe com inflamação mesmo quando o ferro está acabando');
+    if (falta('pcr','vhs'))
+      add('PCR e VHS',
+        'mostram se existe inflamação sustentando a anemia — sem eles, uma ferritina normal fica ambígua');
+    if (falta('vitamina_b12','acido_folico'))
+      add('Vitamina B12 e ácido fólico',
+        'carências comuns e facilmente tratáveis, sobretudo com uso prolongado de metformina ou omeprazol');
+    if (ctx.age >= 50)
+      add('Eletroforese de proteínas séricas',
+        'faz parte da investigação inicial de anemia sem causa definida a partir dos 50 anos');
+    if (ctx.age >= 50 || ferritinaBaixa || (d.ureia_creat?.v > 45))
+      add('Pesquisa de sangue oculto nas fezes',
+        'perda digestiva lenta é uma das causas mais comuns e mais silenciosas de anemia nessa faixa de idade');
+  } else if (ferritinaBaixa && falta('sat_transferrina','transferrina')){
+    add('Saturação de transferrina',
+      'confirma se o estoque de ferro já está comprometido antes de a anemia aparecer');
+  }
+
+  if (alto('ldl') || alto('nao_hdl') || alto('colesterol_total')){
+    if (falta('apo_b'))
+      add('Apolipoproteína B',
+        'conta as partículas que entopem artérias, e não o peso de colesterol — é o melhor alvo quando triglicerídeos e HDL estão alterados');
+    if (falta('lipoproteina_a'))
+      add('Lipoproteína (a)',
+        'fator de risco herdado que não muda com dieta; basta medir uma vez na vida e muda o rigor das metas');
+  }
+  if (preDm && falta('hba1c'))
+    add('Hemoglobina glicada (A1C)', 'mostra a média dos últimos 2–3 meses e confirma se a glicemia alterada foi ponto fora da curva');
+  if (preDm && falta('insulina'))
+    add('Insulina de jejum', 'permite calcular o HOMA-IR e ver se já existe resistência à insulina antes de a glicemia subir');
+  if ((tfg != null && tfg < 60) || dm || preDm || ctx.pas >= 130 || alto('creatinina'))
+    add('Relação albumina/creatinina em amostra de urina',
+      'detecta lesão renal anos antes de a creatinina se mexer — é o exame que falta na maioria dos painéis de rotina');
+
+  if ((alto('tsh') || baixo('tsh')) && falta('t4_livre'))
+    add('T4 livre', 'define se a alteração do TSH é subclínica ou franca — muda a conduta');
+  if (alto('tsh'))
+    add('Anticorpo anti-TPO', 'identifica tireoidite autoimune, a causa mais comum de hipotireoidismo, e pesa na decisão de tratar');
+  if (alto('tgp') || alto('tgo'))
+    add('Sorologias de hepatite B e C e ultrassom de abdome',
+      'primeiro passo diante de enzimas hepáticas alteradas, junto da avaliação de gordura no fígado');
+  if (baixo('vitamina_d') && falta('pth','calcio'))
+    add('PTH e cálcio', 'mostram se a falta de vitamina D já está mexendo no metabolismo ósseo');
+  if (alto('pth') && falta('vitamina_d'))
+    add('Vitamina D (25-OH)', 'a causa mais comum de PTH elevado com cálcio normal é justamente a falta de vitamina D');
+  if (alto('calcio') && falta('pth'))
+    add('PTH', 'é o primeiro passo para esclarecer cálcio alto');
+  if (alto('psa'))
+    add('Repetir o PSA em 3 a 6 meses, com avaliação urológica',
+      'a velocidade de variação do PSA informa mais do que um valor isolado');
+  if (alto('cpk') && falta('tgo'))
+    add('TGO/AST', 'ajuda a confirmar se a CPK alta tem origem muscular');
   return out;
 }
 
@@ -1485,7 +1639,13 @@ function analyze(){
   const ordem = ['critico','alto','baixo','info','normal'];
   const entries = Object.entries(st).filter(([id]) => byId[id])
     .sort((a,b) => (ordem.indexOf(a[1].status) - ordem.indexOf(b[1].status)) || (b[1].sev - a[1].sev));
-  const alterados = entries.filter(([,c]) => c.status !== 'normal' && c.status !== 'info');
+  /* alterados saem por relevância clínica, não por tamanho do desvio */
+  const citados = new Set(patterns.filter(p => p.nivel !== 'info').flatMap(p => p.ids || []));
+  const alterados = entries.filter(([,c]) => c.status !== 'normal' && c.status !== 'info')
+    .sort((a,b) => (prioridadeDe(b[0],b[1],citados) - prioridadeDe(a[0],a[1],citados)) || (b[1].sev - a[1].sev));
+  const principais = alterados.filter(([id,c]) => prioridadeDe(id,c,citados) >= 3);
+  const secundarios = alterados.filter(([id,c]) => prioridadeDe(id,c,citados) < 3);
+  const sugestoes = sugerirExames(vals, st, derived, ctx);
   const normais   = entries.filter(([,c]) => c.status === 'normal');
   const infos     = entries.filter(([,c]) => c.status === 'info');
   const criticos  = entries.filter(([,c]) => c.status === 'critico');
@@ -1539,11 +1699,25 @@ function analyze(){
       </div>`).join('') + `</div>`);
   }
 
-  if (alterados.length)
-    html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>` +
-      alterados.map(([id,c]) => resultCard(byId[id], vals[id], c, ctx) +
-        (calculado.has(id) ? '<p class="muted" style="margin:-4px 0 10px"><small>valor calculado pelo app a partir dos demais exames</small></p>' : '')).join('') +
-      `</div>`);
+  if (sugestoes.length)
+    html.push(`<div class="card"><h2>🔬 O que não foi medido e ajudaria</h2>
+      <p class="muted"><small>Sugestões que nascem dos achados acima — cada uma responde a uma pergunta que este laudo deixou em aberto.
+      Quem decide o que pedir é o médico.</small></p>
+      <ul style="margin:6px 0 0;padding-left:20px">` +
+      sugestoes.map(x => `<li style="margin-bottom:8px"><b>${escapeHtml(x.exame)}</b> — ${escapeHtml(x.porque)}</li>`).join('') +
+      `</ul></div>`);
+
+  const cardDe = ([id,c]) => resultCard(byId[id], vals[id], c, ctx) +
+    (calculado.has(id) ? '<p class="muted" style="margin:-4px 0 10px"><small>valor calculado pelo app a partir dos demais exames</small></p>' : '');
+  if (principais.length)
+    html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>
+      <p class="muted"><small>Em ordem de relevância clínica, não de tamanho do desvio.</small></p>` +
+      principais.map(cardDe).join('') + `</div>`);
+  if (secundarios.length)
+    html.push(`<details><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
+      ${secundarios.map(([id]) => escapeHtml(byId[id].nome)).join(', ')}</summary>
+      <p class="muted"><small>Costumam acompanhar outro achado ou variar entre coletas; raramente decidem alguma conduta sozinhas.</small></p>` +
+      secundarios.map(cardDe).join('') + `</details>`);
 
   if (contas.length)
     html.push(`<div class="card"><h2>🧮 Cálculos a partir dos seus exames</h2><div class="mini">` +
@@ -1573,9 +1747,9 @@ function analyze(){
   $('#v-tech').addEventListener('click', () => setView('tech'));
   $('#btn-print').addEventListener('click', () => window.print());
   $('#btn-edit').addEventListener('click', () => $('#card-values').scrollIntoView({behavior:'smooth'}));
-  $('#btn-json').addEventListener('click', () => baixarJson(vals, st, derived, patterns, ctx));
+  $('#btn-json').addEventListener('click', () => baixarJson(vals, st, derived, patterns, ctx, sugestoes));
   rep.scrollIntoView({behavior:'smooth', block:'start'});
-  return {vals, st, derived, patterns};
+  return {vals, st, derived, patterns, sugestoes, principais, secundarios};
 }
 
 function setView(v){
@@ -1585,7 +1759,7 @@ function setView(v){
   if (s && t){ s.setAttribute('aria-pressed', v === 'simple'); t.setAttribute('aria-pressed', v === 'tech'); }
 }
 
-function baixarJson(vals, st, derived, patterns, ctx){
+function baixarJson(vals, st, derived, patterns, ctx, sugestoes){
   const dados = {
     gerado_em: new Date().toISOString(),
     perfil: {sexo:ctx.sex, idade:ctx.age, peso_kg:ctx.peso, altura_cm:ctx.altura,
@@ -1595,7 +1769,8 @@ function baixarJson(vals, st, derived, patterns, ctx){
       id, nome:byId[id].nome, valor:v, unidade:byId[id].un,
       referencia:refOf(byId[id], ctx), situacao:st[id] && st[id].status, origem:state.origem[id] || 'calculado'})),
     calculos: Object.entries(derived).filter(([,d]) => !d.hidden).map(([k,d]) => ({id:k, rotulo:d.rot, valor:d.v, unidade:d.un})),
-    padroes: patterns.map(p => ({nivel:p.nivel, titulo:p.titulo, tecnico:p.tecnico}))
+    padroes: patterns.map(p => ({nivel:p.nivel, titulo:p.titulo, tecnico:p.tecnico})),
+    exames_sugeridos: (sugestoes || []).map(x => ({exame:x.exame, motivo:x.porque}))
   };
   const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1686,7 +1861,8 @@ $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValue
 
 /* ganchos para testes automatizados e para auto-hospedagem do pdf.js */
 window.EXAMES = {ANALYTES, byId, extractFromLines, pdfToLines, classify, computeDerived,
-                 findPatterns, analyze, state, handleFile, cleanLine, segmentValue, labRangeFrom};
+                 findPatterns, sugerirExames, prioridadeDe, analyze, state, handleFile,
+                 cleanLine, segmentValue, labRangeFrom};
 </script>
 </body>
 </html>

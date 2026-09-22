@@ -42,13 +42,21 @@ junto ao app e declare-os antes do script do app:
   rejeitando faixas incompatíveis com a ordem de grandeza do resultado.
 - **Conversão de unidades** (mmol/L, µmol/L, nmol/L, mcg/dL, 10³/µL, mil/mm³ etc.).
 - **Cálculos derivados**: IMC, LDL por Friedewald, colesterol não-HDL, índice de Castelli,
-  razão TG/HDL, HOMA-IR, glicemia média estimada, TFG por CKD-EPI 2021, saturação de
-  transferrina, bilirrubina indireta, relação AST/ALT, cálcio corrigido, razão neutrófilos/linfócitos.
+  razão TG/HDL, **relação ureia/creatinina**, **relação ApoB/ApoA-1**, HOMA-IR, glicemia média
+  estimada, TFG por CKD-EPI 2021, saturação de transferrina, bilirrubina indireta, relação
+  AST/ALT, cálcio corrigido, razão neutrófilos/linfócitos.
 - **Padrões cruzados** apresentados como hipóteses para discutir com o médico: anemia
   ferropriva, anemia macrocítica, pré-diabetes e diabetes, resistência à insulina,
   dislipidemia aterogênica, critérios laboratoriais de síndrome metabólica, hipo e
   hipertireoidismo, padrão hepatocelular e colestático, filtração renal reduzida,
   deficiência de vitamina D, entre outros.
+- **Ordenação por relevância clínica**, e não por tamanho do desvio: cada exame tem um peso
+  (`PESO_CLINICO`) e sobe de prioridade quando participa de um padrão encontrado
+  (`PADRAO_EXAMES`). O que raramente decide conduta sozinho — CHCM, hemácias, percentuais do
+  diferencial — fica recolhido num bloco de "menor peso clínico".
+- **Exames que faltaram**: a partir dos achados, o app lista o que *não* foi medido e ajudaria,
+  com o motivo de cada sugestão (anemia sem saturação de transferrina, reticulócitos ou PCR;
+  dislipidemia sem ApoB ou Lp(a); alteração metabólica sem albuminúria na urina; e assim por diante).
 - **Valores de alerta** que sugerem procurar avaliação médica sem esperar a rotina.
 - **Perguntas para levar à consulta**, geradas a partir dos padrões encontrados.
 
@@ -73,7 +81,8 @@ Tudo vive em `index.html`, em seções numeradas dentro do `<script type="module
 | 3 | Leitura do PDF: reconstrução de linhas, extração de valores e das faixas do laboratório |
 | 4 | Classificação (normal / abaixo / acima / atenção) |
 | 5 | Cálculos derivados |
-| 6 | Padrões cruzados |
+| 6 | Padrões cruzados (`PADRAO_EXAMES` liga cada padrão aos exames que ele envolve) |
+| 6b | Sugestão de exames ausentes (`sugerirExames`) |
 | 7–10 | Interface, relatório, exportação e eventos |
 
 Para acrescentar um exame, basta adicionar um objeto em `ANALYTES` com `id`, `nome`,
