@@ -1,0 +1,88 @@
+{
+ "versao": 1,
+ "descricao": "Homem com diabetes, síndrome metabólica e fígado alterado",
+ "espera": {
+  "descricao": "Homem com diabetes, síndrome metabólica e fígado alterado",
+  "padroes": [
+   "Valores na faixa de diabetes",
+   "Critérios laboratoriais de síndrome metabólica",
+   "Dislipidemia aterogênica (triglicerídeos altos com HDL baixo)",
+   "Enzimas do fígado acima do normal"
+  ],
+  "sugestoes": [
+   "albumina/creatinina"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 98,
+    "altura": 172,
+    "cintura": 108,
+    "pas": 145,
+    "pad": 95,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "glicose": {
+     "v": 168,
+     "origem": "manual"
+    },
+    "hba1c": {
+     "v": 8.2,
+     "origem": "manual"
+    },
+    "insulina": {
+     "v": 26,
+     "origem": "manual"
+    },
+    "triglicerideos": {
+     "v": 310,
+     "origem": "manual"
+    },
+    "hdl": {
+     "v": 33,
+     "origem": "manual"
+    },
+    "colesterol_total": {
+     "v": 248,
+     "origem": "manual"
+    },
+    "ldl": {
+     "v": 153,
+     "origem": "manual"
+    },
+    "tgp": {
+     "v": 74,
+     "origem": "manual"
+    },
+    "tgo": {
+     "v": 48,
+     "origem": "manual"
+    },
+    "ggt": {
+     "v": 96,
+     "origem": "manual"
+    },
+    "acido_urico": {
+     "v": 8.1,
+     "origem": "manual"
+    },
+    "creatinina": {
+     "v": 1.18,
+     "origem": "manual"
+    },
+    "pcr": {
+     "v": 6.4,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

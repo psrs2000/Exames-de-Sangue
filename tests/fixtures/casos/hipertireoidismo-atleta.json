@@ -1,0 +1,63 @@
+{
+ "versao": 1,
+ "descricao": "Atleta com hipertireoidismo — CPK alta tem contexto de treino",
+ "espera": {
+  "descricao": "Atleta com hipertireoidismo — CPK alta tem contexto de treino",
+  "padroes": [
+   "Padrão de hipertireoidismo",
+   "CPK elevada — atenção ao contexto de treino"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 31,
+    "peso": 78,
+    "altura": 180,
+    "cintura": 82,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": true
+   },
+   "valores": {
+    "tsh": {
+     "v": 0.04,
+     "origem": "manual"
+    },
+    "t4_livre": {
+     "v": 2.42,
+     "origem": "manual"
+    },
+    "t3": {
+     "v": 230,
+     "origem": "manual"
+    },
+    "cpk": {
+     "v": 520,
+     "origem": "manual"
+    },
+    "tgo": {
+     "v": 55,
+     "origem": "manual"
+    },
+    "tgp": {
+     "v": 38,
+     "origem": "manual"
+    },
+    "hemoglobina": {
+     "v": 15.4,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 230000,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

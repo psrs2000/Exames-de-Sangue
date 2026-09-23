@@ -1,0 +1,5459 @@
+{
+ "versao": 1,
+ "app": "analisador-exames-de-sangue",
+ "gerado_em": "2026-01-01T12:00:00.000Z",
+ "exames": [
+  {
+   "data": "2021-12-30",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hba1c": {
+     "v": 5.4,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 110.2,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 3.27,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 9.3,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 29.1,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 86,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 28,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 31.7,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.7,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 4691,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 58,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 31.5,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.8,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.4,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 284196,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 129,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 99,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 137,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.58,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.78,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 30,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1.24,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tfg": {
+     "v": 64,
+     "un": "mL/min/1,73m²",
+     "ref": [
+      90,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 51.2,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 29,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7.8,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.8,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 101,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 348,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.5,
+     "un": "mg/dL",
+     "ref": [
+      8.3,
+      10.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 75,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 464.8,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_folico": {
+     "v": 10.44,
+     "un": "ng/mL",
+     "ref": [
+      3.37,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 32,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 39,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 0.89,
+     "un": "ng/dL",
+     "ref": [
+      0.85,
+      1.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 18,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 10,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.52,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 34,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.21,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2022-04-04",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hba1c": {
+     "v": 6.3,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 134.2,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 4.4,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 11.2,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 35,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 81.3,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 25.9,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 31.8,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.1,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5321,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 53.4,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 35.1,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.8,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 3,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 199647,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 136,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 94,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 135,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.97,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tfg": {
+     "v": 90,
+     "un": "mL/min/1,73m²",
+     "ref": [
+      90,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 61.6,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 35.4,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 8,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.8,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 93,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 367,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.5,
+     "un": "mg/dL",
+     "ref": [
+      8.3,
+      10.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 75,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 258,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.4,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 29,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 1.9,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 139,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 4.5,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 38,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 20.6,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 0.9,
+     "un": "ng/dL",
+     "ref": [
+      0.85,
+      1.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 21,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 13,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.03,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 41,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.26,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2022-07-10",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hba1c": {
+     "v": 6,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 130.3,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 4.165121343907956,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 11.5,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 35.6,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 84.8,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 26.9,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 31.4,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.3,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5075,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 56.4,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 32,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 9.7,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.7,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 220779,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 141,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 99,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 135,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.95,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tfg": {
+     "v": 88,
+     "un": "mL/min/1,73m²",
+     "ref": [
+      90,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 52,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 28.6,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 8.1,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.7,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 83,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 387,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 10.4,
+     "un": "mg/dL",
+     "ref": [
+      8.3,
+      10.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 94,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 379.7,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.5,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 27,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 145,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.6,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 45,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 30.3,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.01,
+     "un": "ng/dL",
+     "ref": [
+      0.85,
+      1.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 22,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 15,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.92,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 37,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.25,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2022-10-02",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "glicose": {
+     "v": 91,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 238,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 12,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hdl": {
+     "v": 37,
+     "un": "mg/dL",
+     "ref": [
+      40,
+      null
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "ldl": {
+     "v": 76,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      130
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "nao_hdl": {
+     "v": 100,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      160
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "vldl": {
+     "v": 22,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.91,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 49.1,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 28.9,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7.4,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.6,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 91,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 383,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 8.9,
+     "un": "mg/dL",
+     "ref": [
+      8.3,
+      10.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 164,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 59,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 215,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.2,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 25,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 145,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.4,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 69,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 37.2,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1,
+     "un": "ng/dL",
+     "ref": [
+      0.85,
+      1.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 19,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 12,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 3.47,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 47,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 6,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 121,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 4.52,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 37.2,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 82.2,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 27.4,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 32.8,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.5,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5031,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 61.3,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 24.3,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 11.2,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 1.6,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.2,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 197643,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.17,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "zinco": {
+     "v": 87.4,
+     "un": "µg/dL",
+     "ref": [
+      60,
+      120
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2023-01-09",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 2,
+     "un": "milhões/mm³",
+     "ref": [
+      4.3,
+      5.9
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.9,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 120.9,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 36.5,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 80.4,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 26.9,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 33,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 15.4,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5045,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 55.6,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 34.1,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.6,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 1.8,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.2,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 187501,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 129,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 100,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 237,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.57,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.16,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 26,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.84,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 36.9,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 36,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7.4,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.8,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 81,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 510,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.4,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 213,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 66,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 186.8,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 27,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 72,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.06,
+     "un": "ng/dL",
+     "ref": [
+      0.97,
+      1.68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 19,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 11,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.35,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 40,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_a1": {
+     "v": 96,
+     "un": "mg/dL",
+     "ref": [
+      79,
+      169
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_b": {
+     "v": 121,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "lipoproteina_a": {
+     "v": 14.6,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.2,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2023-03-19",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 4.72,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12.6,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 37.4,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 79.5,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 27.1,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 34.1,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.4,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5603,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 56.1,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 34.2,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 7.3,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 1.8,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.2,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 187424,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 560,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 91,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 166.3,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 95,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.9,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 34.2,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 11,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 17,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 53,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 67,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.6,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 253,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 156,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7.4,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 77,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 28,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 10,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.7,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 139,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.1,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.1,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 145,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 39.6,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 3.02,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.2,
+     "un": "ng/dL",
+     "ref": [
+      0.89,
+      1.61
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.62,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.68,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 23,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.7,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 118,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "apo_a1": {
+     "v": 100,
+     "un": "mg/dL",
+     "ref": [
+      79,
+      169
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_b": {
+     "v": 124,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "lipoproteina_a": {
+     "v": 12.7,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.17,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2023-06-23",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 4.29,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 11.6,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 35.2,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 81.1,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 27.1,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 33.4,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 15,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 4905,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 58.7,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 31.6,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 7.1,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.4,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 193427,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 668,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 79,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 223.4,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 95,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.8,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 39,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 9,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 17,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 52,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 69,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 5,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 132,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 86,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 6.8,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "amilase": {
+     "v": 105,
+     "un": "U/L",
+     "ref": [
+      32,
+      130
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "lipase": {
+     "v": 29,
+     "un": "U/L",
+     "ref": [
+      null,
+      68
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.4,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.6,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 141,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.5,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.1,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 130,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 38.8,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.2,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.2,
+     "un": "ng/dL",
+     "ref": [
+      0.89,
+      1.61
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.59,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.11,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 28,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.9,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 118.8,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "apo_a1": {
+     "v": 106,
+     "un": "mg/dL",
+     "ref": [
+      79,
+      169
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_b": {
+     "v": 58,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "lipoproteina_a": {
+     "v": 18.1,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.3,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2023-09-28",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 4.51,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12.5,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 37.6,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 83.5,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 27.7,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 32.3,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.5,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5310,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 50.9,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 37.5,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.7,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 1.9,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.6,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 173336,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 750,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 104,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 172.7,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      280
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 92,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.87,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 42,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 12,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 19,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 50,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 64,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.7,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 127,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 116,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.8,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 142,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.1,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.1,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 39.4,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 59.5,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 3.22,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.14,
+     "un": "ng/dL",
+     "ref": [
+      0.89,
+      1.61
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.82,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.73,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 28,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 6,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 123.8,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.26,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-02-01",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 4.26,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 34.9,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 85.2,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 28.6,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 33.7,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.7,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 4881,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 51.3,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 36.4,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.8,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.5,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.6,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 172562,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 671,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_folico": {
+     "v": 15.43,
+     "un": "ng/mL",
+     "ref": [
+      3.37,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 81,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 192.4,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      299
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 100,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "insulina": {
+     "v": 7.7,
+     "un": "µU/mL",
+     "ref": [
+      3,
+      25
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "homa_beta": {
+     "v": 78.18,
+     "un": "%",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "homa_ir": {
+     "v": 1.98,
+     "un": "",
+     "ref": [
+      null,
+      2.7
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.84,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 39.2,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 15,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 26,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 72,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 55,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.7,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 154,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hdl": {
+     "v": 39,
+     "un": "mg/dL",
+     "ref": [
+      40,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vldl": {
+     "v": 25,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "ldl": {
+     "v": 87,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      130
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "nao_hdl": {
+     "v": 112,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      160
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 154,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 7.3,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.1,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.4,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 140,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.2,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.2,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 44.7,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 66.8,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.86,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.2,
+     "un": "ng/dL",
+     "ref": [
+      0.89,
+      1.61
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.63,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.49,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 26,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.6,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 115,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.21,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-04-25",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemacias": {
+     "v": 4.51,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12.1,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 37.5,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 83.4,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 28.3,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 32.8,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.5,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5471,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 53.2,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 33.4,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 10.1,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.3,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 215898,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 603,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_folico": {
+     "v": 15.3,
+     "un": "ng/mL",
+     "ref": [
+      3.37,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 64,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 201,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      299
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 101,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "insulina": {
+     "v": 11.6,
+     "un": "µU/mL",
+     "ref": [
+      3,
+      25
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "homa_beta": {
+     "v": 112.17,
+     "un": "%",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "homa_ir": {
+     "v": 2.86,
+     "un": "",
+     "ref": [
+      null,
+      2.7
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1.05,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tfg": {
+     "v": 79,
+     "un": "mL/min/1,73m²",
+     "ref": [
+      60,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 55,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 12,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 21,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 69,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 61,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.8,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 246,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hdl": {
+     "v": 40,
+     "un": "mg/dL",
+     "ref": [
+      40,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vldl": {
+     "v": 28,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "ldl": {
+     "v": 170,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      130
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "nao_hdl": {
+     "v": 203,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      160
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 149,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 8.5,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.1,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.7,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 137,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.1,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.2,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 265,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 42.6,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 44.5,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 3.71,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.23,
+     "un": "ng/dL",
+     "ref": [
+      0.89,
+      1.61
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.74,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.9,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 25,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.7,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 116.2,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "apo_a1": {
+     "v": 111,
+     "un": "mg/dL",
+     "ref": [
+      79,
+      169
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_b": {
+     "v": 129,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "lipoproteina_a": {
+     "v": 28.4,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio_ionico": {
+     "v": 1.19,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-09-06",
+   "salvo_em": "2026-01-01T12:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 58,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "calcio_ionico": {
+     "v": 1.26,
+     "un": "mmol/L",
+     "ref": [
+      1.1,
+      1.35
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 4.43,
+     "un": "milhões/mm³",
+     "ref": [
+      4.5,
+      5.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hemoglobina": {
+     "v": 12,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 36.2,
+     "un": "%",
+     "ref": [
+      40,
+      50
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 84.7,
+     "un": "fL",
+     "ref": [
+      80,
+      100
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 27.3,
+     "un": "pg",
+     "ref": [
+      26,
+      32
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 33.4,
+     "un": "g/dL",
+     "ref": [
+      32,
+      36
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "rdw": {
+     "v": 14.7,
+     "un": "%",
+     "ref": [
+      11.5,
+      14.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5132,
+     "un": "/mm³",
+     "ref": [
+      4000,
+      11000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "neutrofilos_bast": {
+     "v": 0,
+     "un": "%",
+     "ref": [
+      0,
+      5
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "neutrofilos_pct": {
+     "v": 54.6,
+     "un": "%",
+     "ref": [
+      40,
+      75
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "linfocitos_pct": {
+     "v": 32,
+     "un": "%",
+     "ref": [
+      20,
+      45
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "monocitos_pct": {
+     "v": 8.6,
+     "un": "%",
+     "ref": [
+      2,
+      10
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "eosinofilos_pct": {
+     "v": 2.9,
+     "un": "%",
+     "ref": [
+      1,
+      6
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.4,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 205866,
+     "un": "/mm³",
+     "ref": [
+      150000,
+      450000
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_b12": {
+     "v": 958,
+     "un": "pg/mL",
+     "ref": [
+      172,
+      890
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_folico": {
+     "v": 11.79,
+     "un": "ng/mL",
+     "ref": [
+      3.37,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferro": {
+     "v": 63,
+     "un": "µg/dL",
+     "ref": [
+      65,
+      175
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ferritina": {
+     "v": 175.3,
+     "un": "ng/mL",
+     "ref": [
+      22,
+      299
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hba1c": {
+     "v": 5.8,
+     "un": "%",
+     "ref": [
+      null,
+      5.7
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "glicemia_media": {
+     "v": 120.8,
+     "un": "mg/dL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "glicose": {
+     "v": 98,
+     "un": "mg/dL",
+     "ref": [
+      60,
+      99
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "insulina": {
+     "v": 9.5,
+     "un": "µU/mL",
+     "ref": [
+      3,
+      25
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "homa_beta": {
+     "v": 98.77,
+     "un": "%",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "homa_ir": {
+     "v": 2.32,
+     "un": "",
+     "ref": [
+      null,
+      2.7
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 0.86,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ureia": {
+     "v": 38,
+     "un": "mg/dL",
+     "ref": [
+      19,
+      49
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgp": {
+     "v": 11,
+     "un": "U/L",
+     "ref": [
+      null,
+      58
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tgo": {
+     "v": 19,
+     "un": "U/L",
+     "ref": [
+      null,
+      40
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "ggt": {
+     "v": 53,
+     "un": "U/L",
+     "ref": [
+      null,
+      73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosfatase_alcalina": {
+     "v": 55,
+     "un": "U/L",
+     "ref": [
+      36,
+      110
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "albumina": {
+     "v": 4.7,
+     "un": "g/dL",
+     "ref": [
+      3.7,
+      5.2
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "colesterol_total": {
+     "v": 136,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      190
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "hdl": {
+     "v": 44,
+     "un": "mg/dL",
+     "ref": [
+      40,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vldl": {
+     "v": 14,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "ldl": {
+     "v": 77,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      130
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "nao_hdl": {
+     "v": 91,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      160
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "triglicerideos": {
+     "v": 64,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      150
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_a1": {
+     "v": 127,
+     "un": "mg/dL",
+     "ref": [
+      79,
+      169
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "apo_b": {
+     "v": 63,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "lipoproteina_a": {
+     "v": 17.2,
+     "un": "mg/dL",
+     "ref": [
+      null,
+      30
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "acido_urico": {
+     "v": 6.8,
+     "un": "mg/dL",
+     "ref": [
+      3.7,
+      7.8
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "calcio": {
+     "v": 9.7,
+     "un": "mg/dL",
+     "ref": [
+      8.6,
+      10.9
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "fosforo": {
+     "v": 3.3,
+     "un": "mg/dL",
+     "ref": [
+      2.5,
+      4.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "sodio": {
+     "v": 140,
+     "un": "mEq/L",
+     "ref": [
+      136,
+      145
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "potassio": {
+     "v": 4.5,
+     "un": "mEq/L",
+     "ref": [
+      3.5,
+      5.1
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "magnesio": {
+     "v": 2.1,
+     "un": "mg/dL",
+     "ref": [
+      1.6,
+      2.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "cpk": {
+     "v": 166,
+     "un": "U/L",
+     "ref": [
+      null,
+      200
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "vitamina_d": {
+     "v": 50,
+     "un": "ng/mL",
+     "ref": [
+      30,
+      100
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "pth": {
+     "v": 43.4,
+     "un": "pg/mL",
+     "ref": [
+      18.5,
+      88
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "tsh": {
+     "v": 2.72,
+     "un": "µUI/mL",
+     "ref": [
+      0.48,
+      5.6
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "t4_livre": {
+     "v": 1.26,
+     "un": "ng/dL",
+     "ref": [
+      0.96,
+      1.73
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_livre": {
+     "v": 0.67,
+     "un": "ng/mL",
+     "ref": null,
+     "refLab": false,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 2.96,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      2.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa_relacao": {
+     "v": 23,
+     "un": "%",
+     "ref": [
+      25,
+      null
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    }
+   }
+  }
+ ]
+}

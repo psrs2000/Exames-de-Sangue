@@ -1,0 +1,105 @@
+{
+ "versao": 1,
+ "descricao": "Mulher de 34 anos com anemia ferropriva clássica",
+ "espera": {
+  "descricao": "Mulher de 34 anos com anemia ferropriva clássica",
+  "padroes": [
+   "Padrão sugestivo de anemia por falta de ferro",
+   "Deficiência de vitamina D"
+  ],
+  "sugestoes": [
+   "reticulócitos"
+  ],
+  "semPadroes": [
+   "Critérios laboratoriais de síndrome metabólica"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 34,
+    "peso": 70,
+    "altura": 168,
+    "cintura": 88,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 10.4,
+     "origem": "manual"
+    },
+    "hematocrito": {
+     "v": 32.1,
+     "origem": "manual"
+    },
+    "hemacias": {
+     "v": 3.82,
+     "origem": "manual"
+    },
+    "vcm": {
+     "v": 72.4,
+     "origem": "manual"
+    },
+    "hcm": {
+     "v": 23.1,
+     "origem": "manual"
+    },
+    "rdw": {
+     "v": 17.8,
+     "origem": "manual"
+    },
+    "leucocitos": {
+     "v": 6100,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 418000,
+     "origem": "manual"
+    },
+    "ferritina": {
+     "v": 6.2,
+     "origem": "manual"
+    },
+    "ferro": {
+     "v": 21,
+     "origem": "manual"
+    },
+    "sat_transferrina": {
+     "v": 8,
+     "origem": "manual"
+    },
+    "glicose": {
+     "v": 88,
+     "origem": "manual"
+    },
+    "creatinina": {
+     "v": 0.71,
+     "origem": "manual"
+    },
+    "tsh": {
+     "v": 2.14,
+     "origem": "manual"
+    },
+    "vitamina_b12": {
+     "v": 412,
+     "origem": "manual"
+    },
+    "vitamina_d": {
+     "v": 18.6,
+     "origem": "manual"
+    },
+    "pcr": {
+     "v": 1.8,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

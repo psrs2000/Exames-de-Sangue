@@ -1,0 +1,65 @@
+{
+ "versao": 1,
+ "descricao": "Gestante — faixas de adulto não gestante não se aplicam",
+ "espera": {
+  "descricao": "Gestante — faixas de adulto não gestante não se aplicam",
+  "padroes": [
+   "Você marcou gestação"
+  ],
+  "semPadroes": [
+   "Valores na faixa de pré-diabetes"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 29,
+    "peso": 68,
+    "altura": 168,
+    "cintura": 0,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": true,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 10.9,
+     "origem": "manual"
+    },
+    "hematocrito": {
+     "v": 33,
+     "origem": "manual"
+    },
+    "ferritina": {
+     "v": 22,
+     "origem": "manual"
+    },
+    "tsh": {
+     "v": 0.32,
+     "origem": "manual"
+    },
+    "t4_livre": {
+     "v": 1.3,
+     "origem": "manual"
+    },
+    "glicose": {
+     "v": 84,
+     "origem": "manual"
+    },
+    "creatinina": {
+     "v": 0.52,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 190000,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

@@ -79,6 +79,9 @@ O histórico vive em **duas camadas**, e a distinção importa:
 
 Como funciona:
 
+- **Sexo e idade são lidos do cabeçalho do laudo** quando estão lá (`Sexo: M`, `(45 anos)`,
+  `Data de Nascimento`), porque decidem faixas de referência — deixar isso no padrão do formulário
+  já trocou a faixa de TGP de um paciente.
 - A **data da coleta é lida do próprio laudo** (`DATA DA COLETA`, com vários formatos aceitos;
   na ausência, a data que mais aparece no documento, ignorando datas antigas como a de nascimento).
 - Cada valor guarda a **faixa de referência vigente naquela data**. Isso não é preciosismo:
@@ -148,9 +151,36 @@ a falsa impressão de backup completo.
   Nesse caso o app avisa e oferece a digitação manual.
 - As faixas de referência são de **adultos**; gestação e pediatria não são contempladas
   (o app avisa quando "gestante" está marcado).
+- **O leitor de PDF foi calibrado em poucos formatos.** Dois laudos reais de um laboratório e dois
+  sintéticos cobrem os leiautes mais comuns (blocos e tabela), mas cada laboratório inventa o seu.
+  Em formato desconhecido a leitura pode vir incompleta — por isso o passo 2 existe.
 - A leitura automática pode errar em formatos incomuns. Por isso o passo 2 sempre mostra
   os valores lidos, editáveis, com a etiqueta `PDF` no que veio do laudo e `LAB` no que
   usa a faixa do laboratório.
+
+## Testes
+
+```bash
+npm install
+npx playwright install chromium   # só na primeira vez
+npm test
+```
+
+A suíte roda o app de verdade num Chromium headless e confere 59 comportamentos. Ela existe
+principalmente para **não deixar o app viciar num único laudo e num único paciente**:
+
+| Fixture | O que protege |
+|---|---|
+| `laudo-blocos.pdf` | formato de laudo em blocos (`TÍTULO` … `RESULTADO:`), com as armadilhas que já causaram bugs: rodapé entre o cabeçalho e o resultado, `(A1C)`, seção pediátrica, faixas por sexo, percentual e absoluto na mesma linha, meta terapêutica × faixa populacional |
+| `laudo-tabela.pdf` | formato de laudo em tabela, de outro laboratório fictício, com abreviações pontuadas (`V.C.M.`) — foi ele que revelou que o leitor estava preso a um único leiaute |
+| `casos/*.json` | seis perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida |
+| `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
+
+Os dois laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não
+correspondem a nenhuma pessoa. A série longa foi **de-identificada** a partir de um histórico real:
+datas deslocadas por um valor fixo (mantendo os intervalos), perfil substituído por um sintético e
+valores perturbados em ±2%, bem abaixo de qualquer RCV. Ela preserva os *formatos* das séries, que
+é o que a suíte precisa testar, e não os resultados de ninguém.
 
 ## Estrutura do código
 

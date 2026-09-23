@@ -1,0 +1,79 @@
+{
+ "versao": 1,
+ "descricao": "Padrão colestático com anemia macrocítica e plaquetopenia",
+ "espera": {
+  "descricao": "Padrão colestático com anemia macrocítica e plaquetopenia",
+  "padroes": [
+   "Padrão colestático (vias biliares)",
+   "Padrão sugestivo de anemia por falta de vitaminas",
+   "Plaquetas abaixo do normal"
+  ],
+  "sugestoes": [
+   "hepatite"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 62,
+    "peso": 70,
+    "altura": 168,
+    "cintura": 92,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "fosfatase_alcalina": {
+     "v": 210,
+     "origem": "manual"
+    },
+    "ggt": {
+     "v": 180,
+     "origem": "manual"
+    },
+    "tgp": {
+     "v": 90,
+     "origem": "manual"
+    },
+    "tgo": {
+     "v": 75,
+     "origem": "manual"
+    },
+    "bilirrubina_total": {
+     "v": 2.1,
+     "origem": "manual"
+    },
+    "bilirrubina_direta": {
+     "v": 1.4,
+     "origem": "manual"
+    },
+    "hemoglobina": {
+     "v": 11.6,
+     "origem": "manual"
+    },
+    "vcm": {
+     "v": 104,
+     "origem": "manual"
+    },
+    "vitamina_b12": {
+     "v": 148,
+     "origem": "manual"
+    },
+    "acido_folico": {
+     "v": 4.1,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 118000,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

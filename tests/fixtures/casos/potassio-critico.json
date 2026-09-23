@@ -1,0 +1,58 @@
+{
+ "versao": 1,
+ "descricao": "Valores críticos: potássio alto com função renal reduzida",
+ "espera": {
+  "descricao": "Valores críticos: potássio alto com função renal reduzida",
+  "criticos": [
+   "potassio"
+  ],
+  "padroes": [
+   "Filtração dos rins reduzida",
+   "Anemia detectada"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-03-10",
+   "salvo_em": "2026-03-10T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 71,
+    "peso": 70,
+    "altura": 168,
+    "cintura": 100,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "potassio": {
+     "v": 6.7,
+     "origem": "manual"
+    },
+    "creatinina": {
+     "v": 2.4,
+     "origem": "manual"
+    },
+    "ureia": {
+     "v": 98,
+     "origem": "manual"
+    },
+    "hemoglobina": {
+     "v": 10.2,
+     "origem": "manual"
+    },
+    "glicose": {
+     "v": 104,
+     "origem": "manual"
+    },
+    "sodio": {
+     "v": 133,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}
