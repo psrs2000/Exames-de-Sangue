@@ -230,7 +230,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 91 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 109 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |
@@ -238,6 +238,7 @@ principalmente para **não deixar o app viciar num único laudo e num único pac
 | `laudo-blocos.pdf` | formato de laudo em blocos (`TÍTULO` … `RESULTADO:`), com as armadilhas que já causaram bugs: rodapé entre o cabeçalho e o resultado, `(A1C)`, seção pediátrica, faixas por sexo, percentual e absoluto na mesma linha, meta terapêutica × faixa populacional |
 | `laudo-tabela.pdf` | formato de laudo em tabela, de outro laboratório fictício, com abreviações pontuadas (`V.C.M.`) — foi ele que revelou que o leitor estava preso a um único leiaute |
 | `laudo-bullets.pdf` | resultados marcados com hífen (`- COLESTEROL HDL : 32 mg/dL`), nota com "jejum de 12 horas", referência continuada em outra linha e **tabela de resultados anteriores** — três formas diferentes de o leitor pegar o número errado |
+| `laudo-coagulacao.pdf` | bloco de coagulação, em que o MESMO exame sai impresso em três escalas (12,5 segundos, 98% de atividade, INR 1,05) — e um valor que só existe sob o cabeçalho, sem a palavra "resultado" na linha, com uma "Relação (R)" logo abaixo esperando para ser confundida com ele |
 | `casos/*.json` | sete perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida, e um hemograma internamente incoerente |
 | `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
 
@@ -245,7 +246,7 @@ Um último bloco carrega o app com **toda a rede bloqueada** e exige que ele ain
 nenhuma requisição externa. Foi ele que revelou que o `vendor/` nunca havia funcionado: o import
 sem `./` virava um *bare specifier*, falhava calado e o app caía no CDN.
 
-Os três laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não
+Os quatro laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não
 correspondem a nenhuma pessoa. A série longa foi **de-identificada** a partir de um histórico real:
 datas deslocadas por um valor fixo (mantendo os intervalos), perfil substituído por um sintético e
 valores perturbados em ±2%, bem abaixo de qualquer RCV. Ela preserva os *formatos* das séries, que

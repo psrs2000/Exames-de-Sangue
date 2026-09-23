@@ -156,6 +156,46 @@ try {
     await ctx.close();
   }
 
+  /* ---------- 2c. coagulação e imunologia ---------- */
+  console.log('\n\x1b[1mLaudo de coagulação e imunologia (mesmo exame impresso em três escalas)\x1b[0m');
+  {
+    const ctx = await navegador.newContext();
+    const p = await novaPagina(ctx, erros);
+    const r = await lerPdf(p, 'laudo-coagulacao.pdf');
+    igual(r.data, '2025-03-05', 'data da coleta');
+
+    /* O bloco da protrombina sai em segundos, em % e em INR ao mesmo tempo.
+       Ler o número errado trocaria 12,5 s por 98%: o app fica só com INR e
+       atividade, e ignora o tempo em segundos de propósito. */
+    igual(r.valores.inr, 1.05, 'INR lido do bloco da protrombina');
+    igual(r.valores.tap_atividade, 98, 'atividade de protrombina lida em %');
+    ok(!('tap' in r.valores), 'tempo de protrombina em segundos não vira exame nenhum');
+
+    /* Valor sob o cabeçalho, sem a palavra "resultado" na linha. */
+    igual(r.valores.ttpa, 41.3, 'TTPA vem da linha abaixo do cabeçalho, pela unidade');
+    ok(r.valores.ttpa !== 1.31, 'a "Relação (R)" logo abaixo não sobrescreve o TTPA');
+    igual(r.labRefs.ttpa, [25, 35], 'faixa do laboratório para o TTPA');
+
+    igual(r.valores.fibrinogenio, 460, 'fibrinogênio convertido de g/L sem ruído de ponto flutuante');
+
+    igual(r.valores.fator_reumatoide, 28.4, 'fator reumatoide');
+    igual(r.valores.igg, 1840, 'IgG');
+    igual(r.valores.iga, 210, 'IgA');
+    igual(r.valores.igm, 96, 'IgM');
+    igual(r.valores.ige, 340, 'IgE total não é confundida com as outras imunoglobulinas');
+    igual(r.valores.c3, 72, 'complemento C3');
+    igual(r.valores.c4, 8, 'complemento C4');
+    igual(r.valores.anti_tpo, 212, 'anti-TPO, que fica no grupo da tireoide');
+
+    const grupos = await p.evaluate(() => {
+      const ids = Object.keys(window.EXAMES.state.values);
+      return [...new Set(ids.map(i => window.EXAMES.byId[i].cat))];
+    });
+    ok(grupos.includes('coagulacao'), 'grupo Coagulação em uso');
+    ok(grupos.includes('imunologia'), 'grupo Imunologia em uso');
+    await ctx.close();
+  }
+
   /* ---------- 3. casos clínicos sintéticos ---------- */
   console.log('\n\x1b[1mCasos clínicos sintéticos (perfis que o autor do app não tem)\x1b[0m');
   for (const arquivo of fs.readdirSync(path.join(fixtures, 'casos')).sort()){

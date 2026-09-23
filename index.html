@@ -334,6 +334,7 @@ details.recolhivel>summary .conta{margin-left:auto;font-size:.75rem;font-weight:
 const CATS = {
   metabolico: {nome:'Metabolismo e risco cardiovascular', ico:'🫀'},
   hemograma:  {nome:'Hemograma',                          ico:'🩸'},
+  coagulacao: {nome:'Coagulação',                          ico:'🩹'},
   hepatico:   {nome:'Função hepática',                    ico:'🫁'},
   renal:      {nome:'Função renal',                       ico:'🫘'},
   tireoide:   {nome:'Tireoide',                           ico:'🦋'},
@@ -341,6 +342,7 @@ const CATS = {
   minerais:   {nome:'Eletrólitos e minerais',             ico:'🧂'},
   prostata:   {nome:'Próstata',                           ico:'♂️'},
   inflamacao: {nome:'Inflamação',                         ico:'🔥'},
+  imunologia: {nome:'Imunologia',                          ico:'🛡️'},
   muscular:   {nome:'Enzimas musculares',                 ico:'💪'},
   pancreas:   {nome:'Pâncreas',                           ico:'🔬'},
   hormonios:  {nome:'Hormônios',                          ico:'⚗️'}
@@ -586,6 +588,13 @@ const ANALYTES = [
 {id:'t3',nome:'T3 total',cat:'tireoide',un:'ng/dL',dec:0,ali:['t3 total','triiodotironina','t3'],ref:[80,200],
  simples:'Outro hormônio da tireoide.',tecnico:'Útil na suspeita de tireotoxicose por T3; cai na síndrome do eutireoideo doente.',
  alto:'Pode indicar hipertireoidismo.',baixo:'Comum em doenças agudas, sem indicar doença da tireoide.'},
+{id:'anti_tpo',nome:'Anti-TPO (antitireoperoxidase)',cat:'tireoide',un:'UI/mL',dec:1,
+ ali:['anticorpo antitireoperoxidase','anticorpos antitireoperoxidase','anti tireoperoxidase',
+      'antitireoperoxidase','anti tpo','atpo'],ref:[null,34],
+ simples:'Anticorpo que aparece quando o sistema imune ataca a própria tireoide.',
+ tecnico:'Positivo na tireoidite de Hashimoto e em parte dos casos de Graves. Junto de TSH elevado, prevê progressão para hipotireoidismo franco. Pode ser positivo em pessoas sem doença.',
+ alto:'Indica agressão autoimune à tireoide. Sozinho não é doença: o que define conduta é o TSH junto do T4 livre.',
+ baixo:'Sem sinal de autoimunidade contra a tireoide.'},
 
 /* --- vitaminas e ferro --- */
 {id:'vitamina_d',nome:'Vitamina D (25-OH)',cat:'vitaminas',un:'ng/mL',dec:1,
@@ -663,6 +672,85 @@ const ANALYTES = [
  simples:'Outro marcador de inflamação, mais lento para subir e descer que a PCR.',
  tecnico:'Inespecífico; sobe com idade, anemia, gestação e gamopatias.',
  alto:'Sugere processo inflamatório; precisa de contexto clínico.',baixo:'Sem significado clínico.'},
+
+/* --- coagulação ---
+   Só o INR e a atividade entram do bloco da protrombina; o "tempo" em segundos
+   fica de fora de propósito. O mesmo exame é impresso em segundos, em % e em INR,
+   e ler o número errado trocaria 12,5 s por 98%. O INR existe justamente para ser
+   comparável entre laboratórios, então é ele que vale. */
+{id:'inr',nome:'INR (RNI)',cat:'coagulacao',un:'',dec:2,
+ ali:['razao normatizada internacional','relacao normatizada internacional',
+      'indice internacional normatizado','inr','rni'],ref:[0.8,1.2],crit:[null,5],
+ simples:'Mede quanto o sangue demora para coagular, numa escala igual em qualquer laboratório.',
+ tecnico:'A faixa 0,8–1,2 vale para quem NÃO usa anticoagulante. Em varfarina o alvo terapêutico é 2,0–3,0 (2,5–3,5 em prótese valvar mecânica) — ali um INR "alto" pelo padrão populacional é o desejado. Anticoagulantes diretos (rivaroxabana, apixabana, dabigatrana) não são monitorados por INR.',
+ alto:'O sangue está demorando mais para coagular. Se você usa varfarina, pode ser exatamente o alvo do tratamento — confira com quem acompanha. Fora disso, investiga-se fígado, falta de vitamina K e medicamentos.',
+ baixo:'Isoladamente tem pouco significado.'},
+{id:'tap_atividade',nome:'Atividade de protrombina',cat:'coagulacao',un:'%',dec:0,
+ ali:['atividade de protrombina','atividade da protrombina','atividade protrombinica'],ref:[70,100],
+ simples:'Outra forma de expressar o mesmo teste do INR.',
+ tecnico:'Inverso do INR. Cai em hepatopatia, deficiência de vitamina K e uso de varfarina.',
+ alto:'Sem significado clínico.',
+ baixo:'Acompanha INR alto: fígado, vitamina K ou anticoagulante oral.'},
+{id:'ttpa',nome:'TTPA (tromboplastina parcial)',cat:'coagulacao',un:'segundos',dec:1,
+ ali:['tempo de tromboplastina parcial ativada','tempo de tromboplastina parcial','ttpa','kptt','aptt'],
+ ref:[25,35],
+ simples:'Avalia a outra via da coagulação, a que a heparina afeta.',
+ tecnico:'Alargado em heparina não fracionada, hemofilias, doença de von Willebrand e anticoagulante lúpico. Encurtamento não tem valor clínico.',
+ alto:'Coagulação mais lenta por essa via. Investiga-se heparina, deficiência de fatores e anticoagulante lúpico.',
+ baixo:'Sem significado clínico.'},
+{id:'fibrinogenio',nome:'Fibrinogênio',cat:'coagulacao',un:'mg/dL',dec:0,
+ ali:['fibrinogenio'],ref:[200,400],conv:{'g/l':100},
+ simples:'Proteína que forma a rede do coágulo. Também sobe em inflamação.',
+ tecnico:'Reagente de fase aguda. Cai em CIVD, hepatopatia grave e fibrinólise; sobe em inflamação, gestação e tabagismo.',
+ alto:'Costuma refletir inflamação, não risco de trombose por si só.',
+ baixo:'Chama atenção para consumo (CIVD) ou produção hepática reduzida.'},
+
+/* --- imunologia ---
+   Só o que é numérico. O FAN, que é o exame imunológico mais pedido, sai como
+   título e padrão ("1/320, nuclear pontilhado fino") e não como número — este
+   app não tem como classificá-lo, então nem tenta. */
+{id:'fator_reumatoide',nome:'Fator reumatoide',cat:'imunologia',un:'UI/mL',dec:1,
+ ali:['fator reumatoide','fator reumatoide latex','waaler rose'],ref:[null,14],
+ simples:'Anticorpo associado à artrite reumatoide, mas que também aparece em outras situações.',
+ tecnico:'Sensibilidade e especificidade modestas para artrite reumatoide; positivo em hepatite C, Sjögren, endocardite e em idosos saudáveis. Anti-CCP é mais específico.',
+ alto:'Positivo. Sozinho não fecha diagnóstico nenhum — precisa de quadro clínico e, em geral, do anti-CCP.',
+ baixo:'Negativo. Não exclui artrite reumatoide.'},
+{id:'igg',nome:'Imunoglobulina G (IgG)',cat:'imunologia',un:'mg/dL',dec:0,
+ ali:['imunoglobulina g','igg'],ref:[700,1600],conv:{'g/l':100},
+ simples:'O principal anticorpo de defesa de longo prazo.',
+ tecnico:'Elevação policlonal em infecção crônica, hepatopatia e doença autoimune; pico monoclonal exige eletroforese e imunofixação. Queda em imunodeficiências e perdas proteicas.',
+ alto:'Precisa ser diferenciada entre aumento difuso (inflamação crônica) e pico monoclonal.',
+ baixo:'Pode reduzir a defesa contra infecções; investiga-se imunodeficiência e perda de proteínas.'},
+{id:'iga',nome:'Imunoglobulina A (IgA)',cat:'imunologia',un:'mg/dL',dec:0,
+ ali:['imunoglobulina a','iga'],ref:[70,400],conv:{'g/l':100},
+ simples:'Anticorpo que protege as mucosas — intestino, vias aéreas.',
+ tecnico:'Deficiência seletiva de IgA é a imunodeficiência mais comum e invalida a sorologia de doença celíaca baseada em IgA.',
+ alto:'Aparece em hepatopatia, infecções de mucosa e gamopatias.',
+ baixo:'Se for deficiência seletiva, a pesquisa de doença celíaca precisa ser feita por outro método.'},
+{id:'igm',nome:'Imunoglobulina M (IgM)',cat:'imunologia',un:'mg/dL',dec:0,
+ ali:['imunoglobulina m','igm'],ref:[40,230],conv:{'g/l':100},
+ simples:'Anticorpo da resposta inicial a uma infecção.',
+ tecnico:'Eleva-se na fase aguda; aumento persistente sugere macroglobulinemia de Waldenström ou colangite biliar primária.',
+ alto:'Sugere resposta recente a infecção ou, se persistente, investigação hematológica.',
+ baixo:'Avaliar junto de IgG e IgA.'},
+{id:'ige',nome:'Imunoglobulina E total (IgE)',cat:'imunologia',un:'UI/mL',dec:0,
+ ali:['imunoglobulina e total','imunoglobulina e','ige total','ige'],ref:[null,100],
+ simples:'Anticorpo ligado a alergias e a parasitoses.',
+ tecnico:'Sobe em atopia, parasitoses, aspergilose broncopulmonar alérgica e síndrome de hiper-IgE. Valor normal não exclui alergia específica.',
+ alto:'Compatível com quadro alérgico ou parasitose — o exame não diz a qual alérgeno.',
+ baixo:'Normal. Não afasta alergia a um alérgeno específico.'},
+{id:'c3',nome:'Complemento C3',cat:'imunologia',un:'mg/dL',dec:0,
+ ali:['complemento c3','fracao c3 do complemento','c3 do complemento'],ref:[90,180],
+ simples:'Parte do sistema de defesa que é consumido quando há doença autoimune ativa.',
+ tecnico:'C3 e C4 baixos juntos sugerem consumo por imunocomplexos (lúpus ativo, glomerulonefrite pós-infecciosa, crioglobulinemia).',
+ alto:'Comporta-se como reagente de fase aguda; pouco específico.',
+ baixo:'Sugere consumo do complemento — levar junto do C4 e do quadro clínico.'},
+{id:'c4',nome:'Complemento C4',cat:'imunologia',un:'mg/dL',dec:0,
+ ali:['complemento c4','fracao c4 do complemento','c4 do complemento'],ref:[10,40],
+ simples:'Outra peça do mesmo sistema de defesa.',
+ tecnico:'Queda isolada de C4 ocorre no angioedema hereditário e na crioglobulinemia.',
+ alto:'Pouco específico.',
+ baixo:'Junto de C3 baixo, reforça consumo por imunocomplexos.'},
 
 /* --- outros --- */
 {id:'cpk',nome:'CPK (creatinoquinase)',cat:'muscular',un:'U/L',dec:0,ali:['creatinofosfoquinase','creatino fosfoquinase','cpk','ck total','creatinoquinase','creatina quinase','ck-total'],
@@ -896,7 +984,10 @@ const REF_CUT = /(valor(es)?\s*(de)?\s*referenci|valores?\s*referenci|referencia
 
 const NUM_UNIT = /(?<![a-z0-9])(-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?)\s*([%a-z0-9µμ^/³².\-]*)/gi;
 
-function segmentValue(a, seg){
+/* soComUnidade: aceita apenas números seguidos de uma unidade que pertença a
+   este exame. É o modo usado quando não há nome de exame na linha e a única
+   pista é a unidade escrita. */
+function segmentValue(a, seg, soComUnidade){
   const cut = seg.search(REF_CUT);
   const s = cut >= 0 ? seg.slice(0, cut) : seg;
   if (!s.trim()) return null;
@@ -921,7 +1012,12 @@ function segmentValue(a, seg){
   };
   /* "com jejum de 12 horas" não é um resultado de triglicerídeos */
   const NAO_UNIDADE = /^(horas?|dias?|anos?|mes(es)?|semanas?|vezes|x|ml\/min\/1|pagina|de|a|e)$/;
-  const validos = cands.filter(c => !NAO_UNIDADE.test(c.unit));
+  let validos = cands.filter(c => !NAO_UNIDADE.test(c.unit));
+  if (soComUnidade){
+    validos = validos.filter(c => c.unit &&
+      (c.unit === want || Object.keys(conv).some(k => normUnit(k) === c.unit)));
+    if (!validos.length) return null;   /* sem unidade que case, não se arrisca */
+  }
   const ranked = (validos.length ? validos : cands).map((c,i)=>({c,i,sc:score(c)})).sort((x,y)=> y.sc-x.sc || x.i-y.i);
   for (const {c} of ranked){
     let v = c.v, fator = 1;
@@ -931,6 +1027,7 @@ function segmentValue(a, seg){
         break;
       }
     }
+    if (fator !== 1) v = +v.toPrecision(12);   /* tira o ruído de ponto flutuante da conversão */
     if (plausible(a, v)) return {value:v, unit:c.unit, fator};
   }
   return null;
@@ -1031,6 +1128,7 @@ function extractFromLines(lines, sex){
 
     /* pendências: cabeçalho do exame numa linha, "RESULTADO:" algumas linhas abaixo.
        O resultado pertence ao cabeçalho mais próximo acima dele. */
+    let consumiu = false;
     if (/\bresultados?\b/.test(t) && !hits.length && !/impress|liberad|anterior/.test(t)){
       for (let k=pending.length-1; k>=0; k--){
         const p = pending[k];
@@ -1039,9 +1137,29 @@ function extractFromLines(lines, sex){
         const got = segmentValue(byId[p.id], seg);
         if (got){
           found[p.id] = {...got, page:clean[i].page, line:clean[i].raw, vline:i, hline:p.i};
-          pending.splice(k,1);
+          pending.splice(k,1); consumiu = true;
         }
         break;  /* apenas o cabeçalho mais próximo concorre por este resultado */
+      }
+    }
+
+    /* Segundo gatilho, para blocos que nem escrevem "resultado":
+         TEMPO DE TROMBOPLASTINA PARCIAL ATIVADA (TTPA)
+         Tempo do paciente ........ 41,3 segundos
+       Aceitar qualquer número abaixo de um cabeçalho seria ruído demais, então
+       aqui só passa número com unidade que pertença ao exame pendente. É isso
+       que descarta a linha seguinte, "Relação (R) 1,31", sem unidade nenhuma —
+       e as linhas de faixa de referência já morrem no REF_CUT. */
+    if (!consumiu && !hits.length && pending.length){
+      for (let k=pending.length-1; k>=0; k--){
+        const p = pending[k];
+        if (i - p.i > 8 || found[p.id]){ pending.splice(k,1); continue; }
+        const got = segmentValue(byId[p.id], t, true);
+        if (got){
+          found[p.id] = {...got, page:clean[i].page, line:clean[i].raw, vline:i, hline:p.i};
+          pending.splice(k,1);
+        }
+        break;
       }
     }
 
@@ -1155,6 +1273,10 @@ const PESO_CLINICO = {
   glicose:3, hba1c:3, homa_ir:3, ldl:3, nao_hdl:3, apo_b:3, colesterol_total:3,
   triglicerideos:3, creatinina:3, tfg:3, potassio:3, sodio:3, calcio:3, calcio_ionico:3,
   tsh:3, t4_livre:3, tgp:3, tgo:3, vitamina_b12:3, vitamina_d:3, pcr:3, psa:3, pth:3,
+  inr:3,
+  /* a atividade de protrombina é o MESMO teste do INR noutra escala: fica em peso
+     baixo para o achado não ser relatado duas vezes lado a lado */
+  tap_atividade:1, fator_reumatoide:1, ige:1, iga:1, igm:1,
   hemacias:1, hcm:1, chcm:1, rdw:1, vldl:1, apo_a1:1, psa_livre:1, homa_beta:1,
   glicemia_media:1, transferrina:1, neutrofilos_pct:1, linfocitos_pct:1, monocitos_pct:1,
   eosinofilos_pct:1, basofilos_pct:1, neutrofilos_bast:1, amilase:1, fosforo:1
