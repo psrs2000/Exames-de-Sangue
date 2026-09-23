@@ -1,0 +1,53 @@
+{
+ "versao": 1,
+ "descricao": "Fator reumatoide positivo sem inflamação",
+ "espera": {
+  "descricao": "Fator reumatoide positivo sem inflamação",
+  "padroes": [
+   "Fator reumatoide positivo sem sinal de inflamação"
+  ],
+  "semPadroes": [
+   "Anticorpo antitireoidiano positivo com TSH normal"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 44,
+    "peso": 66,
+    "altura": 162,
+    "cintura": 82,
+    "pas": 120,
+    "pad": 78,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "fator_reumatoide": {
+     "v": 32.6,
+     "origem": "manual"
+    },
+    "pcr": {
+     "v": 1.2,
+     "origem": "manual"
+    },
+    "vhs": {
+     "v": 8,
+     "origem": "manual"
+    },
+    "anti_tpo": {
+     "v": 12.0,
+     "origem": "manual"
+    },
+    "tsh": {
+     "v": 2.1,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

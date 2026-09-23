@@ -1,0 +1,53 @@
+{
+ "versao": 1,
+ "descricao": "INR, fibrinogênio e plaquetas alterados juntos",
+ "espera": {
+  "descricao": "INR, fibrinogênio e plaquetas alterados juntos",
+  "padroes": [
+   "Coagulação alargada com fibrinogênio e plaquetas baixos"
+  ],
+  "semPadroes": [
+   "INR alargado junto de proteínas que o fígado fabrica"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 61,
+    "peso": 68,
+    "altura": 170,
+    "cintura": 88,
+    "pas": 110,
+    "pad": 70,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "inr": {
+     "v": 2.85,
+     "origem": "manual"
+    },
+    "fibrinogenio": {
+     "v": 88,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 44000,
+     "origem": "manual"
+    },
+    "ttpa": {
+     "v": 48.0,
+     "origem": "manual"
+    },
+    "pcr": {
+     "v": 180,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

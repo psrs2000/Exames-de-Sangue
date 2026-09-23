@@ -1,0 +1,53 @@
+{
+ "versao": 1,
+ "descricao": "Anti-TPO positivo com TSH elevado (tireoidite de Hashimoto)",
+ "espera": {
+  "descricao": "Anti-TPO positivo com TSH elevado (tireoidite de Hashimoto)",
+  "padroes": [
+   "Anticorpo antitireoidiano positivo com TSH elevado"
+  ],
+  "semPadroes": [
+   "Anticorpo antitireoidiano positivo com TSH normal"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 58,
+    "peso": 70,
+    "altura": 160,
+    "cintura": 90,
+    "pas": 126,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "tsh": {
+     "v": 8.4,
+     "origem": "manual"
+    },
+    "t4_livre": {
+     "v": 0.74,
+     "origem": "manual"
+    },
+    "anti_tpo": {
+     "v": 340.0,
+     "origem": "manual"
+    },
+    "colesterol_total": {
+     "v": 244,
+     "origem": "manual"
+    },
+    "ldl": {
+     "v": 162,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

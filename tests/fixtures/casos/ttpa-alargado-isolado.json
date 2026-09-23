@@ -1,0 +1,54 @@
+{
+ "versao": 1,
+ "descricao": "TTPA alargado com INR normal — via intrínseca isolada",
+ "espera": {
+  "descricao": "TTPA alargado com INR normal — via intrínseca isolada",
+  "padroes": [
+   "TTPA alargado com INR normal"
+  ],
+  "semPadroes": [
+   "Coagulação alargada com fibrinogênio e plaquetas baixos",
+   "INR alargado junto de proteínas que o fígado fabrica"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 34,
+    "peso": 62,
+    "altura": 167,
+    "cintura": 76,
+    "pas": 114,
+    "pad": 72,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "ttpa": {
+     "v": 47.2,
+     "origem": "manual"
+    },
+    "inr": {
+     "v": 1.02,
+     "origem": "manual"
+    },
+    "tap_atividade": {
+     "v": 96,
+     "origem": "manual"
+    },
+    "fibrinogenio": {
+     "v": 318,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 238000,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

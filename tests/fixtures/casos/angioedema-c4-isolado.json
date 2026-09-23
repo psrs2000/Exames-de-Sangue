@@ -1,0 +1,49 @@
+{
+ "versao": 1,
+ "descricao": "C4 baixo isolado, com C3 normal",
+ "espera": {
+  "descricao": "C4 baixo isolado, com C3 normal",
+  "padroes": [
+   "Complemento C4 baixo com C3 normal"
+  ],
+  "semPadroes": [
+   "Complemento C3 e C4 baixos juntos"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 44,
+    "peso": 66,
+    "altura": 162,
+    "cintura": 82,
+    "pas": 120,
+    "pad": 78,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "c3": {
+     "v": 118,
+     "origem": "manual"
+    },
+    "c4": {
+     "v": 5,
+     "origem": "manual"
+    },
+    "pcr": {
+     "v": 1.1,
+     "origem": "manual"
+    },
+    "vhs": {
+     "v": 9,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

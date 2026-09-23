@@ -230,7 +230,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 109 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 126 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |
@@ -239,7 +239,7 @@ principalmente para **não deixar o app viciar num único laudo e num único pac
 | `laudo-tabela.pdf` | formato de laudo em tabela, de outro laboratório fictício, com abreviações pontuadas (`V.C.M.`) — foi ele que revelou que o leitor estava preso a um único leiaute |
 | `laudo-bullets.pdf` | resultados marcados com hífen (`- COLESTEROL HDL : 32 mg/dL`), nota com "jejum de 12 horas", referência continuada em outra linha e **tabela de resultados anteriores** — três formas diferentes de o leitor pegar o número errado |
 | `laudo-coagulacao.pdf` | bloco de coagulação, em que o MESMO exame sai impresso em três escalas (12,5 segundos, 98% de atividade, INR 1,05) — e um valor que só existe sob o cabeçalho, sem a palavra "resultado" na linha, com uma "Relação (R)" logo abaixo esperando para ser confundida com ele |
-| `casos/*.json` | sete perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida, e um hemograma internamente incoerente |
+| `casos/*.json` | quinze perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida, um hemograma internamente incoerente, e oito perfis de coagulação e imunologia — cada um cobrindo um ramo dos padrões novos, com as asserções negativas que impedem dois ramos de disparar ao mesmo tempo |
 | `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
 
 Um último bloco carrega o app com **toda a rede bloqueada** e exige que ele ainda leia o PDF, sem

@@ -1,0 +1,49 @@
+{
+ "versao": 1,
+ "descricao": "Anti-TPO positivo com tireoide ainda compensada",
+ "espera": {
+  "descricao": "Anti-TPO positivo com tireoide ainda compensada",
+  "padroes": [
+   "Anticorpo antitireoidiano positivo com TSH normal"
+  ],
+  "semPadroes": [
+   "Anticorpo antitireoidiano positivo com TSH elevado"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "F",
+    "idade": 41,
+    "peso": 64,
+    "altura": 164,
+    "cintura": 79,
+    "pas": 118,
+    "pad": 74,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "anti_tpo": {
+     "v": 96.0,
+     "origem": "manual"
+    },
+    "tsh": {
+     "v": 2.4,
+     "origem": "manual"
+    },
+    "t4_livre": {
+     "v": 1.15,
+     "origem": "manual"
+    },
+    "colesterol_total": {
+     "v": 186,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}

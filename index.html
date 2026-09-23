@@ -1285,6 +1285,14 @@ const PESO_CLINICO = {
    prioridade: é o que impede que a ureia apareça como "achado menor" logo abaixo de
    um padrão que a está usando para levantar suspeita de perda digestiva. */
 const PADRAO_EXAMES = {
+  'Complemento C3 e C4 baixos juntos':['c3','c4'],
+  'Complemento C4 baixo com C3 normal':['c3','c4'],
+  'Coagulação alargada com fibrinogênio e plaquetas baixos':['inr','tap_atividade','fibrinogenio','plaquetas','ttpa'],
+  'INR alargado junto de proteínas que o fígado fabrica':['inr','tap_atividade','fibrinogenio','albumina','tgo','tgp','bilirrubina_total'],
+  'TTPA alargado com INR normal':['ttpa','inr'],
+  'Fator reumatoide positivo sem sinal de inflamação':['fator_reumatoide','pcr','vhs'],
+  'Anticorpo antitireoidiano positivo com TSH elevado':['anti_tpo','tsh','t4_livre'],
+  'Anticorpo antitireoidiano positivo com TSH normal':['anti_tpo','tsh','t4_livre'],
   'Padrão sugestivo de anemia por falta de ferro':['hemoglobina','hematocrito','hemacias','vcm','hcm','ferritina','ferro','sat_transferrina','rdw'],
   'Padrão sugestivo de anemia por falta de vitaminas':['hemoglobina','hematocrito','vcm','vitamina_b12','acido_folico'],
   'Anemia detectada':['hemoglobina','hematocrito','hemacias','vcm','rdw','ferro','ferritina','sat_transferrina'],
@@ -1739,6 +1747,57 @@ function findPatterns(v, st, d, ctx){
       'A HbA1c mede o açúcar grudado na hemoglobina — e você tem alteração no ferro e/ou na hemoglobina. Falta de ferro tende a elevar a HbA1c sem que o açúcar tenha subido de verdade. Vale dar mais peso à glicemia e ao HOMA-IR.',
       'Interferência conhecida: ferropenia eleva a HbA1c; anemias hemolíticas e perdas agudas a reduzem. Preferir glicemia de jejum, TOTG ou frutosamina enquanto o status de ferro não estiver corrigido.',
       'Comente que a HbA1c pode estar distorcida pelo quadro de ferro/anemia.');
+  /* --- coagulação e imunologia --- */
+  const highish = id => st[id] && (st[id].status === 'alto' || st[id].status === 'critico');
+
+  /* Consumo é a pergunta que faz alguém pedir C3 e C4 no mesmo pedido. */
+  if (lowish('c3') && lowish('c4'))
+    push('atencao','Complemento C3 e C4 baixos juntos',
+      'As duas peças do sistema complemento estão baixas ao mesmo tempo. Isso costuma significar que elas estão sendo consumidas — um padrão que aparece quando uma doença autoimune está em atividade. Baixo aqui não é falta de produção; é gasto.',
+      'Consumo pela via clássica: lúpus em atividade, glomerulonefrite pós-infecciosa, crioglobulinemia, endocardite subaguda. Correlacionar com FAN, anti-DNA, sedimento urinário e função renal. A queda acompanha a atividade da doença e serve para seguimento.',
+      'Leve C3 e C4 juntos ao médico e pergunte sobre FAN, exame de urina e função renal.');
+  else if (lowish('c4') && st.c3 && st.c3.status === 'normal')
+    push('info','Complemento C4 baixo com C3 normal',
+      'Só uma das duas peças está baixa. Isoladamente, esse padrão aponta para causas diferentes das que derrubam as duas juntas.',
+      'Queda isolada de C4 ocorre no angioedema hereditário (dosar C1-inibidor) e na crioglobulinemia; também há deficiências parciais hereditárias de C4 sem doença.',
+      'Se você tem episódios de inchaço em lábios, face ou garganta, diga isso ao médico.');
+
+  /* A ordem importa: consumo ativo primeiro, síntese hepática depois. */
+  if (highish('inr') && lowish('fibrinogenio') && lowish('plaquetas'))
+    push('alerta','Coagulação alargada com fibrinogênio e plaquetas baixos',
+      'Três resultados que, juntos, sugerem que o corpo está gastando os componentes da coagulação mais rápido do que consegue repor. Essa combinação não é para esperar a próxima consulta de rotina.',
+      'Tríade compatível com coagulação intravascular disseminada: prolongamento do INR, consumo de fibrinogênio e plaquetopenia. Confirmar com D-dímero e esfregaço (esquizócitos) e procurar o fator desencadeante — sepse, neoplasia, complicação obstétrica.',
+      'Procure avaliação médica sem esperar, levando este laudo.');
+  else if (highish('inr') && (lowish('fibrinogenio') || lowish('albumina')))
+    push('atencao','INR alargado junto de proteínas que o fígado fabrica',
+      'O sangue está demorando mais para coagular e, ao mesmo tempo, estão baixas proteínas produzidas pelo fígado. Quando isso aparece junto, a pergunta deixa de ser sobre a coagulação e passa a ser sobre o fígado. Se você usa anticoagulante, a leitura muda — diga isso ao médico.',
+      'INR prolongado com hipofibrinogenemia e/ou hipoalbuminemia sugere falência de síntese hepática. Diferenciar de carência de vitamina K (fibrinogênio e albumina preservados, corrige com reposição) e de consumo. Em uso de varfarina o INR não informa nada sobre síntese hepática.',
+      'Leve INR, fibrinogênio, albumina e as enzimas do fígado juntos ao médico — e diga se usa anticoagulante.');
+
+  if (highish('ttpa') && st.inr && st.inr.status === 'normal')
+    push('info','TTPA alargado com INR normal',
+      'Das duas vias da coagulação, só uma está lenta. Esse desencontro tem um conjunto de causas próprio — e uma delas, curiosamente, aumenta o risco de trombose em vez de sangramento.',
+      'Prolongamento isolado do TTPA: heparina não fracionada, deficiência de fatores VIII, IX ou XI, doença de von Willebrand e anticoagulante lúpico — este último associado a trombose, não a sangramento. Teste da mistura separa deficiência de inibidor.',
+      'Se você não usa heparina, pergunte sobre dosagem de fatores e pesquisa de anticoagulante lúpico.');
+
+  if (highish('fator_reumatoide') && st.pcr && st.pcr.status === 'normal' &&
+      (!st.vhs || st.vhs.status === 'normal'))
+    push('info','Fator reumatoide positivo sem sinal de inflamação',
+      'O fator reumatoide veio positivo, mas os marcadores de inflamação estão normais. Esse exame é positivo em muita gente sem artrite — inclusive em pessoas saudáveis mais velhas —, então sozinho ele não diz grande coisa.',
+      'Fator reumatoide isolado tem baixo valor preditivo positivo: presente em hepatite C, Sjögren, endocardite e em 5–25% de idosos hígidos. Anti-CCP é bem mais específico para artrite reumatoide.',
+      'Sem dor e inchaço em articulações, isso costuma não mudar conduta. Se houver, pergunte sobre o anti-CCP.');
+
+  if (highish('anti_tpo') && highish('tsh'))
+    push('atencao','Anticorpo antitireoidiano positivo com TSH elevado',
+      'O exame mostra o sistema imune agredindo a tireoide e, ao mesmo tempo, a glândula já trabalhando com dificuldade. É o padrão da tireoidite de Hashimoto, a causa mais comum de hipotireoidismo.',
+      'Anti-TPO positivo com TSH elevado: tireoidite de Hashimoto. A positividade do anticorpo aumenta a taxa de progressão do hipotireoidismo subclínico para franco, e é um dos critérios que pesam a favor de tratar antes de o T4 livre cair.',
+      'Leve TSH, T4 livre e anti-TPO juntos ao médico e pergunte se já é caso de tratar.');
+  else if (highish('anti_tpo') && st.tsh && st.tsh.status === 'normal')
+    push('info','Anticorpo antitireoidiano positivo com TSH normal',
+      'O sistema imune está produzindo anticorpos contra a tireoide, mas por enquanto ela dá conta do recado — o TSH está normal. Isso não é doença hoje; é um motivo para acompanhar o TSH com regularidade.',
+      'Anti-TPO positivo com função tireoidiana normal: risco de progressão para hipotireoidismo de cerca de 2 a 4% ao ano. Não indica tratamento, indica seguimento do TSH.',
+      'Pergunte de quanto em quanto tempo repetir o TSH.');
+
   if (ctx.gestante)
     push('info','Você marcou gestação',
       'Na gravidez, muitos valores de referência mudam (hemoglobina, TSH, ferritina, entre outros). A análise automática abaixo usa faixas de adultos não gestantes e pode classificar como alterado algo esperado na gestação.',

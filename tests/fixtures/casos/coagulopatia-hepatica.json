@@ -1,0 +1,69 @@
+{
+ "versao": 1,
+ "descricao": "INR alargado com fibrinogênio e albumina baixos (síntese hepática)",
+ "espera": {
+  "descricao": "INR alargado com fibrinogênio e albumina baixos (síntese hepática)",
+  "padroes": [
+   "INR alargado junto de proteínas que o fígado fabrica"
+  ],
+  "semPadroes": [
+   "Coagulação alargada com fibrinogênio e plaquetas baixos"
+  ]
+ },
+ "exames": [
+  {
+   "data": "2026-04-08",
+   "salvo_em": "2026-04-08T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 52,
+    "peso": 74,
+    "altura": 172,
+    "cintura": 94,
+    "pas": 124,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "inr": {
+     "v": 1.92,
+     "origem": "manual"
+    },
+    "tap_atividade": {
+     "v": 42,
+     "origem": "manual"
+    },
+    "fibrinogenio": {
+     "v": 142,
+     "origem": "manual"
+    },
+    "albumina": {
+     "v": 2.7,
+     "origem": "manual"
+    },
+    "tgo": {
+     "v": 88,
+     "origem": "manual"
+    },
+    "tgp": {
+     "v": 64,
+     "origem": "manual"
+    },
+    "ggt": {
+     "v": 210,
+     "origem": "manual"
+    },
+    "bilirrubina_total": {
+     "v": 2.4,
+     "origem": "manual"
+    },
+    "plaquetas": {
+     "v": 204000,
+     "origem": "manual"
+    }
+   }
+  }
+ ]
+}
