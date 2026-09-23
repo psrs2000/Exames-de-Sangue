@@ -50,17 +50,11 @@ aparelho é independente — quem viaja entre eles é o arquivo `historico-exame
 ## Publicar
 
 Publicar dá ao app um endereço fixo, que abre no celular em qualquer lugar, sem depender de
-computador ligado. Em qualquer das opções abaixo os dados continuam **no navegador de quem
-usa** — o que é publicado é o app vazio.
+computador ligado. Os dados continuam **no navegador de quem usa** — o que é publicado é o
+app vazio.
 
-O app traz `<meta name="robots" content="noindex, nofollow">`, que o mantém fora dos buscadores
-em qualquer hospedagem. O `robots.txt` também está aqui, mas só vale quando o app fica na raiz
-de um domínio.
-
-### GitHub Pages
-
-Não pede cartão nem conta nova, mas **exige repositório público** (Pages em repositório privado
-é recurso pago).
+O app está no **GitHub Pages**, que não pede cartão nem conta nova, mas exige repositório
+público (Pages em repositório privado é recurso pago).
 
 **Settings → Pages → Source: Deploy from a branch → `main` / `(root)` → Save.**
 
@@ -70,34 +64,8 @@ Repare no subcaminho: o app não fica na raiz do domínio. É por isso que os ca
 são relativos (`./vendor/…`) e não absolutos — a suíte cobre esse cenário. O arquivo `.nojekyll`
 impede que o GitHub processe a pasta com Jekyll.
 
-### Cloudflare
-
-Mantém o repositório privado, mas pede cartão de crédito no cadastro, mesmo no plano gratuito.
-
-A Cloudflare importa o repositório como **Worker com assets estáticos** (não como Pages):
-**Workers & Pages → Create → Import a repository**, sem preencher comando de build. Quem manda
-no que sobe são dois arquivos versionados aqui:
-
-- **`wrangler.jsonc`** — site estático servido da raiz do repositório
-- **`.assetsignore`** — tira da publicação tudo que não é o site
-
-O `.assetsignore` não é detalhe: sem ele o `wrangler` tenta subir a pasta inteira, inclusive o
-`node_modules` que ele mesmo acabou de instalar, e o build morre em
-`Asset too large … workerd with a size of 127 MiB`. Com ele sobem só quatro arquivos:
-
-```
-index.html
-robots.txt
-vendor/pdf.min.mjs
-vendor/pdf.worker.min.mjs
-```
-
-O `_headers` é lido à parte, como metarquivo: aplica os cabeçalhos de segurança sem ser servido.
-Para conferir o que seria publicado, sem publicar nada:
-
-```bash
-npx wrangler deploy --dry-run
-```
+Para ficar fora dos buscadores, o que vale é a `<meta name="robots" content="noindex, nofollow">`
+no próprio HTML: o `robots.txt`, que também está aqui, só é lido na raiz de um domínio.
 
 ### No celular
 
