@@ -1,0 +1,10 @@
+{
+  // Publicação na Cloudflare: site estático, sem código de servidor.
+  // O que sobe é a raiz do repositório menos o que está em .assetsignore.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "meus-exames",
+  "compatibility_date": "2026-09-21",
+  "assets": {
+    "directory": "."
+  }
+}

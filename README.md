@@ -42,32 +42,43 @@ npx serve .        # mostra um endereço como http://192.168.0.10:3000
 Abra esse endereço no celular, com os dois aparelhos no mesmo Wi-Fi. O histórico de cada
 aparelho é independente — quem viaja entre eles é o arquivo `historico-exames-*.json`.
 
-## Publicar no Cloudflare Pages
+## Publicar na Cloudflare
 
 Publicar dá ao app um endereço fixo, que abre no celular em qualquer lugar, sem depender de
 computador ligado. O repositório **continua privado**: o que fica acessível é só o app, que
 não carrega dado nenhum dentro de si.
 
-No painel da Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, escolha este
-repositório e configure:
+A Cloudflare hoje importa repositórios como **Worker com assets estáticos** (não como Pages).
+No painel: **Workers & Pages → Create → Import a repository**, escolha este repositório e
+deixe as configurações como vierem. Não é preciso preencher comando de build.
 
-| Campo | Valor |
-|---|---|
-| Production branch | `main` |
-| Framework preset | `None` |
-| Build command | *(deixe vazio)* |
-| Build output directory | `/` |
+Quem manda no que é publicado são dois arquivos versionados aqui:
 
-Deixar o *build command* vazio é o que importa: sem ele a Cloudflare apenas publica os
-arquivos como estão, sem instalar dependências nem rodar nada. Cada `git push` no `main`
-republica sozinho.
+- **`wrangler.jsonc`** — diz que é um site estático servido da raiz do repositório
+- **`.assetsignore`** — tira da publicação tudo que não é o site
 
-Depois, no iPhone: abra o endereço no Safari → **Compartilhar → Adicionar à Tela de Início**.
+O `.assetsignore` não é detalhe: sem ele o `wrangler` tenta subir a pasta inteira, inclusive o
+`node_modules` que ele mesmo acabou de instalar, e o build morre em
+`Asset too large … workerd with a size of 127 MiB`. Com ele, sobem só quatro arquivos:
 
-Dois arquivos cuidam do resto:
+```
+index.html
+robots.txt
+vendor/pdf.min.mjs
+vendor/pdf.worker.min.mjs
+```
 
-- `_headers` — cabeçalhos de segurança e cache longo para o `vendor/`
-- `robots.txt` — mantém a ferramenta fora dos buscadores
+O `_headers` é lido à parte, como metarquivo: aplica os cabeçalhos de segurança sem ser servido.
+O `robots.txt` mantém a ferramenta fora dos buscadores.
+
+Para conferir o que seria publicado, sem publicar nada:
+
+```bash
+npx wrangler deploy --dry-run
+```
+
+Cada `git push` no `main` republica sozinho. Depois, no iPhone: abra o endereço no Safari →
+**Compartilhar → Adicionar à Tela de Início**.
 
 O histórico do celular é separado do histórico do computador: cada navegador guarda o seu.
 Para levar um para o outro, use *Baixar histórico* e *Importar histórico*.
