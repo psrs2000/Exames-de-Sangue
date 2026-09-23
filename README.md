@@ -42,24 +42,43 @@ npx serve .        # mostra um endereço como http://192.168.0.10:3000
 Abra esse endereço no celular, com os dois aparelhos no mesmo Wi-Fi. O histórico de cada
 aparelho é independente — quem viaja entre eles é o arquivo `historico-exames-*.json`.
 
-## Publicar na Cloudflare
+## Publicar
 
 Publicar dá ao app um endereço fixo, que abre no celular em qualquer lugar, sem depender de
-computador ligado. O repositório **continua privado**: o que fica acessível é só o app, que
-não carrega dado nenhum dentro de si.
+computador ligado. Em qualquer das opções abaixo os dados continuam **no navegador de quem
+usa** — o que é publicado é o app vazio.
 
-A Cloudflare hoje importa repositórios como **Worker com assets estáticos** (não como Pages).
-No painel: **Workers & Pages → Create → Import a repository**, escolha este repositório e
-deixe as configurações como vierem. Não é preciso preencher comando de build.
+O app traz `<meta name="robots" content="noindex, nofollow">`, que o mantém fora dos buscadores
+em qualquer hospedagem. O `robots.txt` também está aqui, mas só vale quando o app fica na raiz
+de um domínio.
 
-Quem manda no que é publicado são dois arquivos versionados aqui:
+### GitHub Pages
 
-- **`wrangler.jsonc`** — diz que é um site estático servido da raiz do repositório
+Não pede cartão nem conta nova, mas **exige repositório público** (Pages em repositório privado
+é recurso pago).
+
+**Settings → Pages → Source: Deploy from a branch → `main` / `(root)` → Save.**
+
+Em um ou dois minutos o app está em `https://<usuário>.github.io/<repositório>/`.
+
+Repare no subcaminho: o app não fica na raiz do domínio. É por isso que os caminhos internos
+são relativos (`./vendor/…`) e não absolutos — a suíte cobre esse cenário. O arquivo `.nojekyll`
+impede que o GitHub processe a pasta com Jekyll.
+
+### Cloudflare
+
+Mantém o repositório privado, mas pede cartão de crédito no cadastro, mesmo no plano gratuito.
+
+A Cloudflare importa o repositório como **Worker com assets estáticos** (não como Pages):
+**Workers & Pages → Create → Import a repository**, sem preencher comando de build. Quem manda
+no que sobe são dois arquivos versionados aqui:
+
+- **`wrangler.jsonc`** — site estático servido da raiz do repositório
 - **`.assetsignore`** — tira da publicação tudo que não é o site
 
 O `.assetsignore` não é detalhe: sem ele o `wrangler` tenta subir a pasta inteira, inclusive o
 `node_modules` que ele mesmo acabou de instalar, e o build morre em
-`Asset too large … workerd with a size of 127 MiB`. Com ele, sobem só quatro arquivos:
+`Asset too large … workerd with a size of 127 MiB`. Com ele sobem só quatro arquivos:
 
 ```
 index.html
@@ -69,19 +88,18 @@ vendor/pdf.worker.min.mjs
 ```
 
 O `_headers` é lido à parte, como metarquivo: aplica os cabeçalhos de segurança sem ser servido.
-O `robots.txt` mantém a ferramenta fora dos buscadores.
-
 Para conferir o que seria publicado, sem publicar nada:
 
 ```bash
 npx wrangler deploy --dry-run
 ```
 
-Cada `git push` no `main` republica sozinho. Depois, no iPhone: abra o endereço no Safari →
-**Compartilhar → Adicionar à Tela de Início**.
+### No celular
 
-O histórico do celular é separado do histórico do computador: cada navegador guarda o seu.
-Para levar um para o outro, use *Baixar histórico* e *Importar histórico*.
+Abra o endereço no Safari → **Compartilhar → Adicionar à Tela de Início**.
+
+O histórico do celular é separado do histórico do computador: cada navegador guarda o seu. Para
+levar um para o outro, use *Baixar histórico* e *Importar histórico*.
 
 ## O que ele faz
 
