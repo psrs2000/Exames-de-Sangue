@@ -4,9 +4,14 @@ Aplicativo de página única (um `index.html`) que lê o **PDF de um laudo labor
 brasileiro**, extrai os resultados e monta uma análise explicada — em **linguagem simples**
 ou em **linguagem técnica**, alternável com um clique.
 
-> ⚕️ **Não é um diagnóstico.** A ferramenta compara resultados com faixas de referência
-> gerais e não conhece histórico, sintomas nem medicamentos de quem fez o exame.
+> ⚕️ **Não é um diagnóstico e não é um dispositivo médico.** Este é um projeto pessoal,
+> educativo, **sem validação clínica e sem revisão por profissional de saúde**. Ele compara
+> resultados com faixas de referência gerais e não conhece histórico, sintomas nem
+> medicamentos de quem fez o exame. Nada que ele escreve é recomendação médica.
 > Quem interpreta o seu caso é o seu médico.
+>
+> Se você clonou este repositório: leia a [licença](LICENSE) antes de usar ou distribuir.
+> O software é fornecido **sem garantia de qualquer tipo**, e o risco do uso é de quem usa.
 
 ## Como usar
 
@@ -303,3 +308,13 @@ Para acrescentar um exame, basta adicionar um objeto em `ANALYTES` com `id`, `no
 
 O objeto `window.EXAMES` expõe as funções internas (`extractFromLines`, `classify`,
 `computeDerived`, `findPatterns`…) para inspeção no console e para testes automatizados.
+
+## Licença
+
+[MIT](LICENSE) — você pode usar, copiar, modificar e distribuir, inclusive comercialmente,
+desde que mantenha o aviso de copyright e a licença junto.
+
+A parte que importa aqui é a cláusula final, em maiúsculas no arquivo: o software é fornecido
+**"AS IS", sem garantia de qualquer tipo**, e o autor não responde por nenhum dano decorrente
+do uso. Traduzindo para o caso concreto desta ferramenta: se alguém pegar este código e tratar
+a saída dele como orientação médica, a responsabilidade é de quem fez isso.
