@@ -200,9 +200,22 @@ try {
     ok(/coleta de 06\/09\/2024/.test(evo), 'título traz a coleta aberta');
     ok(/comparam com a coleta anterior, 25\/04\/2024/.test(evo), 'subtítulo traz a coleta de comparação');
     ok(/11 coletas desde 30\/12\/2021/.test(evo), 'subtítulo separa a série inteira da comparação');
-    const linhas = await p.locator('table.evo tbody tr').count();
+    const linhas = await p.locator('table.evo tbody tr:not(.cat)').count();
     ok(linhas >= 50, 'evolução lista todos os exames do laudo', `listou ${linhas}`);
     ok(/PSA total/.test(evo.slice(0, 700)), 'exame que segue alterado aparece no topo mesmo variando pouco');
+
+    /* Agrupar por sistema não pode desfazer a ordem por relevância: os grupos saem
+       na ordem da primeira aparição, então o grupo do exame mais relevante vem
+       primeiro. E agrupar não pode duplicar nem sumir com linha nenhuma. */
+    const grupos = await p.locator('table.evo tbody tr.cat').allTextContents();
+    ok(grupos.length >= 5, 'evolução vem agrupada por sistema', `${grupos.length} grupo(s)`);
+    ok(/Próstata/.test(grupos[0]), 'o grupo do exame mais relevante vem primeiro', `primeiro: ${grupos[0]}`);
+    const nomes = await p.locator('table.evo tbody tr:not(.cat) td:first-child').allTextContents();
+    igual(nomes.length, new Set(nomes.map(t => t.trim())).size, 'agrupar não duplica exame');
+
+    const gNormais = await p.locator('details.normais h3.grp').allTextContents();
+    ok(gNormais.length >= 5, 'os resultados dentro da referência também vêm agrupados',
+       `${gNormais.length} grupo(s)`);
 
     const serie = await textoDoCard(p, 'Leitura da série');
     ok(/Hemoglobina — abaixo da referência em 11 coleta\(s\) seguida\(s\), em melhora/.test(serie),

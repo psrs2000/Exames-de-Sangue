@@ -230,7 +230,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 87 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 91 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |
@@ -257,7 +257,7 @@ Tudo vive em `index.html`, em seções numeradas dentro do `<script type="module
 
 | Seção | Conteúdo |
 |---|---|
-| 1 | Base de referência (`ANALYTES`): sinônimos, unidades, faixas por sexo, textos leigo/técnico |
+| 1 | Base de referência (`CATS` e `ANALYTES`): grupos por sistema, sinônimos, unidades, faixas por sexo, textos leigo/técnico |
 | 2 | Utilidades: normalização, números no formato brasileiro, índice de sinônimos |
 | 3 | Leitura do PDF: reconstrução de linhas, extração de valores e das faixas do laboratório |
 | 4 | Classificação (normal / abaixo / acima / atenção) |

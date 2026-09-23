@@ -161,6 +161,12 @@ table.evo th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-sp
 table.evo td{padding:7px 8px;border-bottom:1px solid var(--surface-2);vertical-align:middle}
 table.evo td.num{font-family:var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.evo td.spark{width:112px;padding:2px 8px}
+table.evo tr.cat td{background:var(--surface-2);font-weight:700;font-size:.8rem;padding:6px 8px;
+  border-bottom:none;letter-spacing:.01em}
+h3.grp{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--surface-2)}
+h3.grp:first-child{margin-top:4px}
+details.normais h3.grp{margin:14px 0 6px}
 .delta{font-weight:700;white-space:nowrap}
 .delta.sobe{color:var(--high)} .delta.desce{color:var(--low)} .delta.igual{color:var(--muted)}
 .delta.bom{color:var(--ok)} .delta.ruim{color:var(--high)}
@@ -326,17 +332,33 @@ details.recolhivel>summary .conta{margin-left:auto;font-size:.75rem;font-weight:
    conv: unidades alternativas -> fator/função de conversão para `un`.
    ------------------------------------------------------------------------ */
 const CATS = {
-  hemograma:  {nome:'Hemograma',            ico:'🩸'},
-  lipidios:   {nome:'Lipídios (gorduras)',  ico:'🫀'},
-  glicemia:   {nome:'Açúcar no sangue',     ico:'🍬'},
-  renal:      {nome:'Rins',                 ico:'🫘'},
-  hepatico:   {nome:'Fígado e vias biliares',ico:'🫁'},
-  tireoide:   {nome:'Tireoide',             ico:'🦋'},
-  vitaminas:  {nome:'Vitaminas e ferro',    ico:'💊'},
-  minerais:   {nome:'Minerais e eletrólitos',ico:'🧂'},
-  inflamacao: {nome:'Inflamação',           ico:'🔥'},
-  outros:     {nome:'Outros',               ico:'🔬'}
+  metabolico: {nome:'Metabolismo e risco cardiovascular', ico:'🫀'},
+  hemograma:  {nome:'Hemograma',                          ico:'🩸'},
+  hepatico:   {nome:'Função hepática',                    ico:'🫁'},
+  renal:      {nome:'Função renal',                       ico:'🫘'},
+  tireoide:   {nome:'Tireoide',                           ico:'🦋'},
+  vitaminas:  {nome:'Ferro e vitaminas',                  ico:'💊'},
+  minerais:   {nome:'Eletrólitos e minerais',             ico:'🧂'},
+  prostata:   {nome:'Próstata',                           ico:'♂️'},
+  inflamacao: {nome:'Inflamação',                         ico:'🔥'},
+  muscular:   {nome:'Enzimas musculares',                 ico:'💪'},
+  pancreas:   {nome:'Pâncreas',                           ico:'🔬'},
+  hormonios:  {nome:'Hormônios',                          ico:'⚗️'}
 };
+
+/* Agrupa uma lista JÁ ORDENADA por relevância sem desfazer essa ordem: os grupos
+   saem na ordem da primeira aparição, então o grupo que contém o exame mais
+   relevante vem primeiro. Agrupar deixa de ser um trade-off contra priorizar. */
+function agruparPorCat(lista, catDe){
+  const grupos = new Map();
+  for (const item of lista){
+    const c = catDe(item);
+    if (!grupos.has(c)) grupos.set(c, []);
+    grupos.get(c).push(item);
+  }
+  return [...grupos];
+}
+const tituloCat = cat => `<span aria-hidden="true">${CATS[cat].ico}</span> ${escapeHtml(CATS[cat].nome)}`;
 
 const ANALYTES = [
 /* --- hemograma --- */
@@ -427,32 +449,32 @@ const ANALYTES = [
  baixo:'Aumenta o risco de sangramento — dengue, viroses, medicamentos, doenças hepáticas e autoimunes.'},
 
 /* --- lipídios --- */
-{id:'colesterol_total',nome:'Colesterol total',cat:'lipidios',un:'mg/dL',dec:0,
+{id:'colesterol_total',nome:'Colesterol total',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['colesterol total','colesterol'],ref:[null,190],conv:{'mmol/l':38.67},
  simples:'Soma de todo o colesterol do sangue. Sozinho diz pouco — o que importa é como ele se divide entre HDL e LDL.',
  tecnico:'Alvo referencial <190 mg/dL. A decisão terapêutica se baseia em LDL e não-HDL conforme risco cardiovascular estimado.',
  alto:'Aumenta o risco de placas nas artérias, sobretudo se o LDL também estiver alto.',
  baixo:'Valores baixos costumam ser benignos; muito baixos podem aparecer em desnutrição, doença hepática ou hipertireoidismo.'},
 
-{id:'hdl',nome:'HDL (colesterol "bom")',cat:'lipidios',un:'mg/dL',dec:0,
+{id:'hdl',nome:'HDL (colesterol "bom")',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['hdl','colesterol hdl','hdl colesterol','hdl-c'],ref:{F:[50,null],M:[40,null]},conv:{'mmol/l':38.67},
  simples:'É o colesterol que ajuda a limpar as artérias. Aqui, quanto mais alto, melhor.',
  tecnico:'Marcador de risco, não alvo terapêutico direto. HDL muito alto (>90) não confere proteção adicional.',
  alto:'Costuma ser favorável.',
  baixo:'HDL baixo é fator de risco cardiovascular e é comum junto com triglicerídeos altos, sedentarismo e resistência à insulina.'},
 
-{id:'ldl',nome:'LDL (colesterol "ruim")',cat:'lipidios',un:'mg/dL',dec:0,
+{id:'ldl',nome:'LDL (colesterol "ruim")',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['ldl','colesterol ldl','ldl colesterol','ldl-c'],ref:[null,130],conv:{'mmol/l':38.67},
  simples:'É o colesterol que se deposita nas artérias. Quanto mais baixo, menor o risco de infarto e AVC.',
  tecnico:'Meta individualizada por risco: <130 (baixo), <100 (intermediário), <70 (alto), <50 (muito alto) — diretriz SBC.',
  alto:'Principal alvo do tratamento para reduzir risco de infarto e AVC — dieta, exercício e, quando indicado, medicação.',
  baixo:'LDL baixo geralmente é desejável.'},
 
-{id:'vldl',nome:'VLDL',cat:'lipidios',un:'mg/dL',dec:0,ali:['vldl','colesterol vldl'],ref:[null,30],
+{id:'vldl',nome:'VLDL',cat:'metabolico',un:'mg/dL',dec:0,ali:['vldl','colesterol vldl'],ref:[null,30],
  simples:'Fração do colesterol ligada aos triglicerídeos.',tecnico:'Estimado como TG/5 quando calculado por Friedewald.',
  alto:'Costuma acompanhar triglicerídeos altos.',baixo:'Sem significado clínico.'},
 
-{id:'triglicerideos',nome:'Triglicerídeos',cat:'lipidios',un:'mg/dL',dec:0,
+{id:'triglicerideos',nome:'Triglicerídeos',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['triglicerideos','triglicerides','trigliceridios','tg'],ref:[null,150],crit:[null,500],conv:{'mmol/l':88.57},
  simples:'Gordura do sangue que sobe com açúcar, farinha, álcool e excesso de peso.',
  tecnico:'Jejum: desejável <150. Sem jejum: <175. Acima de 500 há risco de pancreatite.',
@@ -460,7 +482,7 @@ const ANALYTES = [
  baixo:'Valores baixos raramente preocupam.'},
 
 /* --- glicemia --- */
-{id:'glicose',nome:'Glicose em jejum',cat:'glicemia',un:'mg/dL',dec:0,
+{id:'glicose',nome:'Glicose em jejum',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['glicose','glicemia','glicemia de jejum','glicose em jejum','glicose plasmatica'],
  ref:[70,99],crit:[50,300],conv:{'mmol/l':18.018},
  simples:'É o açúcar no sangue depois do jejum. Mostra como o corpo controla a glicose.',
@@ -468,14 +490,14 @@ const ANALYTES = [
  alto:'Entre 100 e 125 indica pré-diabetes; a partir de 126 (confirmado) indica diabetes.',
  baixo:'Hipoglicemia — pode causar tremor, suor e fraqueza; investigar se houver sintomas.'},
 
-{id:'hba1c',nome:'Hemoglobina glicada (HbA1c)',cat:'glicemia',un:'%',dec:1,
+{id:'hba1c',nome:'Hemoglobina glicada (HbA1c)',cat:'metabolico',un:'%',dec:1,
  ali:['hemoglobina glicada (a1c)','hemoglobina glicada','hemoglobina glicosilada','hba1c','hb glicada','a1c'],ref:[null,5.7],crit:[null,10],
  simples:'Mostra a média do açúcar no sangue dos últimos 2 a 3 meses.',
  tecnico:'5,7–6,4%: pré-diabetes. ≥6,5%: diabetes. Falseia em anemias, hemoglobinopatias e uremia.',
  alto:'De 5,7 a 6,4% indica pré-diabetes; 6,5% ou mais indica diabetes. Em quem já tem diabetes, mostra controle insuficiente.',
  baixo:'Valores baixos podem ocorrer em anemia ou hipoglicemias frequentes.'},
 
-{id:'insulina',nome:'Insulina em jejum',cat:'glicemia',un:'µU/mL',dec:1,ali:['insulina','insulina de jejum','insulina basal'],
+{id:'insulina',nome:'Insulina em jejum',cat:'metabolico',un:'µU/mL',dec:1,ali:['insulina','insulina de jejum','insulina basal'],
  ref:[2.6,20],conv:{'pmol/l':0.1443},
  simples:'Hormônio que coloca o açúcar para dentro das células.',
  tecnico:'Isolada tem baixa acurácia; usar com glicemia no HOMA-IR.',
@@ -643,30 +665,30 @@ const ANALYTES = [
  alto:'Sugere processo inflamatório; precisa de contexto clínico.',baixo:'Sem significado clínico.'},
 
 /* --- outros --- */
-{id:'cpk',nome:'CPK (creatinoquinase)',cat:'outros',un:'U/L',dec:0,ali:['creatinofosfoquinase','creatino fosfoquinase','cpk','ck total','creatinoquinase','creatina quinase','ck-total'],
+{id:'cpk',nome:'CPK (creatinoquinase)',cat:'muscular',un:'U/L',dec:0,ali:['creatinofosfoquinase','creatino fosfoquinase','cpk','ck total','creatinoquinase','creatina quinase','ck-total'],
  ref:{F:[26,192],M:[39,308]},crit:[null,1000],
  simples:'Enzima dos músculos. Sobe após exercício intenso ou lesão muscular.',
  tecnico:'Avaliar exercício recente, estatinas e rabdomiólise (>5× o limite com mialgia).',
  alto:'Exercício intenso recente, pancada muscular ou reação a medicamentos como estatinas.',baixo:'Sem significado clínico.'},
-{id:'ldh',nome:'LDH',cat:'outros',un:'U/L',dec:0,ali:['ldh','desidrogenase latica','lactato desidrogenase'],ref:[120,246],
+{id:'ldh',nome:'LDH',cat:'muscular',un:'U/L',dec:0,ali:['ldh','desidrogenase latica','lactato desidrogenase'],ref:[120,246],
  simples:'Enzima presente em quase todas as células.',tecnico:'Marcador inespecífico de dano tecidual e hemólise.',
  alto:'Inespecífico — hemólise, lesão muscular, infecções e outras causas.',baixo:'Sem significado clínico.'},
-{id:'amilase',nome:'Amilase',cat:'outros',un:'U/L',dec:0,ali:['amilase'],ref:[28,100],
+{id:'amilase',nome:'Amilase',cat:'pancreas',un:'U/L',dec:0,ali:['amilase'],ref:[28,100],
  simples:'Enzima do pâncreas e das glândulas salivares.',tecnico:'Menos específica que a lipase para pancreatite.',
  alto:'Pode indicar problema no pâncreas ou nas glândulas salivares.',baixo:'Sem significado clínico.'},
-{id:'lipase',nome:'Lipase',cat:'outros',un:'U/L',dec:0,ali:['lipase'],ref:[13,60],
+{id:'lipase',nome:'Lipase',cat:'pancreas',un:'U/L',dec:0,ali:['lipase'],ref:[13,60],
  simples:'Enzima do pâncreas.',tecnico:'Mais específica para pancreatite aguda (geralmente >3× o limite).',
  alto:'Valores muito altos com dor abdominal sugerem pancreatite — avaliação urgente.',baixo:'Sem significado clínico.'},
-{id:'psa',nome:'PSA total',cat:'outros',un:'ng/mL',dec:2,ali:['psa','psa total','antigeno prostatico especifico'],ref:[null,4],sexOnly:'M',
+{id:'psa',nome:'PSA total',cat:'prostata',un:'ng/mL',dec:2,ali:['psa','psa total','antigeno prostatico especifico'],ref:[null,4],sexOnly:'M',
  simples:'Exame de rastreio da próstata.',tecnico:'Interpretar com idade, volume prostático, toque retal e velocidade de PSA.',
  alto:'Pode ser aumento benigno da próstata, prostatite ou câncer — exige avaliação do urologista.',baixo:'Resultado favorável.'},
-{id:'testosterona',nome:'Testosterona total',cat:'outros',un:'ng/dL',dec:0,ali:['testosterona total','testosterona'],
+{id:'testosterona',nome:'Testosterona total',cat:'hormonios',un:'ng/dL',dec:0,ali:['testosterona total','testosterona'],
  ref:{F:[15,70],M:[250,836]},
  simples:'Principal hormônio masculino, presente também em mulheres em quantidade menor.',
  tecnico:'Colher entre 7h e 10h, em jejum; confirmar valor baixo em segunda amostra com SHBG.',
  alto:'Em mulheres, pode estar ligado a ovários policísticos; em homens, geralmente por uso de hormônio.',
  baixo:'Em homens, pode causar cansaço, queda de libido e perda de massa muscular.'},
-{id:'homocisteina',nome:'Homocisteína',cat:'outros',un:'µmol/L',dec:1,ali:['homocisteina'],ref:[5,15],
+{id:'homocisteina',nome:'Homocisteína',cat:'metabolico',un:'µmol/L',dec:1,ali:['homocisteina'],ref:[5,15],
  simples:'Substância que sobe quando faltam vitaminas do complexo B.',tecnico:'Marcador funcional de B12/folato e fator de risco vascular independente.',
  alto:'Sugere falta de B12, B6 ou folato; associa-se a risco cardiovascular.',baixo:'Sem significado clínico.'}
 ];
@@ -679,23 +701,23 @@ ANALYTES.push(
  tecnico:'Desvio à esquerda quando elevado; sugere infecção bacteriana aguda.',
  alto:'Aumento sugere infecção aguda em curso.',baixo:'Sem significado clínico.'},
 
-{id:'nao_hdl',nome:'Colesterol não-HDL',cat:'lipidios',un:'mg/dL',dec:0,
+{id:'nao_hdl',nome:'Colesterol não-HDL',cat:'metabolico',un:'mg/dL',dec:0,
  ali:['colesterol nao-hdl','nao-hdl','colesterol nao hdl','nao hdl'],ref:[null,160],
  simples:'Soma de todo o colesterol "ruim" — é um previsor de risco melhor que o LDL isolado.',
  tecnico:'Meta = LDL alvo + 30 mg/dL. Útil sobretudo com triglicerídeos altos.',
  alto:'Indica muitas partículas capazes de entupir artérias.',baixo:'Favorável.'},
 
-{id:'apo_b',nome:'Apolipoproteína B',cat:'lipidios',un:'mg/dL',dec:0,ali:['apolipoproteina b','apo b','apob'],ref:[null,100],
+{id:'apo_b',nome:'Apolipoproteína B',cat:'metabolico',un:'mg/dL',dec:0,ali:['apolipoproteina b','apo b','apob'],ref:[null,100],
  simples:'Conta o número de partículas ruins de gordura no sangue — quanto menor, melhor.',
  tecnico:'Marcador de risco superior ao LDL-C em discordância; metas por risco: <100 (baixo), <90, <70, <55, <45.',
  alto:'Muitas partículas aterogênicas — risco cardiovascular aumentado.',baixo:'Favorável.'},
 
-{id:'apo_a1',nome:'Apolipoproteína A-1',cat:'lipidios',un:'mg/dL',dec:0,ali:['apolipoproteina a-1','apolipoproteina a1','apo a1','apo a-1'],
+{id:'apo_a1',nome:'Apolipoproteína A-1',cat:'metabolico',un:'mg/dL',dec:0,ali:['apolipoproteina a-1','apolipoproteina a1','apo a1','apo a-1'],
  ref:{F:[76,214],M:[79,169]},
  simples:'Proteína principal do HDL, o colesterol "bom".',tecnico:'Usada na relação ApoB/ApoA-1 para estratificação de risco.',
  alto:'Costuma ser favorável.',baixo:'Acompanha HDL baixo.'},
 
-{id:'lipoproteina_a',nome:'Lipoproteína (a)',cat:'lipidios',un:'mg/dL',dec:1,ali:['lipoproteina - a','lipoproteina a','lp(a)','lipoproteina (a)'],ref:[null,30],
+{id:'lipoproteina_a',nome:'Lipoproteína (a)',cat:'metabolico',un:'mg/dL',dec:1,ali:['lipoproteina - a','lipoproteina a','lp(a)','lipoproteina (a)'],ref:[null,30],
  simples:'Um tipo de gordura determinado principalmente pela genética. Basta medir uma vez na vida.',
  tecnico:'≥50 mg/dL é fator agravante de risco cardiovascular; não responde a mudanças de estilo de vida.',
  alto:'Fator de risco herdado — reforça a necessidade de controlar os demais fatores.',baixo:'Favorável.'},
@@ -708,18 +730,18 @@ ANALYTES.push(
  alto:'Valores altos costumam ser normais.',
  baixo:'Filtração reduzida. Entre 60 e 89 é comum com a idade; abaixo de 60 merece acompanhamento e repetição em 3 meses.'},
 
-{id:'homa_ir',nome:'HOMA-IR',cat:'glicemia',un:'',dec:2,ali:['homa ir','homa-ir','homa 1-ir','indice homa ir'],ref:[null,2.7],
+{id:'homa_ir',nome:'HOMA-IR',cat:'metabolico',un:'',dec:2,ali:['homa ir','homa-ir','homa 1-ir','indice homa ir'],ref:[null,2.7],
  simples:'Índice que estima resistência à insulina — a dificuldade do corpo em usar a própria insulina.',
  tecnico:'HOMA-IR = (glicemia mg/dL × insulina µU/mL)/405. Ponto de corte populacional brasileiro ≈ 2,7.',
  alto:'Sugere resistência à insulina, passo anterior ao diabetes tipo 2. Responde bem a perda de peso e exercício.',
  baixo:'Boa sensibilidade à insulina.'},
 
-{id:'homa_beta',nome:'HOMA-Beta',cat:'glicemia',un:'%',dec:1,ali:['homa beta','homa-beta','homa b'],ref:null,
+{id:'homa_beta',nome:'HOMA-Beta',cat:'metabolico',un:'%',dec:1,ali:['homa beta','homa-beta','homa b'],ref:null,
  simples:'Estima o quanto o pâncreas está trabalhando para produzir insulina.',
  tecnico:'HOMA-β = (20 × insulina)/(glicemia mmol/L − 3,5). Interpretar junto ao HOMA-IR.',
  alto:'Pâncreas produzindo bastante insulina — comum na resistência à insulina.',baixo:'Pode sugerir menor reserva de insulina.'},
 
-{id:'glicemia_media',nome:'Glicemia média estimada',cat:'glicemia',un:'mg/dL',dec:0,ali:['glicemia media estimada','glicose media estimada'],ref:null,
+{id:'glicemia_media',nome:'Glicemia média estimada',cat:'metabolico',un:'mg/dL',dec:0,ali:['glicemia media estimada','glicose media estimada'],ref:null,
  simples:'Traduz a hemoglobina glicada em um valor médio de açúcar no sangue.',
  tecnico:'eAG = 28,7 × HbA1c − 46,7. Não validada em não diabéticos.',
  alto:'Acompanha a hemoglobina glicada.',baixo:'Acompanha a hemoglobina glicada.'},
@@ -735,11 +757,11 @@ ANALYTES.push(
  tecnico:'Não depende da albumina; preferível quando há alteração proteica.',
  alto:'Investigar hiperparatireoidismo e excesso de vitamina D.',baixo:'Pode causar formigamentos e cãibras.'},
 
-{id:'psa_livre',nome:'PSA livre',cat:'outros',un:'ng/mL',dec:2,ali:['psa livre'],ref:null,sexOnly:'M',
+{id:'psa_livre',nome:'PSA livre',cat:'prostata',un:'ng/mL',dec:2,ali:['psa livre'],ref:null,sexOnly:'M',
  simples:'Fração livre do PSA; usada junto com o PSA total.',tecnico:'Isolado não tem valor; usar a relação livre/total.',
  alto:'Avaliar pela relação livre/total.',baixo:'Avaliar pela relação livre/total.'},
 
-{id:'psa_relacao',nome:'Relação PSA livre/total',cat:'outros',un:'%',dec:1,
+{id:'psa_relacao',nome:'Relação PSA livre/total',cat:'prostata',un:'%',dec:1,
  ali:['porcentagem de psa livre/psa total','relacao psa livre/psa total','relacao psa livre/total'],ref:[25,null],sexOnly:'M',
  simples:'Ajuda a diferenciar aumento benigno da próstata de casos que exigem investigação.',
  tecnico:'Relevante quando PSA total está entre 4 e 10 ng/mL; <25% aumenta a suspeita de neoplasia.',
@@ -1931,10 +1953,16 @@ function analyze(op={}){
   html.push(evolucaoHtml(evo, ctx));
 
   /* 2. resultados fora da referência */
-  if (principais.length)
+  if (principais.length){
+    const gr = agruparPorCat(principais, ([id]) => byId[id].cat);
+    /* com um grupo só, o cabeçalho não informa nada — fica fora */
+    const corpo = gr.length > 1
+      ? gr.map(([cat, itens]) => `<h3 class="grp">${tituloCat(cat)}</h3>` + itens.map(cardDe).join('')).join('')
+      : principais.map(cardDe).join('');
     html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>
-      <p class="muted"><small>Em ordem de relevância clínica, não de tamanho do desvio.</small></p>` +
-      principais.map(cardDe).join('') + `</div>`);
+      <p class="muted"><small>Agrupados por sistema. Dentro de cada grupo, e entre os grupos, vale a
+      relevância clínica — não o tamanho do desvio.</small></p>` + corpo + `</div>`);
+  }
   if (secundarios.length)
     html.push(`<details class="menores"><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
       ${secundarios.map(([id]) => escapeHtml(byId[id].nome)).join(', ')}</summary>
@@ -1974,11 +2002,18 @@ function analyze(op={}){
       sugestoes.map(x => `<li style="margin-bottom:8px"><b>${escapeHtml(x.exame)}</b> — ${escapeHtml(x.porque)}</li>`).join('') +
       `</ul></div>`);
 
-  if (normais.length || infos.length)
-    html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>
-      <div class="mini">` + normais.concat(infos).map(([id,c]) =>
+  if (normais.length || infos.length){
+    /* aqui não há prioridade a preservar — todos estão na faixa —, então a ordem
+       é a das próprias categorias, que é a mesma do formulário e da impressão. */
+    const porCatN = {};
+    for (const [id,c] of normais.concat(infos)) (porCatN[byId[id].cat] = porCatN[byId[id].cat] || []).push([id,c]);
+    const blocos = Object.keys(CATS).filter(cat => porCatN[cat]).map(cat =>
+      `<h3 class="grp">${tituloCat(cat)}</h3><div class="mini">` + porCatN[cat].map(([id,c]) =>
         `<div><span>${escapeHtml(byId[id].nome)}</span><b>${fmt(vals[id], byId[id].dec)} ${escapeHtml(byId[id].un)}</b></div>`).join('') +
-      `</div></details>`);
+      `</div>`).join('');
+    html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>`
+      + blocos + `</details>`);
+  }
 
   /* Na impressão o passo 2 (formulário) não vai junto — no lugar dele sai uma tabela
      compacta com todos os exames, que é o que se leva para o médico. */
@@ -2452,14 +2487,17 @@ function evolucaoHtml(evo, ctx){
   return `<div class="card"><h2>📈 Evolução — coleta de ${dataBR(evo.dataAtual)}</h2>
     <p class="muted"><small><b>As colunas comparam com a coleta anterior, ${dataBR(evo.prev.data)}.</b>
     A miniatura de tendência mostra a série inteira${nSerie > 2 ? `: ${nSerie} coletas desde ${dataBR(inicio)}` : ''}.
-    Todos os ${evo.linhas.length} exames deste laudo, em ordem de relevância clínica —
-    variações maiores do que esse exame costuma oscilar, cruzamentos da faixa e resultados que seguem alterados vêm primeiro.
+    Todos os ${evo.linhas.length} exames deste laudo, agrupados por sistema. Dentro de cada grupo, e entre os
+    grupos, vale a relevância clínica — variações maiores do que esse exame costuma oscilar, cruzamentos da
+    faixa e resultados que seguem alterados vêm primeiro.
     Cada valor é comparado com a faixa que valia na época de cada coleta.</small></p>
     <table class="evo"><thead><tr><th>Exame</th><th>Tendência</th>
       <th style="text-align:right">${dataBR(evo.prev.data)}</th>
       <th style="text-align:right">${dataBR(evo.dataAtual)}</th>
       <th style="text-align:right">Variação</th></tr></thead>
-      <tbody>${evo.linhas.map(linha).join('')}</tbody></table></div>`;
+      <tbody>${agruparPorCat(evo.linhas, L => L.a.cat).map(([cat, ls]) =>
+        `<tr class="cat"><td colspan="5">${tituloCat(cat)}</td></tr>` + ls.map(linha).join('')
+      ).join('')}</tbody></table></div>`;
 }
 
 /* ---------- 13. Leitura da série -----------------------------------------
