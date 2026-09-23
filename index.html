@@ -2362,6 +2362,46 @@ const CVI = {
   pcr:42, vhs:20, cpk:23, ldh:8.6, amilase:9, lipase:15,
   psa:14, psa_livre:15, psa_relacao:12, testosterona:9, homocisteina:8, pth:25
 };
+/* Em alguns exames a tendência É o sinal: um PSA que sobe devagar, uma filtração renal
+   que cai, um TSH que deriva, uma hemoglobina que escorrega ano a ano. São os exames em que
+   uma tendência confirmada antecede doença, e por isso aparecem mesmo quando discretos.
+   Nos demais, a tendência quase sempre conta uma história de hábito, remédio ou variação
+   natural — importante, mas de outra natureza. */
+const SENTINELA = {
+  psa:'a velocidade de subida é o que se acompanha na próstata, mais que o valor isolado',
+  psa_livre:'acompanha o PSA total', psa_relacao:'acompanha o PSA total',
+  creatinina:'queda sustentada da filtração é como a doença renal crônica se instala',
+  tfg:'queda sustentada da filtração é como a doença renal crônica se instala',
+  tsh:'a tireoide costuma perder função aos poucos, antes de qualquer valor sair da faixa',
+  t4_livre:'acompanha o TSH na avaliação da tireoide',
+  pth:'PTH subindo de forma sustentada, com cálcio normal, pede investigação',
+  calcio:'cálcio em subida sustentada acompanha doenças da paratireoide',
+  calcio_ionico:'é a fração ativa do cálcio', fosforo:'acompanha cálcio e PTH no metabolismo ósseo',
+  hemoglobina:'muitas anemias começam como uma queda lenta, ainda dentro da faixa',
+  hematocrito:'acompanha a hemoglobina', hemacias:'acompanha a hemoglobina',
+  vcm:'mudança sustentada no tamanho das hemácias antecede carências',
+  plaquetas:'queda sustentada das plaquetas pede avaliação hematológica',
+  leucocitos:'alteração sustentada na contagem pede avaliação hematológica',
+  linfocitos_abs:'linfocitose lentamente progressiva em adulto pede avaliação',
+  neutrofilos_abs:'queda sustentada dos neutrófilos pede avaliação',
+  ferritina:'subida sustentada sugere sobrecarga ou inflamação; queda, depleção de ferro',
+  sat_transferrina:'acompanha a ferritina na avaliação do ferro',
+  tgp:'enzima do fígado em subida sustentada indica processo em curso',
+  tgo:'acompanha a TGP na avaliação do fígado',
+  ggt:'subida sustentada acompanha álcool, medicamentos e gordura no fígado',
+  fosfatase_alcalina:'subida sustentada aponta para vias biliares ou osso',
+  bilirrubina_total:'subida sustentada pede avaliação hepática',
+  albumina:'queda sustentada é sinal de doença crônica ou desnutrição',
+  proteinas_totais:'acompanha a albumina',
+  hba1c:'é o marcador da progressão para o diabetes'
+};
+
+/* Exames em que tendência não diz nada: percentuais do diferencial (um sobe só porque
+   outro desce), índices derivados de outro exame e frações calculadas. Aqui uma "tendência"
+   é aritmética ou ruído, nunca um sinal. */
+const SEM_TENDENCIA = new Set(['neutrofilos_pct','linfocitos_pct','monocitos_pct','eosinofilos_pct',
+  'basofilos_pct','neutrofilos_bast','hcm','chcm','rdw','vldl','glicemia_media','homa_beta','nao_hdl']);
+
 /* exames em que o tempo de duplicação é uma leitura consagrada */
 const DUPLICACAO = ['psa'];
 
@@ -2423,7 +2463,13 @@ function ajusteDegrau(pts){
     if (!melhor || sse < melhor.sse) melhor = {sse, j, me, md};
   }
   if (!melhor) return null;
-  return {...melhor, r2: 1 - melhor.sse/sst, quando: pts[melhor.j].data,
+  /* dois patamares de verdade são estáveis dentro de si: se a dispersão de um grupo é da
+     ordem do degrau, aquilo não é patamar, é oscilação */
+  const faixa = xs => Math.max(...xs) - Math.min(...xs);
+  const gap = Math.abs(melhor.md - melhor.me);
+  const estaveis = gap > 0 &&
+    faixa(ys.slice(0,melhor.j)) <= gap*0.8 && faixa(ys.slice(melhor.j)) <= gap*0.8;
+  return {...melhor, estaveis, r2: 1 - melhor.sse/sst, quando: pts[melhor.j].data,
     separados: Math.min(...ys.slice(melhor.j)) > Math.max(...ys.slice(0,melhor.j)) ||
                Math.max(...ys.slice(melhor.j)) < Math.min(...ys.slice(0,melhor.j))};
 }
@@ -2474,7 +2520,7 @@ function analisarSerie(vals, st, ctx){
     }
 
     /* 2. tendência: inclinação por ano, só com série longa e movimento consistente */
-    if (pts.length >= 3){
+    if (pts.length >= 3 && !SEM_TENDENCIA.has(id)){
       const meses = mesesEntre(pts[0].data, pts[pts.length-1].data);
       const varTotal = (pts[pts.length-1].v - pts[0].v) / Math.abs(pts[0].v) * 100;
       const reg = regressao(pts);
@@ -2484,37 +2530,48 @@ function analisarSerie(vals, st, ctx){
       /* Reversão: a série subiu (ou caiu) e voltou. Descrever isso como "subindo X por
          ano" esconde justamente o que mudou — foi o que aconteceu com um PTH que foi a
          66,9 e recuou para 43,6 nas duas últimas coletas. */
+      const ehSentinela = !!SENTINELA[id];
+      const rigor = ehSentinela ? 1 : 1.6;   /* fora das sentinelas, só tendências marcantes */
       let reversao = null;
       if (pts.length >= 5){
         const vs = pts.map(p => p.v), n = vs.length;
+        const media = xs => xs.reduce((a,b)=>a+b,0)/xs.length;
         for (const [i, forma] of [[vs.indexOf(Math.max(...vs)),'pico'], [vs.indexOf(Math.min(...vs)),'vale']]){
           if (i < 1 || i > n-3) continue;                  /* precisa de 2 coletas depois */
-          const ida = (vs[i]-vs[0])/Math.abs(vs[0])*100, volta = (vs[n-1]-vs[i])/Math.abs(vs[i])*100;
-          if (Math.sign(ida) === Math.sign(volta)) continue;
-          if (Math.abs(ida) > rcv && Math.abs(volta) > rcv/2){
-            reversao = {forma, i, ida, volta, extremo:pts[i], firme: Math.abs(volta) > rcv};
+          /* um pico isolado é ruído: o extremo precisa ser acompanhado pelo vizinho, e as
+             pontas são lidas como média de duas coletas, não como pontos soltos */
+          const viz = forma === 'pico' ? Math.max(vs[i-1], vs[i+1]) : Math.min(vs[i-1], vs[i+1]);
+          const topo = media([vs[i], viz]);
+          const inicio = media(vs.slice(0, 2)), fim = media(vs.slice(-2));
+          const ida = (topo - inicio)/Math.abs(inicio)*100, volta = (fim - topo)/Math.abs(topo)*100;
+          if (Math.sign(ida) === Math.sign(volta) || !ida || !volta) continue;
+          /* num exame sentinela, uma volta insinuada em duas coletas seguidas já merece ser
+             dita (e o texto avisa que ainda não é conclusiva); nos demais, o critério é duro */
+          const limiarVolta = ehSentinela ? rcv/3 : rcv*rigor/2;
+          if (Math.abs(ida) > rcv*rigor && Math.abs(volta) > limiarVolta){
+            reversao = {forma, i, ida, volta, extremo:pts[i], firme: Math.abs(volta) > rcv*rigor};
             break;
           }
         }
       }
       const degrau = pts.length >= 5 ? ajusteDegrau(pts) : null;
-      const ehDegrau = degrau && degrau.separados && degrau.r2 > (reg ? reg.r2 + 0.1 : 0.6) &&
+      const ehDegrau = degrau && degrau.separados && degrau.estaveis && degrau.r2 > (reg ? reg.r2 + 0.1 : 0.6) &&
         Math.abs((degrau.md - degrau.me)/Math.abs(degrau.me)*100) > rcv;
       if (meses >= 6 && reversao){
-        tendencias.push({tipo:'reversao', id, a, prio, meses, n:pts.length, trocouMetodo,
+        tendencias.push({tipo:'reversao', id, a, prio, meses, n:pts.length, trocouMetodo, sentinela:ehSentinela,
           varTotal:reversao.volta, ...reversao, de:pts[0], ate:pts[pts.length-1]});
       } else if (meses >= 6 && ehDegrau){
-        tendencias.push({tipo:'patamar', id, a, prio, meses, n:pts.length, trocouMetodo,
+        tendencias.push({tipo:'patamar', id, a, prio, meses, n:pts.length, trocouMetodo, sentinela:ehSentinela,
           varTotal: (degrau.md - degrau.me)/Math.abs(degrau.me)*100,
           mi:degrau.me, mf:degrau.md, quando:degrau.quando,
           de:pts[0], ate:pts[pts.length-1]});
-      } else if (meses >= 6 && Math.abs(varTotal) > rcv && consistente){
+      } else if (meses >= 6 && Math.abs(varTotal) > rcv*rigor && consistente){
         let duplica = null;
         if (DUPLICACAO.includes(id) && reg.slope > 0 && pts.every(p => p.v > 0)){
           const ln = regressao(pts.map(p => ({data:p.data, v:Math.log(p.v)})));
           if (ln && ln.slope > 0) duplica = Math.log(2)/ln.slope*12;   /* meses */
         }
-        tendencias.push({tipo:'reta', id, a, prio, slope:reg.slope, r2:reg.r2, meses, varTotal,
+        tendencias.push({tipo:'reta', id, a, prio, slope:reg.slope, r2:reg.r2, meses, varTotal, sentinela:ehSentinela,
           de:pts[0], ate:pts[pts.length-1], n:pts.length, duplica, trocouMetodo});
       }
     }
@@ -2562,12 +2619,8 @@ function serieHtml(an){
         ${resto.map(bloco).join('')}</details>` : '') + `</details>`);
   }
 
-  if (an.tendencias.length)
-    blocos.push(`<details class="recolhivel"><summary>Tendências
-      <span class="conta">${an.tendencias.length}</span></summary>
-      <p class="muted"><small>Direção consistente ao longo de pelo menos 6 meses, com variação total maior
-      que a oscilação esperada para o exame. A velocidade é a inclinação da reta ajustada à série.</small></p>` +
-      an.tendencias.map(t => `<div class="pat">
+  if (an.tendencias.length){
+    const blocoT = t => `<div class="pat">
         <h3>${escapeHtml(t.a.nome)} — ${
           t.tipo === 'reta' ? `${t.slope > 0 ? 'subindo' : 'caindo'} ${fmt(Math.abs(t.slope), Math.max(t.a.dec,1))} ${escapeHtml(t.a.un)} por ano`
           : t.tipo === 'patamar' ? `mudou de patamar (${t.varTotal > 0 ? 'subiu' : 'caiu'} e estabilizou)`
@@ -2583,7 +2636,29 @@ function serieHtml(an){
             : 'A volta ainda está dentro da oscilação esperada para este exame — vale confirmar na próxima coleta.'}` : ''}
         ${t.duplica && t.duplica < 600 ? `<b>Tempo de duplicação estimado: ${fmt(t.duplica,0)} meses.</b>` : ''}
         ${t.trocouMetodo ? `<b>⚠️ Atenção:</b> o laboratório mudou a faixa de referência deste exame dentro do período —
-          parte desta variação pode ser troca de método, e não mudança sua.` : ''}</p></div>`).join('') + `</details>`);
+          parte desta variação pode ser troca de método, e não mudança sua.` : ''}</p>
+        ${t.sentinela ? `<div class="why"><b>Por que acompanhar:</b> ${escapeHtml(SENTINELA[t.id])}.</div>` : ''}</div>`;
+
+    const sentinelas = an.tendencias.filter(t => t.sentinela);
+    const estilo = an.tendencias.filter(t => !t.sentinela);
+    blocos.push(`<details class="recolhivel"><summary>Tendências
+      <span class="conta">${sentinelas.length || an.tendencias.length}</span></summary>
+      <p class="muted"><small>Direção consistente ao longo de pelo menos 6 meses, com variação maior que a
+      oscilação esperada para aquele exame. Separadas pelo que uma tendência confirmada costuma significar
+      em cada exame.</small></p>` +
+      (sentinelas.length
+        ? `<h4 style="margin:12px 0 4px">Exames em que a tendência é, por si, um sinal</h4>
+           <p class="muted"><small>Aqui uma direção sustentada pode anteceder doença, mesmo com todos os
+           valores ainda dentro da faixa.</small></p>` + sentinelas.map(blocoT).join('')
+        : `<p class="muted"><small>Nenhuma tendência nos exames em que ela costuma anteceder doença.</small></p>`) +
+      (estilo.length
+        ? `<details style="margin-top:12px"><summary>${estilo.length} tendência(s) em exames que respondem a
+             hábito, tratamento ou variação natural</summary>
+           <p class="muted"><small>Nestes exames, uma direção sustentada costuma contar a história de dieta,
+           peso, exercício, álcool, suplemento ou medicação — importante, mas de outra natureza.</small></p>`
+           + estilo.map(blocoT).join('') + `</details>`
+        : '') + `</details>`);
+  }
 
   if (an.pessoais.length)
     blocos.push(`<h3 style="margin-top:18px">Fora do seu padrão, dentro da faixa</h3>

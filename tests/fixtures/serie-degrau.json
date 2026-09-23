@@ -1,0 +1,412 @@
+{
+ "versao": 1,
+ "descricao": "Série curta com degrau limpo na hemoglobina, PSA estável e basófilos ruidosos",
+ "exames": [
+  {
+   "data": "2024-02-05",
+   "salvo_em": "2024-02-05T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 9.2,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.2,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.2,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-05-13",
+   "salvo_em": "2024-05-13T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 9.4,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.3,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.6,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-08-19",
+   "salvo_em": "2024-08-19T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 9.1,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.25,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.3,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2024-11-25",
+   "salvo_em": "2024-11-25T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 12.2,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.35,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.7,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2025-03-03",
+   "salvo_em": "2025-03-03T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 12.4,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.28,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.2,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2025-06-09",
+   "salvo_em": "2025-06-09T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 12.1,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.32,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.5,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  },
+  {
+   "data": "2025-09-15",
+   "salvo_em": "2025-09-15T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 54,
+    "peso": 82,
+    "altura": 176,
+    "cintura": 94,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 12.3,
+     "un": "g/dL",
+     "ref": [
+      13,
+      17.5
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "psa": {
+     "v": 1.3,
+     "un": "ng/mL",
+     "ref": [
+      null,
+      4
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "creatinina": {
+     "v": 1,
+     "un": "mg/dL",
+     "ref": [
+      0.76,
+      1.24
+     ],
+     "refLab": true,
+     "origem": "pdf"
+    },
+    "basofilos_pct": {
+     "v": 0.3,
+     "un": "%",
+     "ref": [
+      0,
+      2
+     ],
+     "refLab": false,
+     "origem": "pdf"
+    }
+   }
+  }
+ ]
+}

@@ -138,7 +138,19 @@ constante conservadora — por isso o app trata os resultados como suporte, não
    seguidas, **em melhora**: 9,2 → 12,1 g/dL". Dizer só "sempre abaixo" esconderia uma recuperação
    de 3 g/dL. É a repetição que transforma um achado isolado em algo a investigar; a própria
    definição de doença renal crônica exige persistência por ≥3 meses.
-2. **Tendências**, com três formas possíveis, escolhidas por comparação de modelos — descrever
+2. **Tendências**, separadas pela natureza do exame antes de qualquer estatística:
+   - **exames sentinela** (`SENTINELA`) — PSA, creatinina e TFG, TSH e T4 livre, PTH e cálcio,
+     hemoglobina e plaquetas, enzimas hepáticas, HbA1c: aqui a tendência **é** o sinal, e uma
+     direção sustentada pode anteceder doença mesmo com tudo dentro da faixa. Cada um traz uma
+     linha dizendo por que acompanhar, e o critério é mais sensível;
+   - **exames que respondem a hábito, tratamento ou variação natural** — lipídios, glicose,
+     ferro, vitaminas, CPK: a tendência importa, mas conta outra história. Ficam num bloco
+     recolhido e exigem variação bem maior para aparecer;
+   - **exames em que tendência não diz nada** (`SEM_TENDENCIA`) — percentuais do diferencial,
+     índices derivados de outro exame: ficam fora da análise, porque ali uma "tendência" é
+     aritmética ou ruído.
+
+   Dentro disso, três formas possíveis, escolhidas por comparação de modelos — descrever
    um salto como "subindo X por ano" mente sobre o formato da série:
    - **reta** — inclinação em **unidades por ano**; para o PSA, também o **tempo de duplicação**;
    - **mudança de patamar** — subiu (ou caiu) e estabilizou noutro nível, com a data do salto;

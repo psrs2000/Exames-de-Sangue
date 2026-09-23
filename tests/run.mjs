@@ -199,7 +199,10 @@ try {
        'persistência informa a direção (em melhora)');
     ok(/Paratormônio \(PTH\) — subiu e voltou a cair/.test(serie), 'reversão reconhecida (pico e recuo)');
     ok(/PSA total — subindo/.test(serie) && /duplicação/.test(serie), 'tendência linear com tempo de duplicação');
-    ok(/Ferritina — mudou de patamar/.test(serie), 'mudança de patamar reconhecida');
+    ok(/Paratormônio \(PTH\) — subiu e voltou a cair/.test(serie), 'reversão preservada nos exames sentinela');
+    ok(/Por que acompanhar/.test(serie), 'tendência sentinela explica por que acompanhar');
+    ok(!/Basófilos/.test(serie), 'percentual do diferencial não vira tendência');
+    ok(/respondem a\s+hábito, tratamento ou varia/.test(serie), 'tendências de estilo de vida ficam em bloco separado');
     ok(/troca de método|mudou a faixa de referência/.test(serie), 'aviso de troca de método presente');
 
     /* a ordem das seções é decisão de leitura, não acidente */
@@ -224,6 +227,22 @@ try {
       return Object.entries(ultimo.valores).filter(([,v]) => v.origem === 'calculado').map(([k]) => k);
     });
     ok(calculados.length > 0, 'valores calculados entram no histórico', `calculados: ${calculados.join(', ') || 'nenhum'}`);
+    await ctx.close();
+  }
+
+  /* ---------- 4b. formas da tendência numa série curta e controlada ---------- */
+  console.log('\n\x1b[1mSérie sintética: degrau limpo, exame estável e exame ruidoso\x1b[0m');
+  {
+    const ctx = await navegador.newContext();
+    const p = await novaPagina(ctx, erros);
+    await importar(p, 'serie-degrau.json');
+    await abrirColeta(p, 0);
+    const serie = await textoDoCard(p, 'Leitura da série');
+    ok(/Hemoglobina — mudou de patamar/.test(serie), 'degrau limpo é reconhecido como mudança de patamar');
+    ok(!/PSA total —/.test(serie), 'exame estável não vira tendência');
+    ok(!/Basófilos/.test(serie), 'exame ruidoso não vira tendência');
+    ok(/Hemoglobina — abaixo da referência em 7 coleta\(s\) seguida\(s\), em melhora/.test(serie),
+       'persistência em melhora mesmo com a tendência em degrau');
     await ctx.close();
   }
 
