@@ -1,0 +1,59 @@
+{
+ "versao": 1,
+ "descricao": "Laudo com hemácias lidas errado — as contas do hemograma não fecham",
+ "espera": {
+  "incoerencias": 1
+ },
+ "exames": [
+  {
+   "data": "2025-01-21",
+   "salvo_em": "2025-01-21T10:00:00.000Z",
+   "perfil": {
+    "sexo": "M",
+    "idade": 60,
+    "peso": 80,
+    "altura": 175,
+    "cintura": 95,
+    "pas": 120,
+    "pad": 80,
+    "jejum": 12,
+    "gestante": false,
+    "atleta": false
+   },
+   "valores": {
+    "hemoglobina": {
+     "v": 12,
+     "origem": "pdf"
+    },
+    "hemacias": {
+     "v": 2,
+     "origem": "pdf"
+    },
+    "hematocrito": {
+     "v": 36.4,
+     "origem": "pdf"
+    },
+    "vcm": {
+     "v": 80.7,
+     "origem": "pdf"
+    },
+    "hcm": {
+     "v": 26.6,
+     "origem": "pdf"
+    },
+    "chcm": {
+     "v": 33,
+     "origem": "pdf"
+    },
+    "leucocitos": {
+     "v": 5800,
+     "origem": "pdf"
+    },
+    "plaquetas": {
+     "v": 210000,
+     "origem": "pdf"
+    }
+   }
+  }
+ ]
+}

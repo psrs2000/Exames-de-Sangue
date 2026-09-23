@@ -57,6 +57,12 @@ aparelho é independente — quem viaja entre eles é o arquivo `historico-exame
   de dois lados no lugar do alvo — a ApoB de 128 mg/dL cabe no 46–174 do laboratório e ainda
   assim está acima de qualquer alvo terapêutico.
 - **Conversão de unidades** (mmol/L, µmol/L, nmol/L, mcg/dL, 10³/µL, mil/mm³ etc.).
+- **Checagem de coerência interna**: um laudo tem relações fixas entre os próprios números —
+  HCM é hemoglobina ÷ hemácias, VCM é hematócrito ÷ hemácias, o colesterol total é a soma das
+  frações, a bilirrubina direta não passa da total, os percentuais do diferencial somam 100.
+  Quando as contas não fecham, a tela de conferência avisa, marca os campos envolvidos e aponta
+  o valor que entra em mais contas erradas. É o único jeito de pegar um erro de leitura cujo
+  número, isolado, parece plausível.
 - **Defesas contra ler o número errado**: tabelas de *resultados anteriores* são ignoradas (os números
   são reais, mas de outras coletas), números seguidos de palavras que não são unidade ("12 horas") são
   descartados, linhas de referência continuadas pertencem ao exame da linha anterior, e a etiqueta
@@ -201,7 +207,7 @@ principalmente para **não deixar o app viciar num único laudo e num único pac
 | `laudo-blocos.pdf` | formato de laudo em blocos (`TÍTULO` … `RESULTADO:`), com as armadilhas que já causaram bugs: rodapé entre o cabeçalho e o resultado, `(A1C)`, seção pediátrica, faixas por sexo, percentual e absoluto na mesma linha, meta terapêutica × faixa populacional |
 | `laudo-tabela.pdf` | formato de laudo em tabela, de outro laboratório fictício, com abreviações pontuadas (`V.C.M.`) — foi ele que revelou que o leitor estava preso a um único leiaute |
 | `laudo-bullets.pdf` | resultados marcados com hífen (`- COLESTEROL HDL : 32 mg/dL`), nota com "jejum de 12 horas", referência continuada em outra linha e **tabela de resultados anteriores** — três formas diferentes de o leitor pegar o número errado |
-| `casos/*.json` | seis perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida |
+| `casos/*.json` | sete perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida, e um hemograma internamente incoerente |
 | `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
 
 Os dois laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não

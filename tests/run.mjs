@@ -130,7 +130,7 @@ try {
        `extraiu ${Object.keys(r.valores).length}`);
     igual(r.valores.vcm, 72.4, 'abreviação pontuada "V.C.M." é reconhecida');
     igual(r.valores.rdw, 17.8, 'abreviação pontuada "R.D.W." é reconhecida');
-    igual(r.valores.hemacias, 3.82, '"Eritrócitos" é sinônimo de hemácias');
+    igual(r.valores.hemacias, 4.5, '"Eritrócitos" é sinônimo de hemácias');
     igual(r.labRefs.hemoglobina, [12, 15.5], 'faixa do laboratório lida da coluna de referência');
     igual(r.valores.sat_transferrina, 8, 'saturação de transferrina extraída');
     await ctx.close();
@@ -151,6 +151,7 @@ try {
     igual(r.labRefs.ldl, undefined, 'meta pediátrica de LDL não é adotada para adulto');
     igual(r.labRefs.triglicerideos, undefined, 'duas metas de triglicerídeos (com e sem jejum) = ambíguo, usa a geral');
     igual(r.labRefs.hdl, [40, null], 'faixa de HDL do laudo é adotada');
+    igual(await p.locator('#values .alert.warn').count(), 0, 'laudo coerente não dispara falso alarme');
     await ctx.close();
   }
 
@@ -174,6 +175,14 @@ try {
       ok(sugestoes.toLowerCase().includes(t.toLowerCase()), `  ${arquivo}: sugere exame com "${t}"`);
     if (caso.espera.criticos)
       ok(/pedem atenção rápida/.test(resumo), `  ${arquivo}: aviso de valor crítico`);
+    if (caso.espera.incoerencias){
+      const avisos = await p.locator('#values .alert.warn li').allTextContents();
+      ok(avisos.length >= caso.espera.incoerencias, `  ${arquivo}: laudo incoerente é sinalizado`,
+         `avisos: ${avisos.length}`);
+      ok(/Hemácias/.test(await p.locator('#values .alert.warn').innerText()),
+         `  ${arquivo}: aponta o valor com mais chance de estar errado`);
+      ok(await p.locator('.vrow.suspeito').count() > 0, `  ${arquivo}: campos suspeitos ficam marcados`);
+    }
     await ctx.close();
   }
 

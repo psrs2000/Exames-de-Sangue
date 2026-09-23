@@ -94,6 +94,8 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
 .grp>h3{display:flex;align-items:center;gap:8px;font-size:.95rem;margin-bottom:6px;
   padding-bottom:5px;border-bottom:1px solid var(--border)}
 .vrow{display:grid;grid-template-columns:1fr 104px 84px 30px;gap:8px;align-items:center;padding:5px 0}
+.vrow.suspeito input{border-color:var(--warn);background:var(--warn-soft)}
+.vrow.suspeito .nm::after{content:'⚠️';font-size:.8rem}
 .vrow .nm{font-size:.9rem;display:flex;align-items:center;gap:6px;min-width:0}
 .vrow .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vrow .un{font-size:.78rem;color:var(--muted);font-family:var(--mono)}
@@ -1173,6 +1175,104 @@ const refText = (a, ctx) => {
   return `acima de ${fmt(r[0],a.dec)}`;
 };
 
+/* ---------- 4b. Coerência interna do laudo -------------------------------
+   Um laudo tem relações fixas entre seus próprios números: o HCM é a hemoglobina
+   dividida pelas hemácias, o colesterol total é a soma das frações, a bilirrubina
+   direta não pode passar da total. Quando as contas não fecham, algum valor foi lido
+   errado — e esse é o tipo de erro que nenhuma faixa de referência pega, porque o
+   número isolado parece plausível. Foi assim que um "hemácias 2,00" passou despercebido
+   ao lado de uma hemoglobina de 12,0.
+   ------------------------------------------------------------------------ */
+const tem = (v, ...ids) => ids.every(id => v[id] != null && isFinite(v[id]));
+const fora = (a, b, tol) => Math.abs(a - b) > Math.abs(b) * tol;
+
+const COERENCIA = [
+  {ids:['hemoglobina','hemacias','hcm'], testa(v){
+    if (!tem(v,'hemoglobina','hemacias') || v.hemacias <= 0) return null;
+    const calc = v.hemoglobina * 10 / v.hemacias;
+    if (tem(v,'hcm') && fora(calc, v.hcm, 0.15))
+      return `hemoglobina ${fmt(v.hemoglobina,1)} ÷ hemácias ${fmt(v.hemacias,2)} daria HCM de ${fmt(calc,1)} pg, mas o laudo traz ${fmt(v.hcm,1)} pg`;
+    if (!tem(v,'hcm') && (calc < 18 || calc > 42))
+      return `hemoglobina ${fmt(v.hemoglobina,1)} com hemácias ${fmt(v.hemacias,2)} daria HCM de ${fmt(calc,1)} pg (fisiologicamente 18 a 42)`;
+    return null;
+  }},
+  {ids:['hematocrito','hemacias','vcm'], testa(v){
+    if (!tem(v,'hematocrito','hemacias') || v.hemacias <= 0) return null;
+    const calc = v.hematocrito * 10 / v.hemacias;
+    if (tem(v,'vcm') && fora(calc, v.vcm, 0.15))
+      return `hematócrito ${fmt(v.hematocrito,1)} ÷ hemácias ${fmt(v.hemacias,2)} daria VCM de ${fmt(calc,1)} fL, mas o laudo traz ${fmt(v.vcm,1)} fL`;
+    return null;
+  }},
+  {ids:['hemoglobina','hematocrito','chcm'], testa(v){
+    if (!tem(v,'hemoglobina','hematocrito') || v.hematocrito <= 0) return null;
+    const calc = v.hemoglobina * 100 / v.hematocrito;
+    if (tem(v,'chcm') && fora(calc, v.chcm, 0.1))
+      return `hemoglobina ÷ hematócrito daria CHCM de ${fmt(calc,1)}, mas o laudo traz ${fmt(v.chcm,1)} g/dL`;
+    if (!tem(v,'chcm') && (calc < 28 || calc > 38))
+      return `hemoglobina ${fmt(v.hemoglobina,1)} e hematócrito ${fmt(v.hematocrito,1)} não combinam (CHCM implícito de ${fmt(calc,1)})`;
+    return null;
+  }},
+  {ids:['neutrofilos_pct','linfocitos_pct','monocitos_pct','eosinofilos_pct','basofilos_pct','neutrofilos_bast'], testa(v){
+    const partes = ['neutrofilos_pct','linfocitos_pct','monocitos_pct','eosinofilos_pct','basofilos_pct','neutrofilos_bast']
+      .filter(id => v[id] != null);
+    if (partes.length < 4) return null;
+    const soma = partes.reduce((a,id) => a + v[id], 0);
+    return Math.abs(soma - 100) > 6
+      ? `os percentuais do diferencial somam ${fmt(soma,1)}% (deveriam somar 100%)` : null;
+  }},
+  {ids:['leucocitos','neutrofilos_pct','neutrofilos_abs'], testa(v){
+    if (!tem(v,'leucocitos','neutrofilos_pct','neutrofilos_abs')) return null;
+    const calc = v.leucocitos * v.neutrofilos_pct / 100;
+    return fora(calc, v.neutrofilos_abs, 0.25)
+      ? `${fmt(v.neutrofilos_pct,1)}% de ${fmt(v.leucocitos,0)} leucócitos daria ${fmt(calc,0)} neutrófilos, mas o laudo traz ${fmt(v.neutrofilos_abs,0)}` : null;
+  }},
+  {ids:['colesterol_total','hdl','ldl','vldl'], testa(v){
+    if (!tem(v,'colesterol_total','hdl','ldl','vldl')) return null;
+    const soma = v.hdl + v.ldl + v.vldl;
+    return fora(soma, v.colesterol_total, 0.12)
+      ? `HDL + LDL + VLDL somam ${fmt(soma,0)}, mas o colesterol total é ${fmt(v.colesterol_total,0)} mg/dL` : null;
+  }},
+  {ids:['colesterol_total','hdl','nao_hdl'], testa(v){
+    if (!tem(v,'colesterol_total','hdl','nao_hdl')) return null;
+    const calc = v.colesterol_total - v.hdl;
+    return fora(calc, v.nao_hdl, 0.1)
+      ? `colesterol total menos HDL daria ${fmt(calc,0)} de não-HDL, mas o laudo traz ${fmt(v.nao_hdl,0)} mg/dL` : null;
+  }},
+  {ids:['bilirrubina_total','bilirrubina_direta'], testa(v){
+    return tem(v,'bilirrubina_total','bilirrubina_direta') && v.bilirrubina_direta > v.bilirrubina_total * 1.02
+      ? `a bilirrubina direta (${fmt(v.bilirrubina_direta,2)}) não pode ser maior que a total (${fmt(v.bilirrubina_total,2)})` : null;
+  }},
+  {ids:['proteinas_totais','albumina'], testa(v){
+    return tem(v,'proteinas_totais','albumina') && v.albumina > v.proteinas_totais * 1.02
+      ? `a albumina (${fmt(v.albumina,1)}) não pode ser maior que as proteínas totais (${fmt(v.proteinas_totais,1)})` : null;
+  }},
+  {ids:['hba1c','glicemia_media'], testa(v){
+    if (!tem(v,'hba1c','glicemia_media')) return null;
+    const calc = 28.7 * v.hba1c - 46.7;
+    return fora(calc, v.glicemia_media, 0.15)
+      ? `uma HbA1c de ${fmt(v.hba1c,1)}% corresponde a cerca de ${fmt(calc,0)} mg/dL de glicemia média, mas o laudo traz ${fmt(v.glicemia_media,0)}` : null;
+  }},
+  {ids:['creatinina','tfg'], testa(v, ctx){
+    if (!tem(v,'creatinina','tfg') || !(ctx.age > 17) || v.creatinina <= 0) return null;
+    const k = ctx.sex === 'F' ? 0.7 : 0.9, al = ctx.sex === 'F' ? -0.241 : -0.302;
+    const calc = 142 * Math.pow(Math.min(v.creatinina/k,1), al) * Math.pow(Math.max(v.creatinina/k,1), -1.2)
+      * Math.pow(0.9938, ctx.age) * (ctx.sex === 'F' ? 1.012 : 1);
+    /* o laudo às vezes trunca em "superior a 90"; só reclamamos de divergência grande */
+    return (calc < 88 || v.tfg < 88) && fora(calc, v.tfg, 0.3)
+      ? `creatinina ${fmt(v.creatinina,2)} aos ${ctx.age} anos daria TFG de cerca de ${fmt(calc,0)}, mas o laudo traz ${fmt(v.tfg,0)} mL/min/1,73m²` : null;
+  }}
+];
+
+function checarCoerencia(vals, ctx){
+  const achados = [];
+  for (const regra of COERENCIA){
+    let msg = null;
+    try { msg = regra.testa(vals, ctx); } catch (e) { msg = null; }
+    if (msg) achados.push({ids: regra.ids.filter(id => vals[id] != null), msg});
+  }
+  return achados;
+}
+
 /* ---------- 5. Cálculos derivados --------------------------------------- */
 function computeDerived(vals, ctx){
   const d = {}, add = (k,v,extra) => { if (isFinite(v) && v != null) d[k] = {v, ...extra}; };
@@ -1629,6 +1729,29 @@ function renderValues(){
   const box = $('#values');
   box.innerHTML = '';
   const ctx = readCtx();
+
+  /* coerência interna: as contas do próprio laudo têm que fechar entre si */
+  const numeros = {};
+  for (const [id,v] of Object.entries(state.values)) if (v != null && isFinite(v)) numeros[id] = v;
+  const incoerencias = checarCoerencia(numeros, ctx);
+  const suspeitos = new Set(incoerencias.flatMap(i => i.ids));
+  if (incoerencias.length)
+    box.appendChild(el('div',{class:'alert warn', style:'margin-bottom:14px'},
+      `<b>⚠️ ${incoerencias.length === 1 ? 'Um valor parece' : `${incoerencias.length} valores parecem`}
+       incoerente${incoerencias.length === 1 ? '' : 's'} com o resto do laudo.</b>
+       Isso costuma ser erro de leitura do PDF — confira no laudo original e corrija abaixo.
+       <ul style="margin:8px 0 0;padding-left:18px">` +
+      incoerencias.map(i => `<li style="margin-bottom:4px">${escapeHtml(i.msg)}.</li>`).join('') + `</ul>` +
+      (() => {
+        /* o exame que aparece em mais de uma conta que não fecha é o suspeito mais provável */
+        const freq = {};
+        for (const i of incoerencias) for (const id of i.ids) freq[id] = (freq[id]||0)+1;
+        const [idMax, n] = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0] || [];
+        return n > 1 && byId[idMax]
+          ? `<p style="margin:8px 0 0"><b>${escapeHtml(byId[idMax].nome)}</b> entra em ${n} dessas contas —
+             é o valor com mais chance de estar errado.</p>` : '';
+      })()));
+
   const groups = {};
   for (const id of state.shown){
     const a = byId[id]; if (!a) continue;
@@ -1638,7 +1761,7 @@ function renderValues(){
     const g = el('div',{class:'grp'});
     g.appendChild(el('h3',{},`<span aria-hidden="true">${CATS[cat].ico}</span> ${CATS[cat].nome}`));
     for (const a of list){
-      const row = el('div',{class:'vrow'});
+      const row = el('div',{class:'vrow' + (suspeitos.has(a.id) ? ' suspeito' : '')});
       const origem = state.origem[a.id];
       const fonte = state.linhaFonte[a.id];
       row.appendChild(el('div',{class:'nm'},
@@ -2744,7 +2867,7 @@ $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValue
 /* ganchos para testes automatizados e para auto-hospedagem do pdf.js */
 window.EXAMES = {ANALYTES, byId, extractFromLines, pdfToLines, classify, computeDerived,
                  findPatterns, sugerirExames, prioridadeDe, analyze, state, handleFile,
-                 cleanLine, segmentValue, labRangeFrom, extrairDataColeta, extrairPerfil, salvarNoHistorico,
+                 cleanLine, segmentValue, labRangeFrom, extrairDataColeta, extrairPerfil, checarCoerencia, salvarNoHistorico,
                  carregarHistorico, baixarHistorico, importarHistorico, calcularEvolucao,
                  analisarSerie, montarSeries, rcvDe, regressao};
 </script>
