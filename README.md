@@ -23,14 +23,25 @@ A pressão arterial aceita as duas formas de escrever: `120 / 80` ou `12 / 8`.
 
 Os arquivos **não saem do seu computador**: a leitura do PDF acontece dentro do navegador.
 A única requisição externa é o download da biblioteca [pdf.js](https://mozilla.github.io/pdf.js/)
-por CDN, feita uma vez. Para uso totalmente offline, hospede os dois arquivos do pdf.js
-junto ao app e declare-os antes do script do app:
+por CDN, feita uma vez.
 
-```html
-<script>
-  window.PDFJS_SOURCES = [{lib:'vendor/pdf.min.mjs', worker:'vendor/pdf.worker.min.mjs'}];
-</script>
+**Para funcionar sem internet**, deixe uma cópia local do pdf.js ao lado do app:
+
+```bash
+npm install && npm run vendor    # cria vendor/ com os dois arquivos do pdf.js
 ```
+
+O app procura `vendor/pdf.min.mjs` primeiro e só recorre ao CDN se não achar. A pasta `vendor/`
+fica fora do repositório (está no `.gitignore`).
+
+**Para usar no celular sem publicar nada**, sirva a pasta na sua rede local:
+
+```bash
+npx serve .        # mostra um endereço como http://192.168.0.10:3000
+```
+
+Abra esse endereço no celular, com os dois aparelhos no mesmo Wi-Fi. O histórico de cada
+aparelho é independente — quem viaja entre eles é o arquivo `historico-exames-*.json`.
 
 ## O que ele faz
 

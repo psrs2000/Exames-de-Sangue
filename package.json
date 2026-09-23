@@ -4,7 +4,8 @@
   "private": true,
   "description": "Analisador de exames de sangue em página única — o app é o index.html, sem build",
   "scripts": {
-    "test": "node tests/run.mjs"
+    "test": "node tests/run.mjs",
+    "vendor": "node -e \"const f=require('fs');f.mkdirSync('vendor',{recursive:true});for(const a of ['pdf.min.mjs','pdf.worker.min.mjs'])f.copyFileSync('node_modules/pdfjs-dist/build/'+a,'vendor/'+a);console.log('pdf.js copiado para vendor/ — o app agora funciona sem internet')\""
   },
   "devDependencies": {
     "playwright": "1.56.1",

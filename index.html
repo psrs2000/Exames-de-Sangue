@@ -785,6 +785,9 @@ const byId = Object.fromEntries(ANALYTES.map(a=>[a.id,a]));
 
 /* ---------- 3. Leitura do PDF ------------------------------------------- */
 const PDFJS_SOURCES = window.PDFJS_SOURCES || [
+  /* cópia local, se existir (veja "npm run vendor" no README): deixa o app offline.
+     Se não existir, ou se o navegador bloquear o import local, cai no CDN abaixo. */
+  {lib:'vendor/pdf.min.mjs', worker:'vendor/pdf.worker.min.mjs'},
   {lib:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs',
    worker:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs'},
   {lib:'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs',
