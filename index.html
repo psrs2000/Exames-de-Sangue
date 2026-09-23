@@ -875,7 +875,10 @@ function segmentValue(a, seg){
     if (want.includes('mm3') && c.unit.startsWith('%')) sc -= 8;
     return sc;
   };
-  const ranked = cands.map((c,i)=>({c,i,sc:score(c)})).sort((x,y)=> y.sc-x.sc || x.i-y.i);
+  /* "com jejum de 12 horas" não é um resultado de triglicerídeos */
+  const NAO_UNIDADE = /^(horas?|dias?|anos?|mes(es)?|semanas?|vezes|x|ml\/min\/1|pagina|de|a|e)$/;
+  const validos = cands.filter(c => !NAO_UNIDADE.test(c.unit));
+  const ranked = (validos.length ? validos : cands).map((c,i)=>({c,i,sc:score(c)})).sort((x,y)=> y.sc-x.sc || x.i-y.i);
   for (const {c} of ranked){
     let v = c.v, fator = 1;
     for (const [k,f] of Object.entries(conv)){
@@ -948,6 +951,7 @@ function labRangeFrom(blockLines, sex){
 /* Motor principal: percorre as linhas e monta {id: {value, unit, page}} */
 function extractFromLines(lines, sex){
   const found = {}, labRefs = {}, pending = [];
+  let emResultadosAnteriores = false;
   const clean = lines.map(l=>({page:l.page, raw:l.raw, t:cleanLine(l.raw)}));
 
   const matchesIn = t => {
@@ -965,8 +969,20 @@ function extractFromLines(lines, sex){
   };
 
   for (let i=0; i<clean.length; i++){
-    const t = clean[i].t;
-    if (!t || t.startsWith('-') || t.length < 3) continue;
+    let t = clean[i].t;
+    /* Alguns laudos marcam cada resultado com hífen ("- COLESTEROL HDL : 32 mg/dL").
+       Pular linhas iniciadas por hífen descartava justamente os resultados. */
+    t = t.replace(/^[-–•]\s*/, '');
+    if (!t || t.length < 3) continue;
+
+    /* Tabela de resultados de coletas passadas: os números são reais, mas de OUTRAS datas */
+    if (/resultados?\s+anteriores|historico\s+de\s+resultados|comparativo\s+de\s+resultados/.test(t)){
+      emResultadosAnteriores = true; continue;
+    }
+    if (emResultadosAnteriores){
+      if (/\bresultados?\b\s*:|data (de )?impressao|material\s*-|^metodo|^assinado/.test(t)) emResultadosAnteriores = false;
+      else continue;
+    }
     const hits = matchesIn(t);
 
     /* pendências: cabeçalho do exame numa linha, "RESULTADO:" algumas linhas abaixo.
@@ -1009,9 +1025,20 @@ function extractFromLines(lines, sex){
       if (i > start && /assinado|^_+$/.test(t)) break;
       block.push(i === start ? t.slice(t.search(REF_CUT) >= 0 ? t.search(REF_CUT) : 0) : t);
     }
-    /* linhas que citam outro exame não valem como referência deste, mas seguem no bloco
-       para que cabeçalhos de seção (adulto/criança) continuem sendo lidos na ordem */
-    const candidatas = block.map(t => matchesIn(t).some(h => h.id !== id) ? '' : t);
+    /* Linhas que citam outro exame não valem como referência deste — e uma linha sem
+       nome de exame pertence ao exame da linha anterior: "(SEM JEJUM): INFERIOR A 175",
+       logo abaixo da referência dos triglicerídeos, já foi adotada como faixa do LDL. */
+    let dono = [id];
+    const SECAO = /adulto|crianc|adolescent|pediatric|recem|neonat|gestante|homens?\b|mulher/;
+    const candidatas = block.map((t, k) => {
+      if (!t) return '';
+      const ids = matchesIn(t).map(h => h.id);
+      if (ids.length) dono = ids;
+      else if (k === 0) dono = [id];
+      /* cabeçalhos de seção valem para o bloco inteiro e nunca são mascarados */
+      if (SECAO.test(t) && !/\d/.test(t)) return t;
+      return dono.includes(id) ? t : '';
+    });
     const r = labRangeFrom(candidatas, sex);
     if (!r || (r[0] == null && r[1] == null)) continue;
     /* só aceitamos a faixa do laboratório se ela tiver a mesma ordem de grandeza do valor
@@ -1547,7 +1574,7 @@ const el = (tag, attrs={}, html='') => {
 };
 const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const state = {values:{}, labRefs:{}, shown:[], origem:{}, lines:null, historico:[]};
+const state = {values:{}, labRefs:{}, shown:[], origem:{}, linhaFonte:{}, lines:null, historico:[]};
 
 const MANUAL_DEFAULT = ['hemoglobina','hematocrito','vcm','leucocitos','plaquetas',
   'colesterol_total','hdl','ldl','triglicerideos','glicose','hba1c','creatinina','ureia',
@@ -1599,9 +1626,10 @@ function renderValues(){
     for (const a of list){
       const row = el('div',{class:'vrow'});
       const origem = state.origem[a.id];
+      const fonte = state.linhaFonte[a.id];
       row.appendChild(el('div',{class:'nm'},
         `<span>${escapeHtml(a.nome)}</span>` +
-        (origem === 'pdf' ? '<span class="tag pdf">PDF</span>' : '') +
+        (origem === 'pdf' ? `<span class="tag pdf"${fonte ? ` title="lido de: ${escapeHtml(fonte)}"` : ''}>PDF</span>` : '') +
         (state.labRefs[a.id] ? '<span class="tag" title="faixa informada pelo laboratório">lab</span>' : '')));
       const inp = el('input',{type:'text',inputmode:'decimal','aria-label':a.nome,
         value: state.values[a.id] != null ? fmt(state.values[a.id], a.dec) : ''});
@@ -1880,7 +1908,7 @@ async function handleFile(file){
   }
   /* limpa a tela antes de ler: com o auto-retomar, um exame anterior pode estar à
      mostra, e valores velhos não podem sobrar se a leitura deste PDF falhar */
-  state.values = {}; state.origem = {}; state.labRefs = {}; state.lines = null; state.shown = [];
+  state.values = {}; state.origem = {}; state.labRefs = {}; state.linhaFonte = {}; state.lines = null; state.shown = [];
   $('#card-values').classList.add('hidden');
   $('#card-report').classList.add('hidden');
   setStatus('Lendo o PDF…<div class="bar"><i style="width:10%"></i></div>');
@@ -1897,7 +1925,9 @@ async function handleFile(file){
     const {found, labRefs} = extractFromLines(lines, ctx.sex);
     state.lines = lines; state.labRefsSex = ctx.sex; renderBio();
     state.values = {}; state.origem = {}; state.labRefs = labRefs;
-    for (const [id,info] of Object.entries(found)){ state.values[id] = info.value; state.origem[id] = 'pdf'; }
+    for (const [id,info] of Object.entries(found)){
+      state.values[id] = info.value; state.origem[id] = 'pdf'; state.linhaFonte[id] = info.line;
+    }
     const ids = Object.keys(found);
     if (!ids.length){
       setStatus('Li o PDF, mas não reconheci nenhum exame. Isso acontece quando o laudo é uma imagem escaneada (sem texto) ou usa um formato incomum. Você pode digitar os valores manualmente.','warn');

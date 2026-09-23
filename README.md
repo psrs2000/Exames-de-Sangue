@@ -46,6 +46,10 @@ junto ao app e declare-os antes do script do app:
   de dois lados no lugar do alvo — a ApoB de 128 mg/dL cabe no 46–174 do laboratório e ainda
   assim está acima de qualquer alvo terapêutico.
 - **Conversão de unidades** (mmol/L, µmol/L, nmol/L, mcg/dL, 10³/µL, mil/mm³ etc.).
+- **Defesas contra ler o número errado**: tabelas de *resultados anteriores* são ignoradas (os números
+  são reais, mas de outras coletas), números seguidos de palavras que não são unidade ("12 horas") são
+  descartados, linhas de referência continuadas pertencem ao exame da linha anterior, e a etiqueta
+  `PDF` de cada valor mostra, ao passar o mouse, a linha exata do laudo de onde ele saiu.
 - **Cálculos derivados**: IMC, LDL por Friedewald, colesterol não-HDL, índice de Castelli,
   razão TG/HDL, **relação ureia/creatinina**, **relação ApoB/ApoA-1**, HOMA-IR, glicemia média
   estimada, TFG por CKD-EPI 2021, saturação de transferrina, bilirrubina indireta, relação
@@ -173,6 +177,7 @@ principalmente para **não deixar o app viciar num único laudo e num único pac
 |---|---|
 | `laudo-blocos.pdf` | formato de laudo em blocos (`TÍTULO` … `RESULTADO:`), com as armadilhas que já causaram bugs: rodapé entre o cabeçalho e o resultado, `(A1C)`, seção pediátrica, faixas por sexo, percentual e absoluto na mesma linha, meta terapêutica × faixa populacional |
 | `laudo-tabela.pdf` | formato de laudo em tabela, de outro laboratório fictício, com abreviações pontuadas (`V.C.M.`) — foi ele que revelou que o leitor estava preso a um único leiaute |
+| `laudo-bullets.pdf` | resultados marcados com hífen (`- COLESTEROL HDL : 32 mg/dL`), nota com "jejum de 12 horas", referência continuada em outra linha e **tabela de resultados anteriores** — três formas diferentes de o leitor pegar o número errado |
 | `casos/*.json` | seis perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida |
 | `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
 

@@ -135,6 +135,24 @@ try {
     await ctx.close();
   }
 
+  /* ---------- 2b. laudo com resultados em marcador e tabela de coletas anteriores ---------- */
+  console.log('\n\x1b[1mLaudo com resultados em marcador, notas e tabela de resultados anteriores\x1b[0m');
+  {
+    const ctx = await navegador.newContext();
+    const p = await novaPagina(ctx, erros);
+    const r = await lerPdf(p, 'laudo-bullets.pdf');
+    igual(r.data, '2024-08-14', 'data da coleta');
+    igual(r.valores.hdl, 32, 'resultado marcado com hífen não é confundido com nota de rodapé');
+    igual(r.valores.ldl, 161, 'LDL vem do resultado, não da tabela de coletas anteriores');
+    igual(r.valores.nao_hdl, 203, 'não-HDL vem do resultado, não da tabela de anteriores');
+    igual(r.valores.vldl, 42, 'VLDL vem do resultado, não da tabela de anteriores');
+    igual(r.valores.triglicerideos, 256, '"com jejum de 12 horas" não vira resultado de triglicerídeos');
+    igual(r.labRefs.ldl, undefined, 'meta pediátrica de LDL não é adotada para adulto');
+    igual(r.labRefs.triglicerideos, undefined, 'duas metas de triglicerídeos (com e sem jejum) = ambíguo, usa a geral');
+    igual(r.labRefs.hdl, [40, null], 'faixa de HDL do laudo é adotada');
+    await ctx.close();
+  }
+
   /* ---------- 3. casos clínicos sintéticos ---------- */
   console.log('\n\x1b[1mCasos clínicos sintéticos (perfis que o autor do app não tem)\x1b[0m');
   for (const arquivo of fs.readdirSync(path.join(fixtures, 'casos')).sort()){
