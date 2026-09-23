@@ -1750,6 +1750,8 @@ function analyze(op={}){
 
   const evo = calcularEvolucao(vals, st, ctx);
   html.push(evolucaoHtml(evo, ctx));
+  const serie = analisarSerie(vals, st, ctx);
+  html.push(serieHtml(serie));
 
   if (patterns.length){
     const ordemP = {alerta:0, atencao:1, info:2};
@@ -2222,6 +2224,206 @@ function evolucaoHtml(evo, ctx){
       <tbody>${evo.linhas.map(linha).join('')}</tbody></table></div>`;
 }
 
+/* ---------- 13. Leitura da série -----------------------------------------
+   Três perguntas que um exame isolado nunca responde:
+   1. o resultado está fora da faixa de forma PERSISTENTE?
+   2. existe uma TENDÊNCIA consistente, e a que velocidade por ano?
+   3. este valor, mesmo dentro da faixa populacional, está fora do SEU padrão?
+
+   O que separa sinal de ruído aqui é o RCV (valor de mudança de referência,
+   também chamado de diferença crítica):  RCV = 1,41 × 1,96 × √(CVa² + CVi²)
+   onde CVi é a variação biológica da pessoa e CVa a imprecisão do método.
+   Os CVi abaixo são estimativas de literatura; o CVa varia por laboratório e
+   aqui entra como uma constante conservadora.
+   ------------------------------------------------------------------------ */
+const CVA_PADRAO = 2.5;
+const CVI = {
+  hemoglobina:2.8, hematocrito:2.8, hemacias:3.2, vcm:1.3, hcm:1.6, chcm:1.7, rdw:3.5,
+  leucocitos:11, neutrofilos_abs:16, linfocitos_abs:10, plaquetas:9,
+  colesterol_total:6, hdl:7.3, ldl:8.3, nao_hdl:8, triglicerideos:21, vldl:21,
+  apo_b:6.5, apo_a1:6.5, lipoproteina_a:8,
+  glicose:5.7, hba1c:1.9, insulina:21, homa_ir:24, glicemia_media:1.9,
+  ureia:12, creatinina:5, tfg:5, acido_urico:8.6,
+  tgo:12, tgp:20, ggt:14, fosfatase_alcalina:6.5, bilirrubina_total:22,
+  bilirrubina_direta:25, albumina:3.2, proteinas_totais:2.8,
+  tsh:20, t4_livre:5.5, t3:8,
+  vitamina_d:12, vitamina_b12:13, acido_folico:15, ferro:27, ferritina:15,
+  transferrina:3, sat_transferrina:27,
+  calcio:2.1, calcio_ionico:1.7, magnesio:3.6, sodio:0.7, potassio:4.6, fosforo:8.5, zinco:9,
+  pcr:42, vhs:20, cpk:23, ldh:8.6, amilase:9, lipase:15,
+  psa:14, psa_livre:15, psa_relacao:12, testosterona:9, homocisteina:8, pth:25
+};
+/* exames em que o tempo de duplicação é uma leitura consagrada */
+const DUPLICACAO = ['psa'];
+
+const rcvDe = id => {
+  const cvi = CVI[id];
+  if (cvi == null) return LIMIAR_EVOLUCAO[id] ?? 20;
+  return 2.77 * Math.sqrt(cvi*cvi + CVA_PADRAO*CVA_PADRAO);
+};
+const diasEntre = (a,b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+const mesesEntre = (a,b) => diasEntre(a,b) / 30.44;
+const periodo = m => m >= 24 ? `${(m/12).toFixed(1)} anos` : `${Math.round(m)} meses`;
+
+/* Junta histórico + exame atual numa série por exame, cada ponto com a faixa da época. */
+function montarSeries(vals, ctx){
+  const dataAtual = ctx.coleta || hojeISO();
+  const registros = state.historico.filter(r => r.data <= dataAtual && r.data !== dataAtual)
+    .concat([{data:dataAtual, valores:Object.fromEntries(Object.entries(vals)
+      .filter(([id]) => byId[id])
+      .map(([id,v]) => [id, {v, ref:refOf(byId[id], ctx), refLab:!!state.labRefs[id]}]))}])
+    .sort((a,b) => a.data.localeCompare(b.data));
+  const series = {};
+  for (const reg of registros)
+    for (const [id, info] of Object.entries(reg.valores)){
+      if (!byId[id] || info == null || !isFinite(info.v)) continue;
+      (series[id] = series[id] || []).push({data:reg.data, v:info.v, ref:info.ref || null, refLab:info.refLab});
+    }
+  return {series, dataAtual, nColetas:registros.length};
+}
+
+const foraDe = (v, ref) => ref ? ((ref[0] != null && v < ref[0]) ? 'abaixo'
+  : (ref[1] != null && v > ref[1]) ? 'acima' : null) : null;
+
+function regressao(pontos){
+  const t0 = new Date(pontos[0].data);
+  const xs = pontos.map(p => (new Date(p.data) - t0)/(365.25*86400000));   /* anos */
+  const ys = pontos.map(p => p.v);
+  const n = xs.length, mx = xs.reduce((a,b)=>a+b)/n, my = ys.reduce((a,b)=>a+b)/n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i=0;i<n;i++){ sxy += (xs[i]-mx)*(ys[i]-my); sxx += (xs[i]-mx)**2; syy += (ys[i]-my)**2; }
+  if (!sxx) return null;
+  const slope = sxy/sxx;
+  return {slope, r2: syy ? (sxy*sxy)/(sxx*syy) : 1};
+}
+
+function analisarSerie(vals, st, ctx){
+  const {series, dataAtual, nColetas} = montarSeries(vals, ctx);
+  if (nColetas < 2) return null;
+  const persistentes = [], tendencias = [], pessoais = [], metodos = [];
+
+  for (const [id, pts] of Object.entries(series)){
+    const a = byId[id];
+    if (pts.length < 2) continue;
+    const rcv = rcvDe(id);
+    const prio = prioridadeDe(id, st[id] || {status:'normal', sev:0});
+
+    /* 1. persistência: quantas coletas seguidas, até a mais recente, ficaram fora */
+    const situ = pts.map(p => foraDe(p.v, p.ref));
+    let seq = 0;
+    for (let i = situ.length-1; i >= 0 && situ[i] && situ[i] === situ[situ.length-1]; i--) seq++;
+    if (seq >= 2){
+      const desde = pts[pts.length - seq].data;
+      const meses = mesesEntre(desde, dataAtual);
+      if (seq >= 3 || meses >= 3)
+        persistentes.push({id, a, prio, lado:situ[situ.length-1], seq, total:pts.length, meses,
+          desde, primeiro:pts[pts.length-seq].v, ultimo:pts[pts.length-1].v});
+    }
+
+    /* 2. tendência: inclinação por ano, só com série longa e movimento consistente */
+    if (pts.length >= 3){
+      const meses = mesesEntre(pts[0].data, pts[pts.length-1].data);
+      const varTotal = (pts[pts.length-1].v - pts[0].v) / Math.abs(pts[0].v) * 100;
+      const reg = regressao(pts);
+      let mesmoSentido = 0;
+      for (let i=1;i<pts.length;i++) if (Math.sign(pts[i].v - pts[i-1].v) === Math.sign(varTotal)) mesmoSentido++;
+      const consistente = reg && (reg.r2 >= 0.5 || mesmoSentido/(pts.length-1) >= 0.7);
+      if (meses >= 6 && Math.abs(varTotal) > rcv && consistente){
+        let duplica = null;
+        if (DUPLICACAO.includes(id) && reg.slope > 0 && pts.every(p => p.v > 0)){
+          const ln = regressao(pts.map(p => ({data:p.data, v:Math.log(p.v)})));
+          if (ln && ln.slope > 0) duplica = Math.log(2)/ln.slope*12;   /* meses */
+        }
+        tendencias.push({id, a, prio, slope:reg.slope, r2:reg.r2, meses, varTotal,
+          de:pts[0], ate:pts[pts.length-1], n:pts.length, duplica});
+      }
+    }
+
+    /* 3. faixa pessoal: o valor de hoje contra o próprio padrão anterior */
+    const antes = pts.slice(0,-1), atual = pts[pts.length-1];
+    if (antes.length >= 4 && !foraDe(atual.v, atual.ref)){
+      const m = antes.reduce((x,p)=>x+p.v,0)/antes.length;
+      const dp = Math.sqrt(antes.reduce((x,p)=>x+(p.v-m)**2,0)/(antes.length-1));
+      const desvio = Math.abs(atual.v - m)/Math.abs(m)*100;
+      if (dp > 0 && Math.abs(atual.v - m)/dp >= 2 && desvio > rcv){
+        const base = Array.isArray(a.ref) ? a.ref : (a.ref ? (a.ref[ctx.sex] || a.ref.F) : null);
+        const lado = atual.v > m ? 'acima' : 'abaixo';
+        /* meta do tipo "desejável até X": cair é bom. Meta do tipo "acima de X": subir é bom. */
+        const bom = base && ((base[0] == null && lado === 'abaixo') || (base[1] == null && lado === 'acima'));
+        pessoais.push({id, a, prio, media:m, dp, atual:atual.v, n:antes.length, lado, bom});
+      }
+    }
+
+    /* 4. troca de método: a faixa do laboratório mudou entre duas coletas */
+    for (let i=1;i<pts.length;i++){
+      const r1 = pts[i-1].ref, r2 = pts[i].ref;
+      if (!pts[i-1].refLab || !pts[i].refLab || !r1 || !r2) continue;
+      const dif = [0,1].some(k => (r1[k] == null) !== (r2[k] == null) ||
+        (r1[k] != null && Math.abs(r1[k]-r2[k]) > Math.abs(r1[k])*0.01));
+      if (dif) metodos.push({id, a, de:pts[i-1].data, ate:pts[i].data,
+        r1:`${fmt(r1[0],a.dec)}–${fmt(r1[1],a.dec)}`, r2:`${fmt(r2[0],a.dec)}–${fmt(r2[1],a.dec)}`});
+    }
+  }
+  const ord = (x,y) => (y.prio - x.prio) || x.a.nome.localeCompare(y.a.nome);
+  persistentes.sort(ord); tendencias.sort(ord); pessoais.sort(ord);
+  return {persistentes, tendencias, pessoais, metodos, nColetas, dataAtual};
+}
+
+function serieHtml(an){
+  if (!an || (!an.persistentes.length && !an.tendencias.length && !an.pessoais.length && !an.metodos.length)) return '';
+  const blocos = [];
+
+  if (an.persistentes.length){
+    const bloco = p => `<div class="pat">
+        <h3>${escapeHtml(p.a.nome)} — ${p.lado} da referência em ${p.seq} coleta(s) seguida(s)</h3>
+        <p>De ${dataBR(p.desde)} até ${dataBR(an.dataAtual)} (${periodo(p.meses)}), sempre ${p.lado}:
+        ${fmt(p.primeiro, p.a.dec)} → ${fmt(p.ultimo, p.a.dec)} ${escapeHtml(p.a.un)}.</p></div>`;
+    const frente = an.persistentes.slice(0,8), resto = an.persistentes.slice(8);
+    blocos.push(`<h3 style="margin-top:14px">Achados persistentes</h3>
+      <p class="muted"><small>Um resultado que se repete fora da faixa pesa mais do que um resultado isolado —
+      é a repetição ao longo do tempo que transforma um achado em algo a investigar.</small></p>` +
+      frente.map(bloco).join('') +
+      (resto.length ? `<details><summary>mais ${resto.length} achado(s) persistente(s), de menor peso clínico</summary>
+        ${resto.map(bloco).join('')}</details>` : ''));
+  }
+
+  if (an.tendencias.length)
+    blocos.push(`<h3 style="margin-top:18px">Tendências</h3>
+      <p class="muted"><small>Direção consistente ao longo de pelo menos 6 meses, com variação total maior
+      que a oscilação esperada para o exame. A velocidade é a inclinação da reta ajustada à série.</small></p>` +
+      an.tendencias.map(t => `<div class="pat">
+        <h3>${escapeHtml(t.a.nome)} — ${t.slope > 0 ? 'subindo' : 'caindo'}
+          ${fmt(Math.abs(t.slope), Math.max(t.a.dec,1))} ${escapeHtml(t.a.un)} por ano</h3>
+        <p>${fmt(t.de.v, t.a.dec)} em ${dataBR(t.de.data)} → ${fmt(t.ate.v, t.a.dec)} em ${dataBR(t.ate.data)}
+        (${t.n} coletas, ${periodo(t.meses)}, variação total de ${fmt(Math.abs(t.varTotal),0)}%).
+        ${t.duplica && t.duplica < 600 ? `<b>Tempo de duplicação estimado: ${fmt(t.duplica,0)} meses.</b>` : ''}</p></div>`).join(''));
+
+  if (an.pessoais.length)
+    blocos.push(`<h3 style="margin-top:18px">Fora do seu padrão, dentro da faixa</h3>
+      <p class="muted"><small>Para vários exames a faixa populacional é larga e a faixa de cada pessoa é estreita.
+      Um valor “normal” que foge do seu próprio histórico pode dizer mais que a faixa impressa no laudo.</small></p>` +
+      an.pessoais.map(x => `<div class="pat">
+        <h3>${escapeHtml(x.a.nome)} — ${fmt(x.atual, x.a.dec)} ${escapeHtml(x.a.un)}, ${x.lado} do seu habitual</h3>
+        <p>Nas ${x.n} coletas anteriores você ficou em torno de ${fmt(x.media, x.a.dec)}
+        (± ${fmt(x.dp, x.a.dec + 1)}). O valor está dentro da faixa de referência, mas fora do seu padrão${
+        x.bom ? ' — e no sentido desejável para este exame' : ''}.</p></div>`).join(''));
+
+  if (an.metodos.length){
+    const vistos = new Set();
+    const linhas = an.metodos.filter(m => !vistos.has(m.id) && vistos.add(m.id));
+    blocos.push(`<h3 style="margin-top:18px">Atenção ao comparar</h3>
+      <p class="muted"><small>Quando o laboratório muda a faixa de referência, em geral mudou o método —
+      e valores medidos por métodos diferentes não são diretamente comparáveis.</small></p>
+      <div class="pat">${linhas.map(m => `<p><b>${escapeHtml(m.a.nome)}</b>: a faixa passou de ${m.r1}
+        para ${m.r2} entre ${dataBR(m.de)} e ${dataBR(m.ate)}.</p>`).join('')}</div>`);
+  }
+
+  return `<div class="card"><h2>🔭 Leitura da série — ${an.nColetas} coletas</h2>
+    <p class="muted"><small>Análises que só existem com histórico. São suporte para a conversa com o médico,
+    não diagnóstico — e ganham confiança à medida que o número de coletas cresce.</small></p>
+    ${blocos.join('')}</div>`;
+}
+
 /* ---------- 10. Eventos -------------------------------------------------- */
 const drop = $('#drop'), fileInput = $('#file');
 drop.addEventListener('click', () => fileInput.click());
@@ -2281,7 +2483,8 @@ $('#sex').addEventListener('change', () => { atualizarFaixasDoLab(); renderValue
 window.EXAMES = {ANALYTES, byId, extractFromLines, pdfToLines, classify, computeDerived,
                  findPatterns, sugerirExames, prioridadeDe, analyze, state, handleFile,
                  cleanLine, segmentValue, labRangeFrom, extrairDataColeta, salvarNoHistorico,
-                 carregarHistorico, baixarHistorico, importarHistorico, calcularEvolucao};
+                 carregarHistorico, baixarHistorico, importarHistorico, calcularEvolucao,
+                 analisarSerie, montarSeries, rcvDe, regressao};
 </script>
 </body>
 </html>

@@ -108,6 +108,29 @@ O arquivo exportado:
       } } ] }
 ```
 
+### Leitura da série
+
+Com histórico, o relatório ganha um segundo card com três análises que exame isolado nenhum
+responde. O que separa sinal de ruído nelas é o **RCV** (valor de mudança de referência, ou
+diferença crítica), `RCV = 1,41 × 1,96 × √(CVa² + CVi²)`, onde `CVi` é a variação biológica
+intraindividual do exame. Os CVi usados são estimativas de literatura e o CVa entra como uma
+constante conservadora — por isso o app trata os resultados como suporte, não como veredito.
+
+1. **Achados persistentes** — "hemoglobina abaixo da referência em 8 coletas seguidas, ao longo de
+   3,9 anos". É a repetição que transforma um achado isolado em algo a investigar; a própria
+   definição de doença renal crônica exige persistência por ≥3 meses.
+2. **Tendências** — regressão linear sobre a série, reportada em **unidades por ano**, só quando há
+   ≥3 coletas, ≥6 meses de intervalo, variação total acima do RCV e direção consistente. Para o PSA,
+   também o **tempo de duplicação** (concepção consagrada no acompanhamento prostático).
+3. **Fora do seu padrão** — a partir de 5 coletas, compara o valor de hoje com a sua própria média e
+   dispersão. Para exames de baixo *índice de individualidade* (`CVi/CVg < 0,6`, caso de hemoglobina,
+   creatinina, cálcio e sódio), a faixa populacional é um guia ruim: um valor "normal" que foge do seu
+   histórico diz mais que a faixa impressa no laudo.
+
+Há ainda um aviso automático de **troca de método**: quando a faixa declarada pelo laboratório muda
+entre duas coletas, o método provavelmente mudou, e valores de métodos diferentes não são
+diretamente comparáveis. Foi o que aconteceu com o T4 livre entre maio e setembro de 2026.
+
 Os PDFs originais **não** são guardados pelo app — você já os tem, e incluí-los no arquivo daria
 a falsa impressão de backup completo.
 
@@ -136,6 +159,7 @@ Tudo vive em `index.html`, em seções numeradas dentro do `<script type="module
 | 6b | Sugestão de exames ausentes (`sugerirExames`) |
 | 7–10 | Interface, relatório, exportação e eventos |
 | 11 | Histórico: IndexedDB, data da coleta, exportar/importar, evolução e sparkline |
+| 13 | Leitura da série: persistência, tendência com inclinação por ano, faixa pessoal, RCV |
 | 12 | Início: carrega o histórico e o último perfil usado |
 
 Para acrescentar um exame, basta adicionar um objeto em `ANALYTES` com `id`, `nome`,
