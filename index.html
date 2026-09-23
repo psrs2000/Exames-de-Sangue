@@ -158,6 +158,16 @@ table.evo td.spark{width:112px;padding:2px 8px}
 .delta.sobe{color:var(--high)} .delta.desce{color:var(--low)} .delta.igual{color:var(--muted)}
 .delta.bom{color:var(--ok)} .delta.ruim{color:var(--high)}
 @media (max-width:560px){table.evo td.spark{display:none}table.evo{font-size:.82rem}}
+details.recolhivel{border:none;padding:0;margin:14px 0 0;background:none;box-shadow:none}
+details.recolhivel>summary{font-size:1rem;font-weight:700;list-style:none;cursor:pointer;
+  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:var(--surface-2)}
+details.recolhivel>summary::-webkit-details-marker{display:none}
+details.recolhivel>summary::before{content:'▸';color:var(--muted);font-size:.85rem}
+details.recolhivel[open]>summary::before{content:'▾'}
+details.recolhivel>summary .conta{margin-left:auto;font-size:.75rem;font-weight:700;
+  background:var(--accent);color:#fff;border-radius:999px;padding:1px 8px;min-width:22px;text-align:center}
+:root[data-theme="dark"] .recolhivel .conta,:root:not([data-theme="light"]) .recolhivel .conta{color:#1a0b10}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .recolhivel .conta{color:#fff}}
 .view-simple .tech-only{display:none}
 .view-tech .simple-only{display:none}
 .only-print{display:none}
@@ -170,7 +180,8 @@ table.evo td.spark{width:112px;padding:2px 8px}
   details.normais{display:none}            /* substituído pela tabela completa */
   table.evo td.spark{display:table-cell}
   details.menores{border:none;padding:0}
-  details.menores>*:not(summary){display:block !important}   /* garante o conteúdo mesmo fechado */
+  details.menores>*:not(summary),
+  details.recolhivel>*:not(summary){display:block !important}   /* garante o conteúdo mesmo fechado */
   details.menores>summary{font-size:1.15rem;margin:18px 0 8px}
   table.tudo{width:100%;border-collapse:collapse;font-size:.78rem}
   table.tudo th{text-align:left;border-bottom:1px solid var(--border);padding:4px 6px;font-size:.72rem;
@@ -1781,11 +1792,34 @@ function analyze(op={}){
   }
   html.push('</div>');
 
+  /* Ordem do relatório: do concreto para o interpretativo — o que mudou, o que está
+     fora da faixa, as contas, as hipóteses, a leitura da série longa e o que faltou medir. */
+  const cardDe = ([id,c]) => resultCard(byId[id], vals[id], c, ctx) +
+    (calculado.has(id) ? '<p class="muted" style="margin:-4px 0 10px"><small>valor calculado pelo app a partir dos demais exames</small></p>' : '');
+
+  /* 1. evolução desde a coleta anterior */
   const evo = calcularEvolucao(vals, st, ctx);
   html.push(evolucaoHtml(evo, ctx));
-  const serie = analisarSerie(vals, st, ctx);
-  html.push(serieHtml(serie));
 
+  /* 2. resultados fora da referência */
+  if (principais.length)
+    html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>
+      <p class="muted"><small>Em ordem de relevância clínica, não de tamanho do desvio.</small></p>` +
+      principais.map(cardDe).join('') + `</div>`);
+  if (secundarios.length)
+    html.push(`<details class="menores"><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
+      ${secundarios.map(([id]) => escapeHtml(byId[id].nome)).join(', ')}</summary>
+      <p class="muted"><small>Costumam acompanhar outro achado ou variar entre coletas; raramente decidem alguma conduta sozinhas.</small></p>` +
+      secundarios.map(cardDe).join('') + `</details>`);
+
+  /* 3. cálculos derivados */
+  if (contas.length)
+    html.push(`<div class="card"><h2>🧮 Cálculos a partir dos seus exames</h2><div class="mini">` +
+      contas.map(([,d]) => `<div><span>${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</b></div>`).join('') +
+      `</div>` + contas.filter(([,d])=>d.txt).map(([,d]) =>
+        `<p style="font-size:.88rem;margin-top:8px"><b>${escapeHtml(d.rot)}:</b> ${escapeHtml(d.txt)}.</p>`).join('') + `</div>`);
+
+  /* 4. padrões cruzados */
   if (patterns.length){
     const ordemP = {alerta:0, atencao:1, info:2};
     patterns.sort((a,b) => ordemP[a.nivel] - ordemP[b.nivel]);
@@ -1798,6 +1832,11 @@ function analyze(op={}){
       </div>`).join('') + `</div>`);
   }
 
+  /* 5. leitura da série longa */
+  const serie = analisarSerie(vals, st, ctx);
+  html.push(serieHtml(serie));
+
+  /* 6. o que faltou medir */
   if (sugestoes.length)
     html.push(`<div class="card"><h2>🔬 O que não foi medido e ajudaria</h2>
       <p class="muted"><small>Sugestões que nascem dos achados acima — cada uma responde a uma pergunta que este laudo deixou em aberto.
@@ -1805,24 +1844,6 @@ function analyze(op={}){
       <ul style="margin:6px 0 0;padding-left:20px">` +
       sugestoes.map(x => `<li style="margin-bottom:8px"><b>${escapeHtml(x.exame)}</b> — ${escapeHtml(x.porque)}</li>`).join('') +
       `</ul></div>`);
-
-  const cardDe = ([id,c]) => resultCard(byId[id], vals[id], c, ctx) +
-    (calculado.has(id) ? '<p class="muted" style="margin:-4px 0 10px"><small>valor calculado pelo app a partir dos demais exames</small></p>' : '');
-  if (principais.length)
-    html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>
-      <p class="muted"><small>Em ordem de relevância clínica, não de tamanho do desvio.</small></p>` +
-      principais.map(cardDe).join('') + `</div>`);
-  if (secundarios.length)
-    html.push(`<details class="menores"><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
-      ${secundarios.map(([id]) => escapeHtml(byId[id].nome)).join(', ')}</summary>
-      <p class="muted"><small>Costumam acompanhar outro achado ou variar entre coletas; raramente decidem alguma conduta sozinhas.</small></p>` +
-      secundarios.map(cardDe).join('') + `</details>`);
-
-  if (contas.length)
-    html.push(`<div class="card"><h2>🧮 Cálculos a partir dos seus exames</h2><div class="mini">` +
-      contas.map(([,d]) => `<div><span>${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</b></div>`).join('') +
-      `</div>` + contas.filter(([,d])=>d.txt).map(([,d]) =>
-        `<p style="font-size:.88rem;margin-top:8px"><b>${escapeHtml(d.rot)}:</b> ${escapeHtml(d.txt)}.</p>`).join('') + `</div>`);
 
   if (normais.length || infos.length)
     html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>
@@ -1867,7 +1888,7 @@ function analyze(op={}){
   $('#v-tech').addEventListener('click', () => setView('tech'));
   $('#btn-print').addEventListener('click', () => window.print());
   /* um <details> fechado não imprime o conteúdo: abrimos antes e restauramos depois */
-  const recolhidos = () => [...document.querySelectorAll('details.menores')];
+  const recolhidos = () => [...document.querySelectorAll('details.menores, details.recolhivel')];
   window.addEventListener('beforeprint', () => recolhidos().forEach(d => { d.dataset.reabrir = d.open ? '' : '1'; d.open = true; }));
   window.addEventListener('afterprint', () => recolhidos().forEach(d => { if (d.dataset.reabrir) d.open = false; }));
   $('#btn-edit').addEventListener('click', () => $('#card-values').scrollIntoView({behavior:'smooth'}));
@@ -2532,16 +2553,18 @@ function serieHtml(an){
         p.rumo !== 'estável' ? ` (${p.varSeq > 0 ? '+' : ''}${fmt(p.varSeq,0)}%)` : ''}.
         ${p.rumo === 'em melhora' ? 'A direção é boa, mas o resultado ainda não voltou para a faixa.' : ''}</p></div>`;
     const frente = an.persistentes.slice(0,8), resto = an.persistentes.slice(8);
-    blocos.push(`<h3 style="margin-top:14px">Achados persistentes</h3>
+    blocos.push(`<details class="recolhivel"><summary>Achados persistentes
+      <span class="conta">${an.persistentes.length}</span></summary>
       <p class="muted"><small>Um resultado que se repete fora da faixa pesa mais do que um resultado isolado —
       é a repetição ao longo do tempo que transforma um achado em algo a investigar.</small></p>` +
       frente.map(bloco).join('') +
       (resto.length ? `<details><summary>mais ${resto.length} achado(s) persistente(s), de menor peso clínico</summary>
-        ${resto.map(bloco).join('')}</details>` : ''));
+        ${resto.map(bloco).join('')}</details>` : '') + `</details>`);
   }
 
   if (an.tendencias.length)
-    blocos.push(`<h3 style="margin-top:18px">Tendências</h3>
+    blocos.push(`<details class="recolhivel"><summary>Tendências
+      <span class="conta">${an.tendencias.length}</span></summary>
       <p class="muted"><small>Direção consistente ao longo de pelo menos 6 meses, com variação total maior
       que a oscilação esperada para o exame. A velocidade é a inclinação da reta ajustada à série.</small></p>` +
       an.tendencias.map(t => `<div class="pat">
@@ -2560,7 +2583,7 @@ function serieHtml(an){
             : 'A volta ainda está dentro da oscilação esperada para este exame — vale confirmar na próxima coleta.'}` : ''}
         ${t.duplica && t.duplica < 600 ? `<b>Tempo de duplicação estimado: ${fmt(t.duplica,0)} meses.</b>` : ''}
         ${t.trocouMetodo ? `<b>⚠️ Atenção:</b> o laboratório mudou a faixa de referência deste exame dentro do período —
-          parte desta variação pode ser troca de método, e não mudança sua.` : ''}</p></div>`).join(''));
+          parte desta variação pode ser troca de método, e não mudança sua.` : ''}</p></div>`).join('') + `</details>`);
 
   if (an.pessoais.length)
     blocos.push(`<h3 style="margin-top:18px">Fora do seu padrão, dentro da faixa</h3>
