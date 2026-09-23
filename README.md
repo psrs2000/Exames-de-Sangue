@@ -10,8 +10,8 @@ ou em **linguagem técnica**, alternável com um clique.
 
 ## Como usar
 
-Abra o `index.html` no navegador (duplo clique já funciona) ou publique a pasta no
-GitHub Pages. Não há build, dependências de projeto nem servidor.
+Abra o `index.html` no navegador (duplo clique já funciona) ou publique a pasta como
+site estático. Não há build, dependências de projeto nem servidor.
 
 1. **Envie o PDF** do laudo (ou clique em *Ver exemplo*, ou digite os valores à mão).
 2. **Confira os valores** lidos e complete seu perfil: sexo, idade, peso, altura,
@@ -21,18 +21,17 @@ GitHub Pages. Não há build, dependências de projeto nem servidor.
 
 A pressão arterial aceita as duas formas de escrever: `120 / 80` ou `12 / 8`.
 
-Os arquivos **não saem do seu computador**: a leitura do PDF acontece dentro do navegador.
-A única requisição externa é o download da biblioteca [pdf.js](https://mozilla.github.io/pdf.js/)
-por CDN, feita uma vez.
+Os arquivos **não saem do seu computador**: a leitura do PDF acontece dentro do navegador,
+e nada é enviado a servidor nenhum.
 
-**Para funcionar sem internet**, deixe uma cópia local do pdf.js ao lado do app:
+A biblioteca [pdf.js](https://mozilla.github.io/pdf.js/), que faz a leitura, vem da pasta
+`vendor/` — versionada junto com o app justamente para que ele funcione **sem internet** e
+sem depender de CDN. Se por algum motivo ela faltar, o app recorre a três CDNs em sequência.
+Para regravá-la a partir do `node_modules`:
 
 ```bash
-npm install && npm run vendor    # cria vendor/ com os dois arquivos do pdf.js
+npm install && npm run vendor
 ```
-
-O app procura `vendor/pdf.min.mjs` primeiro e só recorre ao CDN se não achar. A pasta `vendor/`
-fica fora do repositório (está no `.gitignore`).
 
 **Para usar no celular sem publicar nada**, sirva a pasta na sua rede local:
 
@@ -42,6 +41,36 @@ npx serve .        # mostra um endereço como http://192.168.0.10:3000
 
 Abra esse endereço no celular, com os dois aparelhos no mesmo Wi-Fi. O histórico de cada
 aparelho é independente — quem viaja entre eles é o arquivo `historico-exames-*.json`.
+
+## Publicar no Cloudflare Pages
+
+Publicar dá ao app um endereço fixo, que abre no celular em qualquer lugar, sem depender de
+computador ligado. O repositório **continua privado**: o que fica acessível é só o app, que
+não carrega dado nenhum dentro de si.
+
+No painel da Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, escolha este
+repositório e configure:
+
+| Campo | Valor |
+|---|---|
+| Production branch | `main` |
+| Framework preset | `None` |
+| Build command | *(deixe vazio)* |
+| Build output directory | `/` |
+
+Deixar o *build command* vazio é o que importa: sem ele a Cloudflare apenas publica os
+arquivos como estão, sem instalar dependências nem rodar nada. Cada `git push` no `main`
+republica sozinho.
+
+Depois, no iPhone: abra o endereço no Safari → **Compartilhar → Adicionar à Tela de Início**.
+
+Dois arquivos cuidam do resto:
+
+- `_headers` — cabeçalhos de segurança e cache longo para o `vendor/`
+- `robots.txt` — mantém a ferramenta fora dos buscadores
+
+O histórico do celular é separado do histórico do computador: cada navegador guarda o seu.
+Para levar um para o outro, use *Baixar histórico* e *Importar histórico*.
 
 ## O que ele faz
 
@@ -199,7 +228,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 59 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 87 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |
@@ -210,7 +239,11 @@ principalmente para **não deixar o app viciar num único laudo e num único pac
 | `casos/*.json` | sete perfis clínicos que o autor do app não tem: anemia ferropriva em mulher jovem, gestante, diabetes com síndrome metabólica, atleta com hipertireoidismo, padrão colestático com plaquetopenia, potássio crítico com função renal reduzida, e um hemograma internamente incoerente |
 | `serie-longa.json` | série de 11 coletas em 2,7 anos: persistência com direção, reversão, mudança de patamar, tendência com tempo de duplicação, troca de método, valores calculados no histórico |
 
-Os dois laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não
+Um último bloco carrega o app com **toda a rede bloqueada** e exige que ele ainda leia o PDF, sem
+nenhuma requisição externa. Foi ele que revelou que o `vendor/` nunca havia funcionado: o import
+sem `./` virava um *bare specifier*, falhava calado e o app caía no CDN.
+
+Os três laudos em PDF são **sintéticos** — foram gerados a partir dos `.html` ao lado deles e não
 correspondem a nenhuma pessoa. A série longa foi **de-identificada** a partir de um histórico real:
 datas deslocadas por um valor fixo (mantendo os intervalos), perfil substituído por um sintético e
 valores perturbados em ±2%, bem abaixo de qualquer RCV. Ela preserva os *formatos* das séries, que
@@ -226,6 +259,7 @@ Tudo vive em `index.html`, em seções numeradas dentro do `<script type="module
 | 2 | Utilidades: normalização, números no formato brasileiro, índice de sinônimos |
 | 3 | Leitura do PDF: reconstrução de linhas, extração de valores e das faixas do laboratório |
 | 4 | Classificação (normal / abaixo / acima / atenção) |
+| 4b | Coerência interna do laudo (`COERENCIA`, `checarCoerencia`) |
 | 5 | Cálculos derivados |
 | 6 | Padrões cruzados (`PADRAO_EXAMES` liga cada padrão aos exames que ele envolve) |
 | 6b | Sugestão de exames ausentes (`sugerirExames`) |

@@ -16,14 +16,15 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixtures = path.join(raiz, 'tests', 'fixtures');
 const PORTA = 8121;
 
-/* --- servidor: o app na raiz e o pdf.js do node_modules em /vendor --- */
+/* --- servidor: o app na raiz; /vendor vem da pasta versionada e, se ela faltar,
+       do node_modules (assim a suíte roda mesmo sem "npm run vendor") --- */
 const MIME = {'.html':'text/html; charset=utf-8', '.mjs':'text/javascript', '.js':'text/javascript',
               '.json':'application/json', '.pdf':'application/pdf'};
 const servidor = http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split('?')[0]);
-  const alvo = url.startsWith('/vendor/')
-    ? path.join(raiz, 'node_modules', 'pdfjs-dist', 'build', url.slice(8))
-    : path.join(raiz, url === '/' ? 'index.html' : url);
+  let alvo = path.join(raiz, url === '/' ? 'index.html' : url);
+  if (url.startsWith('/vendor/') && !fs.existsSync(alvo))
+    alvo = path.join(raiz, 'node_modules', 'pdfjs-dist', 'build', url.slice(8));
   if (!alvo.startsWith(raiz) || !fs.existsSync(alvo) || fs.statSync(alvo).isDirectory()){
     res.writeHead(404); return res.end('não encontrado');
   }
@@ -276,6 +277,40 @@ try {
     ok(/6 coletas desde/.test(evo), 'coleta do meio enxerga apenas as anteriores a ela');
     await abrirColeta(p, 10);
     ok((await textoDoCard(p, 'Evolução —')) === '', 'coleta mais antiga não tem evolução');
+    await ctx.close();
+  }
+
+  /* ---------- 6. o app se vira sem internet ----------
+     Aqui NÃO sobrescrevemos window.PDFJS_SOURCES: é a lista de verdade que está
+     sendo testada. Tudo que não for do próprio site é bloqueado, então só passa
+     se a cópia em vendor/ for encontrada e carregada. Foi assim que apareceu o
+     bug do import sem "./", que caía calado no CDN. */
+  console.log('\n\x1b[1mAutonomia: funciona sem internet\x1b[0m');
+  {
+    const ctx = await navegador.newContext();
+    const p = await ctx.newPage();
+    const errosOff = [], externas = [];
+    p.on('pageerror', e => errosOff.push('pageerror: ' + e.message));
+    p.on('console', m => { if (m.type() === 'error') errosOff.push('console: ' + m.text()); });
+    await p.route('**/*', rota => {
+      const u = rota.request().url();
+      if (u.startsWith(`http://localhost:${PORTA}`) || u.startsWith('blob:') || u.startsWith('data:'))
+        return rota.continue();
+      externas.push(u);
+      return rota.abort();
+    });
+    await p.goto(`http://localhost:${PORTA}/index.html`);
+    await p.setInputFiles('#file', path.join(fixtures, 'laudo-blocos.pdf'));
+    let leu = true;
+    try { await p.waitForSelector('#card-values:not(.hidden)', {timeout:60000}); }
+    catch { leu = false; }
+    ok(leu, 'lê o PDF com a rede bloqueada', errosOff.slice(0,2).join(' | '));
+    igual(externas, [], 'não faz nenhuma requisição externa');
+    if (leu){
+      const n = await p.evaluate(() => Object.keys(window.EXAMES.state.values).length);
+      ok(n >= 20, 'extração completa mesmo offline', `${n} exames`);
+    }
+    ok(errosOff.length === 0, 'nenhum erro de console offline', errosOff.slice(0,2).join(' | '));
     await ctx.close();
   }
 
