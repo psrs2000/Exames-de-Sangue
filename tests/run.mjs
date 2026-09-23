@@ -213,6 +213,15 @@ try {
     ok(!/Basófilos/.test(serie), 'percentual do diferencial não vira tendência');
     ok(/respondem a\s+hábito, tratamento ou varia/.test(serie), 'tendências de estilo de vida ficam em bloco separado');
     ok(/troca de método|mudou a faixa de referência/.test(serie), 'aviso de troca de método presente');
+    /* a série de referência é limpa: nenhuma das 11 coletas pode disparar incoerência */
+    const sujeira = await p.evaluate(() => {
+      const h = window.EXAMES.state.historico;
+      return h.map(reg => {
+        const v = {}; for (const [id,i] of Object.entries(reg.valores)) v[id] = i.v;
+        return {data: reg.data, n: window.EXAMES.checarCoerencia(v, {sex:reg.perfil.sexo, age:reg.perfil.idade}).length};
+      }).filter(x => x.n > 0);
+    });
+    igual(sujeira, [], 'as 11 coletas da série de referência são internamente coerentes');
 
     /* a ordem das seções é decisão de leitura, não acidente */
     const ordem = await p.locator('#card-report > .card > h2, #card-report > details > summary')
