@@ -116,12 +116,20 @@ diferença crítica), `RCV = 1,41 × 1,96 × √(CVa² + CVi²)`, onde `CVi` é 
 intraindividual do exame. Os CVi usados são estimativas de literatura e o CVa entra como uma
 constante conservadora — por isso o app trata os resultados como suporte, não como veredito.
 
-1. **Achados persistentes** — "hemoglobina abaixo da referência em 8 coletas seguidas, ao longo de
-   3,9 anos". É a repetição que transforma um achado isolado em algo a investigar; a própria
+1. **Achados persistentes**, com a direção junto — "hemoglobina abaixo da referência em 11 coletas
+   seguidas, **em melhora**: 9,2 → 12,1 g/dL". Dizer só "sempre abaixo" esconderia uma recuperação
+   de 3 g/dL. É a repetição que transforma um achado isolado em algo a investigar; a própria
    definição de doença renal crônica exige persistência por ≥3 meses.
-2. **Tendências** — regressão linear sobre a série, reportada em **unidades por ano**, só quando há
-   ≥3 coletas, ≥6 meses de intervalo, variação total acima do RCV e direção consistente. Para o PSA,
-   também o **tempo de duplicação** (concepção consagrada no acompanhamento prostático).
+2. **Tendências**, com três formas possíveis, escolhidas por comparação de modelos — descrever
+   um salto como "subindo X por ano" mente sobre o formato da série:
+   - **reta** — inclinação em **unidades por ano**; para o PSA, também o **tempo de duplicação**;
+   - **mudança de patamar** — subiu (ou caiu) e estabilizou noutro nível, com a data do salto;
+   - **reversão** — subiu e voltou a cair (ou o contrário), com o pico e o quanto recuou desde ele,
+     dizendo se a volta já supera a oscilação esperada ou ainda não.
+
+   Em todos os casos: ≥3 coletas, ≥6 meses e variação total acima do RCV. Uma tendência que
+   atravessa uma troca de faixa do laboratório vem marcada, porque parte da variação pode ser
+   troca de método.
 3. **Fora do seu padrão** — a partir de 5 coletas, compara o valor de hoje com a sua própria média e
    dispersão. Para exames de baixo *índice de individualidade* (`CVi/CVg < 0,6`, caso de hemoglobina,
    creatinina, cálcio e sódio), a faixa populacional é um guia ruim: um valor "normal" que foge do seu

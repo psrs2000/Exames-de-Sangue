@@ -2000,11 +2000,20 @@ const dataBR = d => d ? d.split('-').reverse().join('/') : '—';
 /* --- gravar o exame atual --- */
 function registroAtual(){
   const ctx = readCtx();
+  const medidos = {};
+  for (const [id,v] of Object.entries(state.values))
+    if (v != null && isFinite(v) && byId[id]) medidos[id] = v;
+  /* LDL de Friedewald, TFG, HOMA-IR, absolutos do diferencial: se ficarem de fora,
+     nunca formam série e reaparecem como "primeira medida" em toda coleta */
+  const calculados = {};
+  for (const d of Object.values(computeDerived(medidos, ctx)))
+    if (d.inject && medidos[d.inject] == null && isFinite(d.v)) calculados[d.inject] = d.v;
   const valores = {};
-  for (const [id,v] of Object.entries(state.values)){
-    if (v == null || !isFinite(v) || !byId[id]) continue;
+  for (const [id,v] of Object.entries({...medidos, ...calculados})){
+    if (!byId[id]) continue;
     const r = refOf(byId[id], ctx);
-    valores[id] = {v, un:byId[id].un, ref:r || null, refLab:!!state.labRefs[id], origem:state.origem[id] || 'manual'};
+    valores[id] = {v, un:byId[id].un, ref:r || null, refLab:!!state.labRefs[id],
+      origem: calculados[id] != null ? 'calculado' : (state.origem[id] || 'manual')};
   }
   return {
     data: ctx.coleta || hojeISO(),
@@ -2132,29 +2141,33 @@ function calcularEvolucao(vals, st, ctx){
     const a = byId[id]; if (!a) continue;
     const cl = st[id];
     const antes = prev.valores[id] != null ? prev.valores[id].v : null;
-    if (antes == null || !isFinite(antes) || antes === 0){
+    if (antes == null || !isFinite(antes)){
       /* sem par no exame anterior: entra assim mesmo, como primeira medida */
       linhas.push({id, a, antes:null, agora:v, pct:null, cl, serie:[], mudouSituacao:false,
         relevante:false, prio:prioridadeDe(id, cl || {status:'normal', sev:0})});
       continue;
     }
-    const pct = (v - antes) / Math.abs(antes) * 100;
+    /* valor anterior zero (bastonetes, por exemplo) tem comparação, só não tem porcentagem */
+    const pct = antes !== 0 ? (v - antes) / Math.abs(antes) * 100 : (v === 0 ? 0 : null);
+    const deltaAbs = v - antes;
     const antesFora = prev.valores[id].ref ? foraDaFaixa(antes, prev.valores[id].ref) : null;
     const agoraFora = cl ? (cl.status !== 'normal' && cl.status !== 'info') : null;
     const mudouSituacao = antesFora != null && agoraFora != null && antesFora !== agoraFora;
     /* Um exame que segue fora da faixa entra sempre, por menor que tenha sido a variação:
        é exatamente aí que saber se subiu ou desceu importa. */
-    const relevante = Math.abs(pct) >= (LIMIAR_EVOLUCAO[id] ?? 10) || mudouSituacao || antesFora || agoraFora;
+    const relevante = (pct != null && Math.abs(pct) >= (LIMIAR_EVOLUCAO[id] ?? 10))
+      || mudouSituacao || antesFora || agoraFora;
     const serie = [...anteriores, {data:dataAtual, valores:{[id]:{v}}}]
       .filter(r => r.valores[id] != null)
       .map(r => ({data:r.data, v:r.valores[id].v}));
-    linhas.push({id, a, antes, agora:v, pct, cl, serie, mudouSituacao, relevante,
+    linhas.push({id, a, antes, agora:v, pct, deltaAbs, cl, serie, mudouSituacao, relevante,
       dataAntes:prev.data, prio:prioridadeDe(id, cl || {status:'normal', sev:0})});
   }
   /* todos aparecem; a ordem apenas coloca o que é notícia clínica em cima */
   linhas.sort((x,y) => (y.relevante - x.relevante) || (y.prio - x.prio) ||
     (Math.abs(y.pct ?? -1) - Math.abs(x.pct ?? -1)));
-  return {prev, linhas, dataAtual, relevantes:linhas.filter(l => l.relevante).length};
+  const souNovo = !state.historico.some(r => r.data === dataAtual);
+  return {prev, linhas, dataAtual, souNovo, relevantes:linhas.filter(l => l.relevante).length};
 }
 const foraDaFaixa = (v, ref) =>
   (ref[0] != null && v < ref[0]) || (ref[1] != null && v > ref[1]);
@@ -2194,11 +2207,16 @@ function sparkline(serie, ref, status){
 function evolucaoHtml(evo, ctx){
   if (!evo || !evo.linhas.length) return '';
   const linha = L => {
-    if (L.pct == null) return `<tr>
-      <td>${escapeHtml(L.a.nome)}</td><td class="spark"></td>
-      <td class="num muted">—</td>
+    if (L.pct == null){
+      const semPar = L.antes == null;
+      return `<tr>
+      <td>${escapeHtml(L.a.nome)}</td>
+      <td class="spark">${semPar ? '' : sparkline(L.serie, refOf(L.a, ctx), L.cl && L.cl.status)}</td>
+      <td class="num muted">${semPar ? '—' : fmt(L.antes, L.a.dec)}</td>
       <td class="num">${fmt(L.agora, L.a.dec)} <span class="muted">${escapeHtml(L.a.un)}</span></td>
-      <td class="num delta igual"><small>primeira medida</small></td></tr>`;
+      <td class="num delta igual"><small>${semPar ? 'primeira medida'
+        : (L.deltaAbs > 0 ? '+' : '') + fmt(L.deltaAbs, L.a.dec)}</small></td></tr>`;
+    }
     const dir = L.pct > 0 ? 'sobe' : L.pct < 0 ? 'desce' : 'igual';
     const seta = L.pct > 0 ? '▲' : L.pct < 0 ? '▼' : '—';
     /* voltar para dentro da faixa é sempre boa notícia, suba ou desça */
@@ -2213,8 +2231,12 @@ function evolucaoHtml(evo, ctx){
       <td class="num delta ${corDelta}" title="${dir === 'sobe' ? 'subiu' : dir === 'desce' ? 'desceu' : 'estável'}">${seta} ${fmt(Math.abs(L.pct),0)}%</td>
     </tr>`;
   };
-  return `<div class="card"><h2>📈 Evolução desde ${dataBR(evo.prev.data)}</h2>
-    <p class="muted"><small>Todos os ${evo.linhas.length} exames deste laudo, em ordem de relevância clínica —
+  const nSerie = state.historico.filter(r => r.data <= evo.dataAtual).length + (evo.souNovo ? 1 : 0);
+  const inicio = state.historico.length ? state.historico[0].data : evo.prev.data;
+  return `<div class="card"><h2>📈 Evolução — coleta de ${dataBR(evo.dataAtual)}</h2>
+    <p class="muted"><small><b>As colunas comparam com a coleta anterior, ${dataBR(evo.prev.data)}.</b>
+    A miniatura de tendência mostra a série inteira${nSerie > 2 ? `: ${nSerie} coletas desde ${dataBR(inicio)}` : ''}.
+    Todos os ${evo.linhas.length} exames deste laudo, em ordem de relevância clínica —
     variações maiores do que esse exame costuma oscilar, cruzamentos da faixa e resultados que seguem alterados vêm primeiro.
     Cada valor é comparado com a faixa que valia na época de cada coleta.</small></p>
     <table class="evo"><thead><tr><th>Exame</th><th>Tendência</th>
@@ -2297,6 +2319,28 @@ function regressao(pontos){
   return {slope, r2: syy ? (sxy*sxy)/(sxx*syy) : 1};
 }
 
+/* Compara dois modelos para a série: uma reta e dois patamares separados por um salto.
+   Um exame que pula de nível e estabiliza (hemoglobina tratada, por exemplo) é mal
+   descrito por "subindo X por ano" — a reta ajusta razoavelmente e mente sobre o formato. */
+function ajusteDegrau(pts){
+  const ys = pts.map(p => p.v), n = ys.length;
+  const media = xs => xs.reduce((a,b)=>a+b,0)/xs.length;
+  const my = media(ys);
+  const sst = ys.reduce((a,v)=>a+(v-my)**2, 0);
+  if (!sst) return null;
+  let melhor = null;
+  for (let j=2; j<=n-2; j++){
+    const esq = ys.slice(0,j), dir = ys.slice(j);
+    const me = media(esq), md = media(dir);
+    const sse = esq.reduce((a,v)=>a+(v-me)**2,0) + dir.reduce((a,v)=>a+(v-md)**2,0);
+    if (!melhor || sse < melhor.sse) melhor = {sse, j, me, md};
+  }
+  if (!melhor) return null;
+  return {...melhor, r2: 1 - melhor.sse/sst, quando: pts[melhor.j].data,
+    separados: Math.min(...ys.slice(melhor.j)) > Math.max(...ys.slice(0,melhor.j)) ||
+               Math.max(...ys.slice(melhor.j)) < Math.min(...ys.slice(0,melhor.j))};
+}
+
 function analisarSerie(vals, st, ctx){
   const {series, dataAtual, nColetas} = montarSeries(vals, ctx);
   if (nColetas < 2) return null;
@@ -2308,6 +2352,21 @@ function analisarSerie(vals, st, ctx){
     const rcv = rcvDe(id);
     const prio = prioridadeDe(id, st[id] || {status:'normal', sev:0});
 
+    /* troca de método (a faixa do laboratório mudou): precisa ser conhecida ANTES da
+       tendência, porque uma série que atravessa troca de método não é comparável */
+    let trocouMetodo = false;
+    for (let i=1;i<pts.length;i++){
+      const r1 = pts[i-1].ref, r2 = pts[i].ref;
+      if (!pts[i-1].refLab || !pts[i].refLab || !r1 || !r2) continue;
+      const dif = [0,1].some(k => (r1[k] == null) !== (r2[k] == null) ||
+        (r1[k] != null && Math.abs(r1[k]-r2[k]) > Math.abs(r1[k])*0.01));
+      if (dif){
+        trocouMetodo = true;
+        metodos.push({id, a, de:pts[i-1].data, ate:pts[i].data,
+          r1:`${fmt(r1[0],a.dec)}–${fmt(r1[1],a.dec)}`, r2:`${fmt(r2[0],a.dec)}–${fmt(r2[1],a.dec)}`});
+      }
+    }
+
     /* 1. persistência: quantas coletas seguidas, até a mais recente, ficaram fora */
     const situ = pts.map(p => foraDe(p.v, p.ref));
     let seq = 0;
@@ -2315,9 +2374,16 @@ function analisarSerie(vals, st, ctx){
     if (seq >= 2){
       const desde = pts[pts.length - seq].data;
       const meses = mesesEntre(desde, dataAtual);
-      if (seq >= 3 || meses >= 3)
-        persistentes.push({id, a, prio, lado:situ[situ.length-1], seq, total:pts.length, meses,
-          desde, primeiro:pts[pts.length-seq].v, ultimo:pts[pts.length-1].v});
+      if (seq >= 3 || meses >= 3){
+        const lado = situ[situ.length-1];
+        const de = pts[pts.length-seq].v, ate = pts[pts.length-1].v;
+        const varSeq = de !== 0 ? (ate - de)/Math.abs(de)*100 : 0;
+        /* "sempre abaixo" pode esconder uma melhora grande: a direção precisa aparecer */
+        const rumo = Math.abs(varSeq) <= rcv ? 'estável'
+          : ((lado === 'abaixo') === (varSeq > 0)) ? 'em melhora' : 'piorando';
+        persistentes.push({id, a, prio, lado, seq, total:pts.length, meses, desde,
+          primeiro:de, ultimo:ate, varSeq, rumo});
+      }
     }
 
     /* 2. tendência: inclinação por ano, só com série longa e movimento consistente */
@@ -2328,14 +2394,41 @@ function analisarSerie(vals, st, ctx){
       let mesmoSentido = 0;
       for (let i=1;i<pts.length;i++) if (Math.sign(pts[i].v - pts[i-1].v) === Math.sign(varTotal)) mesmoSentido++;
       const consistente = reg && (reg.r2 >= 0.5 || mesmoSentido/(pts.length-1) >= 0.7);
-      if (meses >= 6 && Math.abs(varTotal) > rcv && consistente){
+      /* Reversão: a série subiu (ou caiu) e voltou. Descrever isso como "subindo X por
+         ano" esconde justamente o que mudou — foi o que aconteceu com um PTH que foi a
+         66,9 e recuou para 43,6 nas duas últimas coletas. */
+      let reversao = null;
+      if (pts.length >= 5){
+        const vs = pts.map(p => p.v), n = vs.length;
+        for (const [i, forma] of [[vs.indexOf(Math.max(...vs)),'pico'], [vs.indexOf(Math.min(...vs)),'vale']]){
+          if (i < 1 || i > n-3) continue;                  /* precisa de 2 coletas depois */
+          const ida = (vs[i]-vs[0])/Math.abs(vs[0])*100, volta = (vs[n-1]-vs[i])/Math.abs(vs[i])*100;
+          if (Math.sign(ida) === Math.sign(volta)) continue;
+          if (Math.abs(ida) > rcv && Math.abs(volta) > rcv/2){
+            reversao = {forma, i, ida, volta, extremo:pts[i], firme: Math.abs(volta) > rcv};
+            break;
+          }
+        }
+      }
+      const degrau = pts.length >= 5 ? ajusteDegrau(pts) : null;
+      const ehDegrau = degrau && degrau.separados && degrau.r2 > (reg ? reg.r2 + 0.1 : 0.6) &&
+        Math.abs((degrau.md - degrau.me)/Math.abs(degrau.me)*100) > rcv;
+      if (meses >= 6 && reversao){
+        tendencias.push({tipo:'reversao', id, a, prio, meses, n:pts.length, trocouMetodo,
+          varTotal:reversao.volta, ...reversao, de:pts[0], ate:pts[pts.length-1]});
+      } else if (meses >= 6 && ehDegrau){
+        tendencias.push({tipo:'patamar', id, a, prio, meses, n:pts.length, trocouMetodo,
+          varTotal: (degrau.md - degrau.me)/Math.abs(degrau.me)*100,
+          mi:degrau.me, mf:degrau.md, quando:degrau.quando,
+          de:pts[0], ate:pts[pts.length-1]});
+      } else if (meses >= 6 && Math.abs(varTotal) > rcv && consistente){
         let duplica = null;
         if (DUPLICACAO.includes(id) && reg.slope > 0 && pts.every(p => p.v > 0)){
           const ln = regressao(pts.map(p => ({data:p.data, v:Math.log(p.v)})));
           if (ln && ln.slope > 0) duplica = Math.log(2)/ln.slope*12;   /* meses */
         }
-        tendencias.push({id, a, prio, slope:reg.slope, r2:reg.r2, meses, varTotal,
-          de:pts[0], ate:pts[pts.length-1], n:pts.length, duplica});
+        tendencias.push({tipo:'reta', id, a, prio, slope:reg.slope, r2:reg.r2, meses, varTotal,
+          de:pts[0], ate:pts[pts.length-1], n:pts.length, duplica, trocouMetodo});
       }
     }
 
@@ -2354,15 +2447,6 @@ function analisarSerie(vals, st, ctx){
       }
     }
 
-    /* 4. troca de método: a faixa do laboratório mudou entre duas coletas */
-    for (let i=1;i<pts.length;i++){
-      const r1 = pts[i-1].ref, r2 = pts[i].ref;
-      if (!pts[i-1].refLab || !pts[i].refLab || !r1 || !r2) continue;
-      const dif = [0,1].some(k => (r1[k] == null) !== (r2[k] == null) ||
-        (r1[k] != null && Math.abs(r1[k]-r2[k]) > Math.abs(r1[k])*0.01));
-      if (dif) metodos.push({id, a, de:pts[i-1].data, ate:pts[i].data,
-        r1:`${fmt(r1[0],a.dec)}–${fmt(r1[1],a.dec)}`, r2:`${fmt(r2[0],a.dec)}–${fmt(r2[1],a.dec)}`});
-    }
   }
   const ord = (x,y) => (y.prio - x.prio) || x.a.nome.localeCompare(y.a.nome);
   persistentes.sort(ord); tendencias.sort(ord); pessoais.sort(ord);
@@ -2375,9 +2459,12 @@ function serieHtml(an){
 
   if (an.persistentes.length){
     const bloco = p => `<div class="pat">
-        <h3>${escapeHtml(p.a.nome)} — ${p.lado} da referência em ${p.seq} coleta(s) seguida(s)</h3>
+        <h3>${escapeHtml(p.a.nome)} — ${p.lado} da referência em ${p.seq} coleta(s) seguida(s),
+          <span class="${p.rumo === 'em melhora' ? 'delta bom' : p.rumo === 'piorando' ? 'delta ruim' : 'muted'}">${p.rumo}</span></h3>
         <p>De ${dataBR(p.desde)} até ${dataBR(an.dataAtual)} (${periodo(p.meses)}), sempre ${p.lado}:
-        ${fmt(p.primeiro, p.a.dec)} → ${fmt(p.ultimo, p.a.dec)} ${escapeHtml(p.a.un)}.</p></div>`;
+        ${fmt(p.primeiro, p.a.dec)} → ${fmt(p.ultimo, p.a.dec)} ${escapeHtml(p.a.un)}${
+        p.rumo !== 'estável' ? ` (${p.varSeq > 0 ? '+' : ''}${fmt(p.varSeq,0)}%)` : ''}.
+        ${p.rumo === 'em melhora' ? 'A direção é boa, mas o resultado ainda não voltou para a faixa.' : ''}</p></div>`;
     const frente = an.persistentes.slice(0,8), resto = an.persistentes.slice(8);
     blocos.push(`<h3 style="margin-top:14px">Achados persistentes</h3>
       <p class="muted"><small>Um resultado que se repete fora da faixa pesa mais do que um resultado isolado —
@@ -2392,11 +2479,22 @@ function serieHtml(an){
       <p class="muted"><small>Direção consistente ao longo de pelo menos 6 meses, com variação total maior
       que a oscilação esperada para o exame. A velocidade é a inclinação da reta ajustada à série.</small></p>` +
       an.tendencias.map(t => `<div class="pat">
-        <h3>${escapeHtml(t.a.nome)} — ${t.slope > 0 ? 'subindo' : 'caindo'}
-          ${fmt(Math.abs(t.slope), Math.max(t.a.dec,1))} ${escapeHtml(t.a.un)} por ano</h3>
+        <h3>${escapeHtml(t.a.nome)} — ${
+          t.tipo === 'reta' ? `${t.slope > 0 ? 'subindo' : 'caindo'} ${fmt(Math.abs(t.slope), Math.max(t.a.dec,1))} ${escapeHtml(t.a.un)} por ano`
+          : t.tipo === 'patamar' ? `mudou de patamar (${t.varTotal > 0 ? 'subiu' : 'caiu'} e estabilizou)`
+          : `${t.forma === 'pico' ? 'subiu e voltou a cair' : 'caiu e voltou a subir'}`}</h3>
         <p>${fmt(t.de.v, t.a.dec)} em ${dataBR(t.de.data)} → ${fmt(t.ate.v, t.a.dec)} em ${dataBR(t.ate.data)}
         (${t.n} coletas, ${periodo(t.meses)}, variação total de ${fmt(Math.abs(t.varTotal),0)}%).
-        ${t.duplica && t.duplica < 600 ? `<b>Tempo de duplicação estimado: ${fmt(t.duplica,0)} meses.</b>` : ''}</p></div>`).join(''));
+        ${t.tipo === 'patamar' ? `O salto fica em torno de ${dataBR(t.quando)}: antes em torno de ${fmt(t.mi, t.a.dec)},
+          depois em torno de ${fmt(t.mf, t.a.dec)} ${escapeHtml(t.a.un)}.` : ''}
+        ${t.tipo === 'reversao' ? `${t.forma === 'pico' ? 'Máximo' : 'Mínimo'} de
+          <b>${fmt(t.extremo.v, t.a.dec)}</b> em ${dataBR(t.extremo.data)}; de lá para cá
+          ${t.volta > 0 ? 'subiu' : 'caiu'} ${fmt(Math.abs(t.volta),0)}%.
+          ${t.firme ? 'O movimento de volta já supera a oscilação esperada para este exame.'
+            : 'A volta ainda está dentro da oscilação esperada para este exame — vale confirmar na próxima coleta.'}` : ''}
+        ${t.duplica && t.duplica < 600 ? `<b>Tempo de duplicação estimado: ${fmt(t.duplica,0)} meses.</b>` : ''}
+        ${t.trocouMetodo ? `<b>⚠️ Atenção:</b> o laboratório mudou a faixa de referência deste exame dentro do período —
+          parte desta variação pode ser troca de método, e não mudança sua.` : ''}</p></div>`).join(''));
 
   if (an.pessoais.length)
     blocos.push(`<h3 style="margin-top:18px">Fora do seu padrão, dentro da faixa</h3>
