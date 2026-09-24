@@ -163,6 +163,11 @@ table.evo td.num{font-family:var(--mono);text-align:right;white-space:nowrap;fon
 table.evo td.spark{width:112px;padding:2px 8px}
 table.evo tr.cat td{background:var(--surface-2);font-weight:700;font-size:.8rem;padding:6px 8px;
   border-bottom:none;letter-spacing:.01em}
+.conta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:7px 10px;margin:6px 0;
+  border-left:3px solid var(--border);background:var(--surface-2);border-radius:0 6px 6px 0;font-size:.9rem}
+.conta.fora{border-left-color:var(--warn)}
+.conta b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.conta small{flex:1 1 100%;color:var(--muted);font-size:.8rem}
 h3.grp{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
   margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--surface-2)}
 h3.grp:first-child{margin-top:4px}
@@ -203,6 +208,8 @@ details.recolhivel>summary .conta{margin-left:auto;font-size:.75rem;font-weight:
   table.tudo td.v{font-family:var(--mono);text-align:right;white-space:nowrap}
   table.tudo tr.fora td{font-weight:700}
   table.tudo tr.cat td{background:var(--surface-2);font-weight:700;padding-top:7px}
+  table.tudo tr.calc td{font-style:italic}
+  .conta{break-inside:avoid}
 }
 </style>
 </head>
@@ -1462,7 +1469,7 @@ function computeDerived(vals, ctx){
     add('nao_hdl_calc', ct - hdl, {rot:'Colesterol não-HDL (calculado)', un:'mg/dL', dec:0,
       txt: (ct-hdl) < 130 ? 'desejável para risco baixo/intermediário' : 'acima do desejável',
       alterado:(ct-hdl) >= 130, inject:'nao_hdl'});
-    add('castelli1', ct/hdl, {rot:'Índice de Castelli I (CT/HDL)', un:'', dec:2,
+    add('castelli1', ct/hdl, {cat:'metabolico', rot:'Índice de Castelli I (CT/HDL)', un:'', dec:2,
       txt: ct/hdl > (ctx.sex==='M'?5:4.4) ? 'acima do desejável' : 'desejável',
       alterado: ct/hdl > (ctx.sex==='M'?5:4.4)});
   }
@@ -1471,7 +1478,7 @@ function computeDerived(vals, ctx){
       txt:'estimado a partir de colesterol total, HDL e triglicerídeos', inject:'ldl'});
   }
   if (tg != null && hdl != null){
-    add('tg_hdl', tg/hdl, {rot:'Razão triglicerídeos/HDL', un:'', dec:2,
+    add('tg_hdl', tg/hdl, {cat:'metabolico', rot:'Razão triglicerídeos/HDL', un:'', dec:2,
       txt: tg/hdl >= 3 ? 'sugere partículas de LDL pequenas e densas e resistência à insulina' : 'desejável',
       alterado: tg/hdl >= 3});
   }
@@ -1505,18 +1512,18 @@ function computeDerived(vals, ctx){
   }
   const bt = g('bilirrubina_total'), bd = g('bilirrubina_direta');
   if (bt != null && bd != null)
-    add('bi', bt - bd, {rot:'Bilirrubina indireta (calculada)', un:'mg/dL', dec:2,
+    add('bi', bt - bd, {cat:'hepatico', rot:'Bilirrubina indireta (calculada)', un:'mg/dL', dec:2,
       txt: (bt-bd) > 0.9 ? 'predomínio indireto — considerar Gilbert ou hemólise' : 'normal',
       alterado:(bt-bd) > 0.9});
   const ast = g('tgo'), alt = g('tgp');
   if (ast != null && alt != null && alt > 0)
-    add('deritis', ast/alt, {rot:'Relação AST/ALT (De Ritis)', un:'', dec:2,
+    add('deritis', ast/alt, {cat:'hepatico', rot:'Relação AST/ALT (De Ritis)', un:'', dec:2,
       txt: ast/alt > 2 ? 'relação >2 — padrão que sugere origem alcoólica ou muscular'
         : ast/alt < 1 ? 'ALT predominante — padrão comum na gordura no fígado' : 'relação intermediária'});
   const ur = g('ureia'), crea = g('creatinina');
   if (ur != null && crea > 0){
     const rel = ur/crea;
-    add('ureia_creat', rel, {rot:'Relação ureia/creatinina', un:'', dec:0,
+    add('ureia_creat', rel, {cat:'renal', rot:'Relação ureia/creatinina', un:'', dec:0,
       txt: rel > 45 ? 'ureia desproporcionalmente alta — típico de desidratação, dieta muito proteica, uso de diurético ou perda de sangue no trato digestivo'
         : rel < 20 ? 'ureia baixa para a creatinina — comum em dieta pobre em proteína, doença hepática ou excesso de líquidos'
         : 'dentro do habitual',
@@ -1525,14 +1532,14 @@ function computeDerived(vals, ctx){
   const apoB = g('apo_b'), apoA = g('apo_a1');
   if (apoB != null && apoA > 0){
     const rel = apoB/apoA, lim = ctx.sex === 'M' ? 0.9 : 0.8, bom = ctx.sex === 'M' ? 0.7 : 0.6;
-    add('apob_apoa1', rel, {rot:'Relação ApoB/ApoA-1', un:'', dec:2,
+    add('apob_apoa1', rel, {cat:'metabolico', rot:'Relação ApoB/ApoA-1', un:'', dec:2,
       txt: rel >= lim ? 'risco cardiovascular alto por este marcador'
         : rel > bom ? 'risco intermediário' : 'faixa de menor risco',
       alterado: rel > bom});
   }
   const alb = g('albumina'), ca = g('calcio');
   if (alb != null && ca != null && alb < 4)
-    add('ca_corr', ca + 0.8*(4 - alb), {rot:'Cálcio corrigido pela albumina', un:'mg/dL', dec:1,
+    add('ca_corr', ca + 0.8*(4 - alb), {cat:'minerais', rot:'Cálcio corrigido pela albumina', un:'mg/dL', dec:1,
       txt:'ajuste necessário quando a albumina está baixa'});
   const leuco = g('leucocitos');
   for (const [pct, abs] of [['neutrofilos_pct','neutrofilos_abs'],['linfocitos_pct','linfocitos_abs']]){
@@ -1542,7 +1549,7 @@ function computeDerived(vals, ctx){
   const ne = g('neutrofilos_abs') ?? d['_inj_neutrofilos_abs']?.v;
   const li = g('linfocitos_abs') ?? d['_inj_linfocitos_abs']?.v;
   if (ne != null && li > 0)
-    add('nlr', ne/li, {rot:'Razão neutrófilos/linfócitos', un:'', dec:2,
+    add('nlr', ne/li, {cat:'hemograma', rot:'Razão neutrófilos/linfócitos', un:'', dec:2,
       txt: ne/li > 3 ? 'acima de 3 — marcador inespecífico de inflamação/estresse' : 'dentro do habitual',
       alterado: ne/li > 3});
   return d;
@@ -2088,7 +2095,22 @@ function analyze(op={}){
   const criticos  = entries.filter(([,c]) => c.status === 'critico');
 
   const perfil = Object.entries(derived).filter(([k,d]) => !d.hidden && ['imc','cintura','pa'].includes(k));
-  const contas = Object.entries(derived).filter(([k,d]) => !d.hidden && !['imc','cintura','pa'].includes(k));
+  /* Os cálculos que viram exame (LDL de Friedewald, TFG, HOMA-IR, não-HDL…) já
+     aparecem no grupo deles como resultado, marcados como calculados pelo app —
+     repeti-los num card à parte era mostrar o mesmo número duas vezes. Ficam aqui
+     só as razões puras, que não são exame nenhum e por isso não tinham casa. */
+  const contas = Object.entries(derived).filter(([k,d]) => !d.hidden && !d.inject && d.cat);
+  const contasPorCat = alterado => {
+    const m = {};
+    for (const [k,d] of contas) if (!!d.alterado === alterado) (m[d.cat] = m[d.cat] || []).push([k,d]);
+    return m;
+  };
+  const contasFora = contasPorCat(true), contasOk = contasPorCat(false);
+  /* Um cálculo não tem faixa de referência nem medição de laboratório: é uma
+     leitura dos outros números do grupo. Por isso entra como linha, não como card. */
+  const linhaConta = ([,d]) => `<div class="conta${d.alterado ? ' fora' : ''}">
+    <span>🧮 ${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</b>
+    ${d.txt ? `<small>${escapeHtml(d.txt)}</small>` : ''}</div>`;
 
   const html = [];
   html.push(`<div class="card"><h2><span class="step">3</span> Resultado da análise</h2>
@@ -2134,15 +2156,20 @@ function analyze(op={}){
   html.push(evolucaoHtml(evo, ctx));
 
   /* 2. resultados fora da referência */
-  if (principais.length){
+  if (principais.length || Object.keys(contasFora).length){
     const gr = agruparPorCat(principais, ([id]) => byId[id].cat);
+    const vistos = new Set(gr.map(([cat]) => cat));
+    /* grupo cujo único achado é um cálculo alterado entra depois dos demais */
+    const todos = [...gr, ...Object.keys(CATS).filter(c => contasFora[c] && !vistos.has(c)).map(c => [c, []])];
+    const bloco = ([cat, itens]) => itens.map(cardDe).join('') + (contasFora[cat] || []).map(linhaConta).join('');
     /* com um grupo só, o cabeçalho não informa nada — fica fora */
-    const corpo = gr.length > 1
-      ? gr.map(([cat, itens]) => `<h3 class="grp">${tituloCat(cat)}</h3>` + itens.map(cardDe).join('')).join('')
-      : principais.map(cardDe).join('');
+    const corpo = todos.length > 1
+      ? todos.map(g => `<h3 class="grp">${tituloCat(g[0])}</h3>` + bloco(g)).join('')
+      : todos.map(bloco).join('');
     html.push(`<div class="card"><h2>📊 Resultados fora da referência</h2>
-      <p class="muted"><small>Agrupados por sistema. Dentro de cada grupo, e entre os grupos, vale a
-      relevância clínica — não o tamanho do desvio.</small></p>` + corpo + `</div>`);
+      <p class="muted"><small>Agrupados por sistema, com os cálculos junto dos exames que os originaram.
+      Dentro de cada grupo, e entre os grupos, vale a relevância clínica — não o tamanho do desvio.</small></p>`
+      + corpo + `</div>`);
   }
   if (secundarios.length)
     html.push(`<details class="menores"><summary>🔹 ${secundarios.length} alteração(ões) de menor peso clínico —
@@ -2150,12 +2177,6 @@ function analyze(op={}){
       <p class="muted"><small>Costumam acompanhar outro achado ou variar entre coletas; raramente decidem alguma conduta sozinhas.</small></p>` +
       secundarios.map(cardDe).join('') + `</details>`);
 
-  /* 3. cálculos derivados */
-  if (contas.length)
-    html.push(`<div class="card"><h2>🧮 Cálculos a partir dos seus exames</h2><div class="mini">` +
-      contas.map(([,d]) => `<div><span>${escapeHtml(d.rot)}</span><b>${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</b></div>`).join('') +
-      `</div>` + contas.filter(([,d])=>d.txt).map(([,d]) =>
-        `<p style="font-size:.88rem;margin-top:8px"><b>${escapeHtml(d.rot)}:</b> ${escapeHtml(d.txt)}.</p>`).join('') + `</div>`);
 
   /* 4. padrões cruzados */
   if (patterns.length){
@@ -2188,11 +2209,13 @@ function analyze(op={}){
        é a das próprias categorias, que é a mesma do formulário e da impressão. */
     const porCatN = {};
     for (const [id,c] of normais.concat(infos)) (porCatN[byId[id].cat] = porCatN[byId[id].cat] || []).push([id,c]);
-    const blocos = Object.keys(CATS).filter(cat => porCatN[cat]).map(cat =>
-      `<h3 class="grp">${tituloCat(cat)}</h3><div class="mini">` + porCatN[cat].map(([id,c]) =>
-        `<div><span>${escapeHtml(byId[id].nome)}</span><b>${fmt(vals[id], byId[id].dec)} ${escapeHtml(byId[id].un)}</b></div>`).join('') +
-      `</div>`).join('');
-    html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}</summary>`
+    const nContas = Object.values(contasOk).reduce((n,l) => n + l.length, 0);
+    const blocos = Object.keys(CATS).filter(cat => porCatN[cat] || contasOk[cat]).map(cat =>
+      `<h3 class="grp">${tituloCat(cat)}</h3>` +
+      (porCatN[cat] ? `<div class="mini">` + porCatN[cat].map(([id,c]) =>
+        `<div><span>${escapeHtml(byId[id].nome)}</span><b>${fmt(vals[id], byId[id].dec)} ${escapeHtml(byId[id].un)}</b></div>`).join('') + `</div>` : '') +
+      (contasOk[cat] || []).map(linhaConta).join('')).join('');
+    html.push(`<details class="normais"><summary>✅ ${normais.length} resultado(s) dentro da referência${infos.length ? ` e ${infos.length} informativo(s)` : ''}${nContas ? ` e ${nContas} cálculo(s)` : ''}</summary>`
       + blocos + `</details>`);
   }
 
@@ -2200,8 +2223,17 @@ function analyze(op={}){
      compacta com todos os exames, que é o que se leva para o médico. */
   const porCat = {};
   for (const [id,c] of entries) (porCat[byId[id].cat] = porCat[byId[id].cat] || []).push([id,c]);
-  const linhas = Object.keys(CATS).filter(cat => porCat[cat]).map(cat => [cat, porCat[cat]]).map(([cat,list]) =>
+  /* no papel a lista de normais é substituída por esta tabela, então os cálculos
+     precisam aparecer aqui também — senão sumiriam justamente na via impressa */
+  const contasCat = {};
+  for (const [k,d] of contas) (contasCat[d.cat] = contasCat[d.cat] || []).push(d);
+  const linhas = Object.keys(CATS).filter(cat => porCat[cat] || contasCat[cat]).map(cat => [cat, porCat[cat] || []]).map(([cat,list]) =>
     `<tr class="cat"><td colspan="4">${escapeHtml(CATS[cat].nome)}</td></tr>` +
+    (contasCat[cat] || []).map(d => `<tr class="calc${d.alterado ? ' fora' : ''}">
+        <td>🧮 ${escapeHtml(d.rot)}</td>
+        <td class="v">${fmt(d.v,d.dec)} ${escapeHtml(d.un||'')}</td>
+        <td>calculado</td>
+        <td>${escapeHtml(d.txt || '')}</td></tr>`).join('') +
     list.map(([id,c]) => {
       const a = byId[id];
       const sit = c.status === 'normal' ? '' : (c.sev === 1 ? 'no limite' : STATUS_LABEL[c.status].toLowerCase());

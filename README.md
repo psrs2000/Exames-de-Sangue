@@ -102,6 +102,10 @@ levar um para o outro, use *Baixar histórico* e *Importar histórico*.
   razão TG/HDL, **relação ureia/creatinina**, **relação ApoB/ApoA-1**, HOMA-IR, glicemia média
   estimada, TFG por CKD-EPI 2021, saturação de transferrina, bilirrubina indireta, relação
   AST/ALT, cálcio corrigido, razão neutrófilos/linfócitos.
+  Os cálculos não formam uma seção à parte: cada um aparece **dentro do grupo dos exames que o
+  originaram** — Castelli ao lado do LDL, De Ritis ao lado das enzimas do fígado, ureia/creatinina
+  ao lado da creatinina. Os que viram exame (LDL de Friedewald, TFG, HOMA-IR, não-HDL, saturação
+  de transferrina) entram como resultado, marcados como calculados, e não são repetidos.
 - **Padrões cruzados** apresentados como hipóteses para discutir com o médico: anemia
   ferropriva, anemia macrocítica, pré-diabetes e diabetes, resistência à insulina,
   dislipidemia aterogênica, critérios laboratoriais de síndrome metabólica, hipo e
@@ -230,7 +234,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 126 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 133 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |
@@ -263,7 +267,7 @@ Tudo vive em `index.html`, em seções numeradas dentro do `<script type="module
 | 3 | Leitura do PDF: reconstrução de linhas, extração de valores e das faixas do laboratório |
 | 4 | Classificação (normal / abaixo / acima / atenção) |
 | 4b | Coerência interna do laudo (`COERENCIA`, `checarCoerencia`) |
-| 5 | Cálculos derivados |
+| 5 | Cálculos derivados (cada um com o grupo a que pertence) |
 | 6 | Padrões cruzados (`PADRAO_EXAMES` liga cada padrão aos exames que ele envolve) |
 | 6b | Sugestão de exames ausentes (`sugerirExames`) |
 | 7–10 | Interface, relatório, exportação e eventos |

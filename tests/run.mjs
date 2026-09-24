@@ -212,6 +212,23 @@ try {
       ok(padroes.includes(t), `  ${arquivo}: padrão "${t}"`);
     for (const t of caso.espera.semPadroes || [])
       ok(!padroes.includes(t), `  ${arquivo}: NÃO dispara "${t}"`);
+    /* cálculo alterado tem que cair dentro do grupo dos exames que o originaram,
+       no card dos resultados fora da faixa — e não numa seção solta no fim. */
+    for (const [rot, grupo] of caso.espera.calculosNoGrupo || []){
+      const achou = await p.evaluate(([rot, grupo]) => {
+        const card = [...document.querySelectorAll('#card-report .card')]
+          .find(c => /fora da referência/.test(c.querySelector('h2')?.textContent || ''));
+        if (!card) return '(sem card)';
+        for (const c of card.querySelectorAll('.conta')){
+          if (!c.textContent.includes(rot)) continue;
+          let n = c.previousElementSibling;
+          while (n && !n.matches('h3.grp')) n = n.previousElementSibling;
+          return n ? n.textContent.trim() : '(sem grupo)';
+        }
+        return '(ausente)';
+      }, [rot, grupo]);
+      ok(achou.includes(grupo), `  ${arquivo}: "${rot}" aparece no grupo "${grupo}"`, `achou: ${achou}`);
+    }
     for (const t of caso.espera.sugestoes || [])
       ok(sugestoes.toLowerCase().includes(t.toLowerCase()), `  ${arquivo}: sugere exame com "${t}"`);
     if (caso.espera.criticos)
@@ -280,9 +297,36 @@ try {
     /* a ordem das seções é decisão de leitura, não acidente */
     const ordem = await p.locator('#card-report > .card > h2, #card-report > details > summary')
       .evaluateAll(ns => ns.map(n => n.textContent.trim().split(' ')[0] + ' ' + (n.textContent.trim().split(' ')[1] || '')));
-    igual(ordem.slice(0, 8).map(t => t.replace(/[0-9]/g, '#')),
-      ['# Resultado', '📈 Evolução', '📊 Resultados', '🔹 #', '🧮 Cálculos', '🔎 Padrões', '🔭 Leitura', '🔬 O'],
+    igual(ordem.slice(0, 7).map(t => t.replace(/[0-9]/g, '#')),
+      ['# Resultado', '📈 Evolução', '📊 Resultados', '🔹 #', '🔎 Padrões', '🔭 Leitura', '🔬 O'],
       'ordem das seções do relatório');
+    ok(!ordem.some(t => /🧮/.test(t)), 'os cálculos não formam mais uma seção à parte');
+
+    /* Cada cálculo é uma leitura dos exames do próprio grupo, então mora lá dentro.
+       Alterado acompanha os resultados fora da faixa; o resto acompanha os normais. */
+    const grupoDoCalculo = await p.evaluate(() => {
+      const achar = rot => {
+        for (const c of document.querySelectorAll('#card-report .conta')){
+          if (!c.textContent.includes(rot)) continue;
+          let n = c.previousElementSibling;
+          while (n && !n.matches('h3.grp')) n = n.previousElementSibling;
+          return n ? n.textContent.trim() : '(sem grupo)';
+        }
+        return '(ausente)';
+      };
+      return {castelli: achar('Castelli'), ureia: achar('ureia/creatinina'), deritis: achar('De Ritis')};
+    });
+    ok(/Metabolismo/.test(grupoDoCalculo.castelli), 'Castelli fica no grupo do metabolismo',
+       grupoDoCalculo.castelli);
+    ok(/renal/i.test(grupoDoCalculo.ureia), 'relação ureia/creatinina fica no grupo dos rins',
+       grupoDoCalculo.ureia);
+    ok(/hep/i.test(grupoDoCalculo.deritis), 'De Ritis fica no grupo do fígado', grupoDoCalculo.deritis);
+
+    /* o que vira exame (TFG, LDL de Friedewald…) aparece UMA vez, como resultado */
+    const repetidos = await p.evaluate(() =>
+      [...document.querySelectorAll('#card-report .conta')].filter(c =>
+        /TFG estimada|LDL estimado|HOMA-IR \(calculado\)|não-HDL \(calculado\)/.test(c.textContent)).length);
+    igual(repetidos, 0, 'cálculo que virou exame não é repetido como cálculo');
     const recolhiveis = await p.locator('details.recolhivel').evaluateAll(ns =>
       ns.map(n => ({titulo: n.querySelector('summary').textContent.trim().split('\n')[0].trim(), aberto: n.open})));
     igual(recolhiveis.map(r => r.aberto), [false, false], 'persistentes e tendências começam recolhidos');
