@@ -124,6 +124,29 @@ levar um para o outro, use *Baixar histórico* e *Importar histórico*.
 - **Valores de alerta** que sugerem procurar avaliação médica sem esperar a rotina.
 - **Perguntas para levar à consulta**, geradas a partir dos padrões encontrados.
 
+## Planilha para tabela dinâmica
+
+O botão **📊 Baixar planilha** exporta o histórico inteiro em CSV, **uma linha por medição** —
+formato longo, de propósito. Numa tabela dinâmica, data, grupo, exame e situação viram filtros e
+eixos, e aí dá para perguntar o que o relatório não responde: o que saiu da faixa em cada ano,
+peso contra triglicerídeos, quantas coletas cada exame tem. O formato largo (exames nas linhas,
+datas nas colunas) é mais bonito de olhar e inútil de pivotar.
+
+São 27 colunas: `Data`, `Ano`, `Mês`, `Coleta nº`, `Grupo`, `Exame`, `ID`, `Unidade`, `Valor`,
+`Limite inferior`, `Limite superior`, `Referência`, `Origem da faixa`, `Situação`,
+`Fora da faixa`, `Origem do valor`, `Valor anterior`, `Variação`, `Variação (%)`,
+`Dias desde a anterior`, e o perfil da coleta (`Idade`, `Peso`, `Altura`, `Cintura`,
+`PA sistólica`, `PA diastólica`, `Jejum`).
+
+A `Situação` e os limites são os **vigentes na data daquela coleta**, não os de hoje — é o que a
+coleta guardou. Quando um laboratório muda a faixa no meio da série, a planilha mostra as duas.
+
+O arquivo sai com ponto e vírgula, decimais com vírgula e marca de codificação UTF-8: o Excel em
+português abre com duplo clique, sem assistente de importação e sem acento quebrado.
+
+> ⚠️ **A planilha não é backup.** Ela é só leitura e perde o que o app precisa para reimportar.
+> Quem guarda seus exames é o arquivo JSON do histórico.
+
 ## Histórico de exames
 
 O histórico vive em **duas camadas**, e a distinção importa:
@@ -234,7 +257,7 @@ npx playwright install chromium   # só na primeira vez
 npm test
 ```
 
-A suíte roda o app de verdade num Chromium headless e confere 133 comportamentos. Ela existe
+A suíte roda o app de verdade num Chromium headless e confere 144 comportamentos. Ela existe
 principalmente para **não deixar o app viciar num único laudo e num único paciente**:
 
 | Fixture | O que protege |

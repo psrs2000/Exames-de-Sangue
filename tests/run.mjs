@@ -377,6 +377,64 @@ try {
     await ctx.close();
   }
 
+  /* ---------- 5b. planilha para tabela dinâmica ---------- */
+  console.log('\n\x1b[1mPlanilha (CSV longo, uma linha por medição)\x1b[0m');
+  {
+    const ctx = await navegador.newContext();
+    const p = await novaPagina(ctx, erros);
+    await importar(p, 'serie-longa.json');
+    const r = await p.evaluate(() => {
+      const {linhasPlanilha, paraCSV, CSV_COLUNAS, state, byId} = window.EXAMES;
+      const linhas = linhasPlanilha(state.historico);
+      const csv = paraCSV(CSV_COLUNAS, linhas);
+      const medicoes = state.historico.reduce((n, reg) =>
+        n + Object.keys(reg.valores).filter(id => byId[id]).length, 0);
+      const corpo = csv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean);
+      const col = nome => CSV_COLUNAS.indexOf(nome);
+      const campos = l => l.split(';');
+      /* faixa guardada na coleta, não a de hoje: o T4 livre do laboratório
+         mudou de faixa no meio da série e as duas têm que aparecer */
+      const limitesT4 = [...new Set(corpo.filter(l => /;t4_livre;/.test(l))
+        .map(l => campos(l)[col('Limite superior')]))];
+      return {
+        colunas: CSV_COLUNAS.length,
+        cabecalho: corpo[0].split(';').length,
+        linhas: corpo.length - 1,
+        medicoes,
+        bom: csv.charCodeAt(0) === 0xFEFF,
+        aspas: corpo.some(l => l.includes('"HDL (colesterol ""bom""')),
+        decimalVirgula: corpo.some(l => /;12,1;/.test(l)),
+        primeiraSemAnterior: campos(corpo[1])[col('Valor anterior')] === '',
+        temVariacao: corpo.some(l => campos(l)[col('Variação (%)')] !== '' &&
+                                     campos(l)[col('Dias desde a anterior')] !== ''),
+        origemFaixa: [...new Set(corpo.slice(1).map(l => campos(l)[col('Origem da faixa')]))].sort(),
+        limitesT4
+      };
+    });
+    igual(r.cabecalho, r.colunas, 'cabeçalho traz todas as colunas declaradas');
+    igual(r.linhas, r.medicoes, 'uma linha por medição, nenhuma perdida ou repetida');
+    ok(r.bom, 'arquivo começa com a marca UTF-8 que o Excel pt-BR espera');
+    ok(r.decimalVirgula, 'decimais saem com vírgula');
+    ok(r.aspas, 'nome com aspas é escapado no CSV');
+    ok(r.primeiraSemAnterior, 'primeira medição de um exame não inventa valor anterior');
+    ok(r.temVariacao, 'medições seguintes trazem variação e intervalo em dias');
+    igual(r.origemFaixa, ['laboratório','padrão do app'], 'a planilha diz de onde veio cada faixa');
+    ok(r.limitesT4.length >= 2, 'usa a faixa vigente na data de cada coleta, não a de hoje',
+       `limites vistos: ${r.limitesT4.join(' | ')}`);
+
+    /* o botão de verdade, não só a função por trás dele */
+    const [baixado] = await Promise.all([
+      p.waitForEvent('download', {timeout:15000}).catch(() => null),
+      p.click('#btn-hist-planilha')
+    ]);
+    ok(baixado && /^exames-planilha-\d{4}-\d{2}-\d{2}\.csv$/.test(baixado.suggestedFilename()),
+       'o botão baixa o arquivo com nome e extensão certos',
+       baixado ? baixado.suggestedFilename() : 'nenhum download');
+    ok(/\d+ medição/.test(await p.locator('#hist-status .alert').innerText()),
+       'a tela confirma quantas medições foram para a planilha');
+    await ctx.close();
+  }
+
   /* ---------- 6. o app se vira sem internet ----------
      Aqui NÃO sobrescrevemos window.PDFJS_SOURCES: é a lista de verdade que está
      sendo testada. Tudo que não for do próprio site é bloqueado, então só passa
